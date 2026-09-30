@@ -1,0 +1,20 @@
+{
+  "name": "cloud-devops-mcp-server",
+  "version": "0.1.0",
+  "description": "MCP server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO error budget calculations.",
+  "author": "Alex C. Godwin",
+  "license": "MIT",
+  "runtime": {
+    "type": "node",
+    "command": "node",
+    "args": [
+      "dist/index.js"
+    ]
+  },
+  "tools": [
+    "assess_terraform_change",
+    "build_incident_runbook",
+    "review_cicd_pipeline",
+    "estimate_slo_error_budget"
+  ]
+}

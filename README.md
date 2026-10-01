@@ -17,6 +17,7 @@ This project is intentionally focused on engineering judgment rather than generi
 - [MCP clients](#mcp-clients)
 - [Configuration](#configuration)
 - [Example tool input](#example-tool-input)
+- [Demo outputs](#demo-outputs)
 - [Docker](#docker)
 - [Development](#development)
 - [Security model](#security-model)
@@ -135,6 +136,10 @@ Example output shape:
   "recommendedReleasePath": "Use staged rollout, peer review and post-apply validation before broad release."
 }
 ```
+
+## Demo outputs
+
+See [docs/demo.md](docs/demo.md) for practical sample inputs and outputs across all four tools.
 
 ## Docker
 

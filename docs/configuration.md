@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
     }
   }
 }
@@ -35,7 +35,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 Install once and use the binary directly:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.2.1
+npm install -g cloud-devops-mcp-server@0.3.0
 ```
 
 Then configure the client with:

@@ -1,5 +1,30 @@
 # Tools
 
+## `assess_cloud_change_bundle`
+
+Correlates evidence from Terraform, AWS IAM, Kubernetes and GitHub Actions into one release-risk assessment. It preserves each domain's individual score, then adds cross-domain findings when controls combine into a larger change path.
+
+Current correlation rules include:
+
+- Public infrastructure exposure plus public Kubernetes exposure.
+- Privilege-escalating IAM plus insufficiently protected production delivery.
+- Mutable GitHub Actions references plus mutable Kubernetes image tags.
+- Public exposure plus wildcard or privilege-escalating IAM.
+- Public reachability plus root-capable Kubernetes workloads.
+- Terraform IAM changes plus high-risk IAM policy evidence.
+- Stateful Terraform changes without an explicit rollback or forward-fix plan.
+
+The output includes a combined risk score, risk level, confidence, domain summaries, correlated finding IDs, change-path sequences, uncertainties, a release gate and deduplicated remediation actions.
+
+Use it for:
+
+- Multi-file pull request review.
+- Production change-advisory preparation.
+- Release risk summaries spanning infrastructure, identity, runtime and delivery.
+- Explaining why individually acceptable changes become risky when deployed together.
+
+At least two evidence domains are required.
+
 ## `assess_terraform_change`
 
 Scores deployment risk from infrastructure change characteristics or raw Terraform plan JSON. Raw plans produce rule-tagged evidence and automatically derive resource classes, IAM changes, public exposure and stateful-resource changes.

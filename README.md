@@ -8,7 +8,7 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It gives MCP clients practical Cloud DevOps tools for infrastructure risk review, incident response, CI/CD readiness and SLO error budget analysis.
 
-The v0.2 line adds evidence-backed analysis. Tools can inspect Terraform plan JSON, AWS IAM policy JSON, Kubernetes YAML and GitHub Actions workflow YAML directly instead of relying only on pre-classified boolean inputs. Results include validated structured content, evidence, uncertainties and assessment confidence.
+The v0.3 line adds cross-domain change correlation on top of evidence-backed analysis. Tools can inspect Terraform plan JSON, AWS IAM policy JSON, Kubernetes YAML and GitHub Actions workflow YAML directly, while `assess_cloud_change_bundle` connects those findings into one release-risk view with domain summaries, correlated findings and potential change paths.
 
 ## Table of contents
 
@@ -32,6 +32,7 @@ The v0.2 line adds evidence-backed analysis. Tools can inspect Terraform plan JS
 
 AI assistants are more useful in engineering work when they can call focused tools with clear inputs and consistent outputs. This server provides a Cloud DevOps tool layer for:
 
+- Cross-domain release-risk correlation across infrastructure, identity, runtime and delivery.
 - Infrastructure-as-code deployment risk analysis.
 - Production incident runbook generation.
 - CI/CD delivery readiness review.
@@ -44,6 +45,7 @@ AI assistants are more useful in engineering work when they can call focused too
 
 | Tool | Purpose |
 | --- | --- |
+| `assess_cloud_change_bundle` | Correlates Terraform, IAM, Kubernetes and GitHub Actions evidence into one deployment-risk assessment with cross-domain change paths. |
 | `assess_terraform_change` | Scores Terraform/IaC risk and can derive evidence from raw Terraform plan JSON. |
 | `build_incident_runbook` | Produces a practical incident response runbook for a service, symptom, environment and severity. |
 | `review_cicd_pipeline` | Reviews CI/CD maturity while separating failed controls from unknown evidence. |
@@ -58,8 +60,10 @@ AI assistants are more useful in engineering work when they can call focused too
 flowchart TD
   Client["MCP client"] --> Transport["stdio transport"]
   Transport --> Server["Cloud DevOps MCP server"]
-  Server --> Tools["Engineering tools"]
-  Tools --> Output["Structured guidance"]
+  Server --> DomainTools["Domain analyzers"]
+  DomainTools --> Correlator["Cross-domain correlation engine"]
+  DomainTools --> Output["Structured guidance"]
+  Correlator --> Output
 ```
 
 ## Quickstart
@@ -67,13 +71,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.2.1
+npx -y cloud-devops-mcp-server@0.3.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.2.1
+npx.cmd -y cloud-devops-mcp-server@0.3.0
 ```
 
 ## Install from npm
@@ -81,7 +85,7 @@ npx.cmd -y cloud-devops-mcp-server@0.2.1
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.2.1
+npm install -g cloud-devops-mcp-server@0.3.0
 cloud-devops-mcp-server
 ```
 
@@ -108,7 +112,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
     }
   }
 }
@@ -121,7 +125,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
     }
   }
 }
@@ -200,7 +204,8 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Add read-only cloud inventory checks with explicitly scoped credentials.
 - Add hosted Streamable HTTP transport with authentication and tenant isolation.
 - Add signed release provenance, SBOM generation and automated npm/MCP Registry publication.
-- Add cross-tool change correlation for combined Terraform, IAM, Kubernetes and CI/CD risk review.
+- Expand cross-domain correlation with policy packs for identity, data, networking and supply-chain risk.
+- Add machine-readable policy profiles for production, staging and regulated workloads.
 
 ## Author
 

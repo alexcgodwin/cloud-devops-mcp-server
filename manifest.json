@@ -1,7 +1,7 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "MCP v2 server for evidence-backed Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
   "author": {
     "name": "Alex C. Godwin",
@@ -20,9 +20,11 @@
     "protocol": "2026-07-28",
     "structuredContent": true,
     "readOnly": true,
+    "crossDomainCorrelation": true,
     "artifactParsing": ["terraform-plan-json", "iam-policy-json", "kubernetes-yaml", "github-actions-yaml"]
   },
   "tools": [
+    {"name": "assess_cloud_change_bundle", "category": "cross-domain-risk"},
     {"name": "assess_terraform_change", "category": "infrastructure-risk"},
     {"name": "build_incident_runbook", "category": "incident-response"},
     {"name": "review_cicd_pipeline", "category": "delivery-readiness"},

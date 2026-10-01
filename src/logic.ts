@@ -47,6 +47,43 @@ export interface SloBudgetInput {
   failedRequests?: number;
 }
 
+export interface IamPolicyReviewInput {
+  policyName: string;
+  actions: string[];
+  resources: string[];
+  hasWildcardActions?: boolean;
+  hasWildcardResources?: boolean;
+  allowsPrivilegeEscalationActions?: boolean;
+  hasConditionBlocks?: boolean;
+  usedByProduction?: boolean;
+}
+
+export interface KubernetesDeploymentReviewInput {
+  workloadName: string;
+  namespace: string;
+  replicas: number;
+  hasReadinessProbe?: boolean;
+  hasLivenessProbe?: boolean;
+  hasResourceRequests?: boolean;
+  hasResourceLimits?: boolean;
+  hasPodDisruptionBudget?: boolean;
+  usesLatestTag?: boolean;
+  runsAsRoot?: boolean;
+  exposesPublicService?: boolean;
+}
+
+export interface GitHubWorkflowReviewInput {
+  workflowName: string;
+  triggers: string[];
+  deploysToProduction?: boolean;
+  usesPinnedActions?: boolean;
+  hasLeastPrivilegePermissions?: boolean;
+  hasSecretScanning?: boolean;
+  hasDependencyCaching?: boolean;
+  hasEnvironmentProtection?: boolean;
+  hasConcurrencyControl?: boolean;
+}
+
 const resourceWeights: Record<ChangedResource, number> = {
   network: 16,
   iam: 18,
@@ -243,4 +280,190 @@ export function estimateSloBudget(input: SloBudgetInput) {
   }
 
   return result;
+}
+
+export function reviewIamPolicy(input: IamPolicyReviewInput) {
+  let riskScore = 0;
+  const findings: string[] = [];
+  const strengths: string[] = [];
+
+  if (input.hasWildcardActions || input.actions.some((action) => action.includes("*"))) {
+    riskScore += 28;
+    findings.push("Replace wildcard actions with the smallest explicit action set required by the workload.");
+  } else {
+    strengths.push("Actions are explicitly scoped.");
+  }
+
+  if (input.hasWildcardResources || input.resources.some((resource) => resource === "*" || resource.endsWith(":*"))) {
+    riskScore += 24;
+    findings.push("Scope resources to specific ARNs or controlled resource patterns instead of broad wildcards.");
+  } else {
+    strengths.push("Resources are explicitly scoped.");
+  }
+
+  if (input.allowsPrivilegeEscalationActions) {
+    riskScore += 26;
+    findings.push("Review privilege-escalation paths such as iam:PassRole, sts:AssumeRole, policy attachment and access-key creation.");
+  }
+
+  if (!input.hasConditionBlocks) {
+    riskScore += 12;
+    findings.push("Add condition blocks for account, region, source identity, resource tags or network boundaries where possible.");
+  } else {
+    strengths.push("Condition blocks are present.");
+  }
+
+  if (input.usedByProduction) {
+    riskScore += 10;
+  }
+
+  const boundedRiskScore = Math.min(riskScore, 100);
+
+  return {
+    policyName: input.policyName,
+    riskScore: boundedRiskScore,
+    riskLevel: riskLevel(boundedRiskScore),
+    strengths,
+    findings,
+    recommendedControls: [
+      "Use least privilege and remove unused permissions after access analysis.",
+      "Prefer role-based access with short-lived credentials over long-lived keys.",
+      "Require peer review for IAM changes and attach evidence to the change record.",
+      "Validate CloudTrail, Access Analyzer or equivalent evidence before production rollout."
+    ]
+  };
+}
+
+export function reviewKubernetesDeployment(input: KubernetesDeploymentReviewInput) {
+  let readinessScore = 100;
+  const findings: string[] = [];
+  const strengths: string[] = [];
+
+  if (input.replicas < 2) {
+    readinessScore -= 18;
+    findings.push("Run at least two replicas for production workloads that need availability.");
+  } else {
+    strengths.push("Replica count supports basic availability.");
+  }
+
+  if (!input.hasReadinessProbe) {
+    readinessScore -= 16;
+    findings.push("Add a readiness probe so traffic only reaches pods that can serve requests.");
+  } else {
+    strengths.push("Readiness probe is present.");
+  }
+
+  if (!input.hasLivenessProbe) {
+    readinessScore -= 10;
+    findings.push("Add a liveness probe to recover stuck application processes.");
+  }
+
+  if (!input.hasResourceRequests) {
+    readinessScore -= 14;
+    findings.push("Add CPU and memory requests so the scheduler can place pods safely.");
+  }
+
+  if (!input.hasResourceLimits) {
+    readinessScore -= 10;
+    findings.push("Add resource limits to reduce noisy-neighbor and runaway-memory risk.");
+  }
+
+  if (!input.hasPodDisruptionBudget) {
+    readinessScore -= 12;
+    findings.push("Add a PodDisruptionBudget for safer node maintenance and voluntary disruptions.");
+  }
+
+  if (input.usesLatestTag) {
+    readinessScore -= 12;
+    findings.push("Avoid the latest image tag. Use immutable image tags or digests for traceable rollbacks.");
+  }
+
+  if (input.runsAsRoot) {
+    readinessScore -= 12;
+    findings.push("Run containers as a non-root user and enforce a restricted security context.");
+  }
+
+  if (input.exposesPublicService) {
+    readinessScore -= 8;
+    findings.push("Validate public exposure, ingress rules, TLS, WAF or network policy before rollout.");
+  }
+
+  const boundedReadinessScore = Math.max(readinessScore, 0);
+
+  return {
+    workloadName: input.workloadName,
+    namespace: input.namespace,
+    readinessScore: boundedReadinessScore,
+    readinessLevel:
+      boundedReadinessScore >= 85 ? "production-ready" : boundedReadinessScore >= 65 ? "needs-hardening" : "not-ready",
+    strengths,
+    findings,
+    recommendedControls: [
+      "Deploy with health checks, resource controls and immutable images.",
+      "Require rollout monitoring for errors, latency, saturation and restart loops.",
+      "Keep rollback instructions tied to the deployed image or Helm release.",
+      "Use network policy and least-privilege service accounts for production namespaces."
+    ]
+  };
+}
+
+export function reviewGitHubActionsWorkflow(input: GitHubWorkflowReviewInput) {
+  let score = 100;
+  const findings: string[] = [];
+  const strengths: string[] = [];
+
+  if (input.triggers.includes("pull_request_target")) {
+    score -= 18;
+    findings.push("Avoid pull_request_target for untrusted code unless the workflow is tightly constrained.");
+  }
+
+  if (!input.usesPinnedActions) {
+    score -= 16;
+    findings.push("Pin third-party actions to commit SHAs or trusted release tags to reduce supply-chain risk.");
+  } else {
+    strengths.push("Actions are pinned or version controlled.");
+  }
+
+  if (!input.hasLeastPrivilegePermissions) {
+    score -= 18;
+    findings.push("Set explicit least-privilege GITHUB_TOKEN permissions instead of relying on defaults.");
+  } else {
+    strengths.push("Workflow permissions are explicitly scoped.");
+  }
+
+  if (!input.hasSecretScanning) {
+    score -= 10;
+    findings.push("Add secret scanning or a pre-deploy guard for accidental credential exposure.");
+  }
+
+  if (!input.hasDependencyCaching) {
+    score -= 6;
+    findings.push("Add dependency caching where safe to improve repeatability and build speed.");
+  }
+
+  if (input.deploysToProduction && !input.hasEnvironmentProtection) {
+    score -= 18;
+    findings.push("Use protected environments, required reviewers or deployment approvals for production.");
+  }
+
+  if (input.deploysToProduction && !input.hasConcurrencyControl) {
+    score -= 10;
+    findings.push("Add concurrency controls to prevent overlapping production deployments.");
+  }
+
+  const workflowScore = Math.max(score, 0);
+
+  return {
+    workflowName: input.workflowName,
+    workflowScore,
+    readinessLevel: workflowScore >= 85 ? "production-ready" : workflowScore >= 65 ? "needs-hardening" : "not-ready",
+    strengths,
+    findings,
+    recommendedControls: [
+      "Pin actions, scope token permissions and protect production environments.",
+      "Publish build provenance such as commit SHA, artifact version and deployment environment.",
+      "Fail closed when tests, security checks or policy gates fail.",
+      "Keep secrets in managed secret stores and rotate credentials used by workflows."
+    ]
+  };
 }

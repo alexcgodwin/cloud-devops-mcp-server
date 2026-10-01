@@ -3,6 +3,9 @@ import {
   assessTerraformChange,
   buildIncidentRunbook,
   estimateSloBudget,
+  reviewGitHubActionsWorkflow,
+  reviewIamPolicy,
+  reviewKubernetesDeployment,
   reviewPipeline
 } from "../src/logic.js";
 
@@ -64,5 +67,63 @@ describe("estimateSloBudget", () => {
 
     expect(result.allowedDowntimeMinutes).toBe(43.2);
     expect(result.budgetStatus).toBe("within-budget");
+  });
+});
+
+describe("reviewIamPolicy", () => {
+  it("flags wildcard and privilege escalation risk", () => {
+    const result = reviewIamPolicy({
+      policyName: "platform-admin",
+      actions: ["iam:*", "sts:AssumeRole"],
+      resources: ["*"],
+      hasWildcardActions: true,
+      hasWildcardResources: true,
+      allowsPrivilegeEscalationActions: true,
+      hasConditionBlocks: false,
+      usedByProduction: true
+    });
+
+    expect(result.riskLevel).toBe("critical");
+    expect(result.findings.join(" ")).toContain("privilege-escalation");
+  });
+});
+
+describe("reviewKubernetesDeployment", () => {
+  it("marks hardened workloads as production ready", () => {
+    const result = reviewKubernetesDeployment({
+      workloadName: "payments-api",
+      namespace: "production",
+      replicas: 3,
+      hasReadinessProbe: true,
+      hasLivenessProbe: true,
+      hasResourceRequests: true,
+      hasResourceLimits: true,
+      hasPodDisruptionBudget: true,
+      usesLatestTag: false,
+      runsAsRoot: false,
+      exposesPublicService: false
+    });
+
+    expect(result.readinessLevel).toBe("production-ready");
+    expect(result.strengths.join(" ")).toContain("Replica");
+  });
+});
+
+describe("reviewGitHubActionsWorkflow", () => {
+  it("flags unsafe production workflows", () => {
+    const result = reviewGitHubActionsWorkflow({
+      workflowName: "production-deploy",
+      triggers: ["push", "pull_request_target"],
+      deploysToProduction: true,
+      usesPinnedActions: false,
+      hasLeastPrivilegePermissions: false,
+      hasSecretScanning: false,
+      hasDependencyCaching: true,
+      hasEnvironmentProtection: false,
+      hasConcurrencyControl: false
+    });
+
+    expect(result.readinessLevel).toBe("not-ready");
+    expect(result.findings.join(" ")).toContain("protected environments");
   });
 });

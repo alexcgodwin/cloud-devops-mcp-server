@@ -32,6 +32,9 @@ AI assistants are more useful in engineering work when they can call focused too
 - Production incident runbook generation.
 - CI/CD delivery readiness review.
 - SLO error budget calculations.
+- AWS IAM least-privilege review.
+- Kubernetes workload production readiness review.
+- GitHub Actions workflow security and deployment review.
 
 ## Tools
 
@@ -41,6 +44,9 @@ AI assistants are more useful in engineering work when they can call focused too
 | `build_incident_runbook` | Produces a practical incident response runbook for a service, symptom, environment and severity. |
 | `review_cicd_pipeline` | Reviews CI/CD maturity and recommends gates for safer production delivery. |
 | `estimate_slo_error_budget` | Calculates remaining downtime and optional request failure budget for an SLO window. |
+| `review_iam_policy` | Reviews IAM policy risk, wildcard access and privilege-escalation paths. |
+| `review_kubernetes_deployment` | Reviews Kubernetes workload production readiness controls. |
+| `review_github_actions_workflow` | Reviews GitHub Actions workflow security and production deployment safety. |
 
 ## Architecture
 
@@ -139,7 +145,7 @@ Example output shape:
 
 ## Demo outputs
 
-See [docs/demo.md](docs/demo.md) for practical sample inputs and outputs across all four tools.
+See [docs/demo.md](docs/demo.md) for practical sample inputs and outputs across the toolset.
 
 ## Docker
 
@@ -173,11 +179,10 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Roadmap
 
-- Add Kubernetes deployment review.
-- Add AWS IAM policy review helpers.
 - Add Terraform plan JSON parsing.
-- Add GitHub Actions workflow analysis.
-- Add optional HTTP transport after the local stdio server is stable.
+- Add hosted HTTP transport for remote MCP clients.
+- Add cloud inventory read-only checks for AWS, Azure and Kubernetes.
+- Add signed hosted MCP authentication for remote clients.
 
 ## Author
 

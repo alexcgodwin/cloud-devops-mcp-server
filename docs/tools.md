@@ -39,3 +39,33 @@ Use it for:
 - SLO status review.
 - Error budget planning.
 - Reliability reporting.
+
+## `review_iam_policy`
+
+Reviews IAM policies for wildcard access, privilege-escalation paths, missing conditions and production blast radius.
+
+Use it for:
+
+- IAM pull request review.
+- Least-privilege checks.
+- Production permission-set review.
+
+## `review_kubernetes_deployment`
+
+Reviews Kubernetes workload controls such as probes, replicas, resource requests, resource limits, disruption budgets, image tags and security context.
+
+Use it for:
+
+- Kubernetes production readiness.
+- EKS workload review.
+- Helm or manifest review.
+
+## `review_github_actions_workflow`
+
+Reviews GitHub Actions workflows for action pinning, token permissions, production protections, secret guardrails and deployment concurrency.
+
+Use it for:
+
+- CI/CD security review.
+- Production deployment workflow review.
+- Release gate hardening.

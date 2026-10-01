@@ -16,6 +16,9 @@
     "assess_terraform_change",
     "build_incident_runbook",
     "review_cicd_pipeline",
-    "estimate_slo_error_budget"
+    "estimate_slo_error_budget",
+    "review_iam_policy",
+    "review_kubernetes_deployment",
+    "review_github_actions_workflow"
   ]
 }

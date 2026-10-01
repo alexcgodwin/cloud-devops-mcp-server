@@ -13,4 +13,7 @@ The format follows Keep a Changelog, and this project uses semantic versioning.
 - Incident runbook generation tool.
 - CI/CD pipeline readiness review tool.
 - SLO error budget estimation tool.
+- AWS IAM policy review tool.
+- Kubernetes deployment readiness review tool.
+- GitHub Actions workflow review tool.
 - CI workflow, tests, security policy and contribution guide.

@@ -125,3 +125,91 @@ Output:
   "remainingFailedRequests": 3799
 }
 ```
+
+## IAM policy review
+
+Input:
+
+```json
+{
+  "policyName": "prod-admin-helper",
+  "environment": "production",
+  "allowedActions": ["iam:PassRole", "sts:AssumeRole", "s3:*"],
+  "allowedResources": ["*"],
+  "hasConditionBlocks": false,
+  "isAttachedToHumanUser": true
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "policyName": "prod-admin-helper",
+  "riskScore": 100,
+  "riskLevel": "critical",
+  "findings": [
+    "Policy allows wildcard resources.",
+    "Policy includes actions commonly used in privilege-escalation paths."
+  ]
+}
+```
+
+## Kubernetes deployment review
+
+Input:
+
+```json
+{
+  "workloadName": "checkout-api",
+  "environment": "production",
+  "replicaCount": 3,
+  "hasReadinessProbe": true,
+  "hasLivenessProbe": true,
+  "hasResourceRequests": true,
+  "hasResourceLimits": true,
+  "hasPodDisruptionBudget": true,
+  "usesLatestImageTag": false,
+  "runsAsRoot": false,
+  "exposesPublicService": false
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "workloadName": "checkout-api",
+  "readinessScore": 100,
+  "readinessLevel": "production-ready",
+  "findings": []
+}
+```
+
+## GitHub Actions workflow review
+
+Input:
+
+```json
+{
+  "workflowName": "deploy-production",
+  "runsOnPullRequestTarget": false,
+  "usesPinnedActions": true,
+  "hasLeastPrivilegePermissions": true,
+  "usesEnvironmentProtection": true,
+  "hasConcurrencyControl": true,
+  "hasSecretScanning": true,
+  "deploysToProduction": true
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "workflowName": "deploy-production",
+  "readinessScore": 100,
+  "readinessLevel": "production-ready",
+  "findings": []
+}
+```

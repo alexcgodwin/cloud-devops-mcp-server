@@ -32,6 +32,18 @@
     {
       "name": "estimate_slo_error_budget",
       "category": "sre"
+    },
+    {
+      "name": "review_iam_policy",
+      "category": "cloud-security"
+    },
+    {
+      "name": "review_kubernetes_deployment",
+      "category": "kubernetes"
+    },
+    {
+      "name": "review_github_actions_workflow",
+      "category": "ci-cd-security"
     }
   ]
 }

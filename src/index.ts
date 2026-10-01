@@ -6,6 +6,9 @@ import {
   assessTerraformChange,
   buildIncidentRunbook,
   estimateSloBudget,
+  reviewGitHubActionsWorkflow,
+  reviewIamPolicy,
+  reviewKubernetesDeployment,
   reviewPipeline
 } from "./logic.js";
 
@@ -83,6 +86,61 @@ server.tool(
     failedRequests: z.number().int().min(0).optional().describe("Optional failed request count for the SLO window.")
   },
   async (input) => jsonResponse(estimateSloBudget(input))
+);
+
+server.tool(
+  "review_iam_policy",
+  "Review AWS IAM policy risk for least privilege, wildcard access and privilege-escalation paths.",
+  {
+    policyName: z.string().min(2).describe("IAM policy, role or permission set name."),
+    actions: z.array(z.string()).min(1).describe("Allowed IAM actions or service actions in the policy."),
+    resources: z.array(z.string()).min(1).describe("Resource ARNs or resource patterns affected by the policy."),
+    hasWildcardActions: z.boolean().optional().describe("Whether the policy includes broad action wildcards such as * or service:*"),
+    hasWildcardResources: z.boolean().optional().describe("Whether the policy allows access to * or broad resource wildcards."),
+    allowsPrivilegeEscalationActions: z
+      .boolean()
+      .optional()
+      .describe("Whether the policy allows privilege-escalation paths such as iam:PassRole, sts:AssumeRole or policy attachment."),
+    hasConditionBlocks: z.boolean().optional().describe("Whether the policy uses condition blocks to narrow access."),
+    usedByProduction: z.boolean().optional().describe("Whether this policy is used by production workloads or production operators.")
+  },
+  async (input) => jsonResponse(reviewIamPolicy(input))
+);
+
+server.tool(
+  "review_kubernetes_deployment",
+  "Review Kubernetes workload production readiness and operational safety controls.",
+  {
+    workloadName: z.string().min(2).describe("Deployment, StatefulSet or workload name."),
+    namespace: z.string().min(1).describe("Kubernetes namespace."),
+    replicas: z.number().int().min(0).describe("Configured replica count."),
+    hasReadinessProbe: z.boolean().optional().describe("Whether the workload has a readiness probe."),
+    hasLivenessProbe: z.boolean().optional().describe("Whether the workload has a liveness probe."),
+    hasResourceRequests: z.boolean().optional().describe("Whether CPU and memory requests are configured."),
+    hasResourceLimits: z.boolean().optional().describe("Whether CPU and memory limits are configured."),
+    hasPodDisruptionBudget: z.boolean().optional().describe("Whether a PodDisruptionBudget protects voluntary disruption."),
+    usesLatestTag: z.boolean().optional().describe("Whether containers use the mutable latest tag."),
+    runsAsRoot: z.boolean().optional().describe("Whether the workload runs as root or lacks restricted security context."),
+    exposesPublicService: z.boolean().optional().describe("Whether the workload is reachable from the public internet.")
+  },
+  async (input) => jsonResponse(reviewKubernetesDeployment(input))
+);
+
+server.tool(
+  "review_github_actions_workflow",
+  "Review GitHub Actions workflow security, release safety and production deployment readiness.",
+  {
+    workflowName: z.string().min(2).describe("Workflow name."),
+    triggers: z.array(z.string()).min(1).describe("Workflow triggers such as push, pull_request, workflow_dispatch or pull_request_target."),
+    deploysToProduction: z.boolean().optional().describe("Whether this workflow deploys or promotes to production."),
+    usesPinnedActions: z.boolean().optional().describe("Whether actions are pinned to trusted versions or commit SHAs."),
+    hasLeastPrivilegePermissions: z.boolean().optional().describe("Whether the workflow sets explicit least-privilege token permissions."),
+    hasSecretScanning: z.boolean().optional().describe("Whether secret scanning or credential guardrails are present."),
+    hasDependencyCaching: z.boolean().optional().describe("Whether dependency caching is configured where appropriate."),
+    hasEnvironmentProtection: z.boolean().optional().describe("Whether production environments require reviewers or protected deployment rules."),
+    hasConcurrencyControl: z.boolean().optional().describe("Whether concurrency prevents overlapping deployments.")
+  },
+  async (input) => jsonResponse(reviewGitHubActionsWorkflow(input))
 );
 
 const transport = new StdioServerTransport();

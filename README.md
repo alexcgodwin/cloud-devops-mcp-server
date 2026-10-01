@@ -1,6 +1,8 @@
 # Cloud DevOps MCP Server
 
 [![CI](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/cloud-devops-mcp-server.svg)](https://www.npmjs.com/package/cloud-devops-mcp-server)
+[![MCP Registry](https://img.shields.io/badge/MCP%20Registry-active-brightgreen.svg)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.alexcgodwin%2Fcloud-devops-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Cloud%20DevOps-blue)](server.json)
 
@@ -14,8 +16,10 @@ The v0.2 line adds evidence-backed analysis. Tools can inspect Terraform plan JS
 - [Tools](#tools)
 - [Architecture](#architecture)
 - [Quickstart](#quickstart)
+- [Install from npm](#install-from-npm)
 - [MCP clients](#mcp-clients)
 - [Configuration](#configuration)
+- [Public release verification](#public-release-verification)
 - [Example tool input](#example-tool-input)
 - [Demo outputs](#demo-outputs)
 - [Docker](#docker)
@@ -60,19 +64,28 @@ flowchart TD
 
 ## Quickstart
 
-```bash
-git clone https://github.com/alexcgodwin/cloud-devops-mcp-server.git
-cd cloud-devops-mcp-server
-npm install
-npm run build
-npm test
-```
-
-Run the server locally:
+Run the published MCP server directly from npm:
 
 ```bash
-npm start
+npx -y cloud-devops-mcp-server@0.2.1
 ```
+
+On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
+
+```powershell
+npx.cmd -y cloud-devops-mcp-server@0.2.1
+```
+
+## Install from npm
+
+Install the CLI globally if you prefer a persistent local command:
+
+```bash
+npm install -g cloud-devops-mcp-server@0.2.1
+cloud-devops-mcp-server
+```
+
+The package is published on npm as `cloud-devops-mcp-server` and registered in the official MCP Registry as `io.github.alexcgodwin/cloud-devops-mcp-server`.
 
 ## MCP clients
 
@@ -88,35 +101,39 @@ Use any MCP host that supports local stdio servers. The server does not require 
 
 ## Configuration
 
-Use the built `dist/index.js` file from your local checkout.
+For MCP clients that support local stdio servers, the recommended public configuration is:
 
 ```json
 {
   "mcpServers": {
     "cloud-devops": {
-      "command": "node",
-      "args": ["/absolute/path/to/cloud-devops-mcp-server/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
     }
   }
 }
 ```
 
-Windows example:
+Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell wrapper:
 
 ```json
 {
   "mcpServers": {
     "cloud-devops": {
-      "command": "node",
-      "args": [
-        "C:\\Users\\Owner\\Downloads\\cloud-devops-mcp-server-bootstrap\\dist\\index.js"
-      ]
+      "command": "npx.cmd",
+      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
     }
   }
 }
 ```
 
-See [docs/configuration.md](docs/configuration.md) for client-specific setup notes.
+See [docs/configuration.md](docs/configuration.md) for npm, global-install and source-development configuration options.
+
+## Public release verification
+
+The published `0.2.1` package was acceptance-tested from a clean directory using the npm-installed CLI and the exact public `npx` command. The test discovered all seven tools, executed all seven successfully through stdio, verified structured outputs, rejected malformed input, and found no credential, private-key, token or `.env` files in the published package.
+
+See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
 ## Example tool input
 
@@ -182,8 +199,8 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Expand Terraform plan evidence rules across AWS, Azure and Google Cloud resources.
 - Add read-only cloud inventory checks with explicitly scoped credentials.
 - Add hosted Streamable HTTP transport with authentication and tenant isolation.
-- Publish the npm package, then add the package entry to `server.json` for MCP Registry distribution.
-- Add signed release provenance and automated registry publication.
+- Add signed release provenance, SBOM generation and automated npm/MCP Registry publication.
+- Add cross-tool change correlation for combined Terraform, IAM, Kubernetes and CI/CD risk review.
 
 ## Author
 

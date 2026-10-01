@@ -4,6 +4,14 @@ All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.
 
+## [0.2.1] - 2026-10-01
+
+### Fixed
+
+- Normalized the npm executable path so package installation exposes the `cloud-devops-mcp-server` CLI correctly.
+- Normalized npm repository metadata before publication.
+- Added the official MCP Registry npm package declaration with stdio transport.
+
 ## [0.2.0] - 2026-10-01
 
 ### Added

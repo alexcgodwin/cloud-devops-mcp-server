@@ -3,16 +3,20 @@
   "name": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "title": "Cloud DevOps MCP Server",
   "description": "Read-only Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "repository": {
     "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
     "source": "github",
     "id": "1398827812"
   },
-  "_meta": {
-    "io.modelcontextprotocol.registry/publisher-provided": {
-      "transport": "stdio",
-      "releaseStatus": "npm-package-pending"
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "cloud-devops-mcp-server",
+      "version": "0.2.1",
+      "transport": {
+        "type": "stdio"
+      }
     }
-  }
+  ]
 }

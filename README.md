@@ -71,13 +71,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.3.0
+npx -y cloud-devops-mcp-server@0.3.1
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.3.0
+npx.cmd -y cloud-devops-mcp-server@0.3.1
 ```
 
 ## Install from npm
@@ -85,7 +85,7 @@ npx.cmd -y cloud-devops-mcp-server@0.3.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.3.0
+npm install -g cloud-devops-mcp-server@0.3.1
 cloud-devops-mcp-server
 ```
 
@@ -112,7 +112,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.1"]
     }
   }
 }
@@ -125,7 +125,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.3.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.3.1"]
     }
   }
 }

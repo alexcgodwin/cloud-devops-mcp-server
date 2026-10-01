@@ -1,7 +1,7 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "MCP v2 server for evidence-backed Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
   "author": {
     "name": "Alex C. Godwin",

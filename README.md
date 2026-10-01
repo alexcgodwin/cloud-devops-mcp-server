@@ -158,7 +158,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.4.0 release candidate passes 37 automated tests, including a real authenticated Streamable HTTP client/server connection, twelve-tool MCP contract coverage, provider policy-pack tests, Terraform/Kubernetes security tests and SBOM correlation tests. The clean public npm acceptance record is updated after publication.
+The published v0.4.0 package passes 37 automated tests and a separate clean-install acceptance run. The npm-installed server exposed all twelve tools over stdio, passed AWS/Azure/GCP policy-pack calls, Terraform and Kubernetes security reviews, CycloneDX supply-chain correlation, and an authenticated Streamable HTTP client/server test with invalid-token rejection. The npm release also carries SLSA provenance.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 

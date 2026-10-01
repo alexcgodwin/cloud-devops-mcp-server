@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "title": "Cloud DevOps MCP Server",
-  "description": "Read-only Cloud DevOps risk review with cross-domain Terraform, IAM, Kubernetes and CI/CD correlation, incident response and SLO analysis.",
-  "version": "0.3.0",
+  "description": "Cloud DevOps risk review with cross-domain IaC, IAM, Kubernetes and CI/CD correlation.",
+  "version": "0.3.1",
   "repository": {
     "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
     "source": "github",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "cloud-devops-mcp-server",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "transport": {
         "type": "stdio"
       }

@@ -4,6 +4,15 @@ All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.
 
+## [0.3.1] - 2026-10-01
+
+### Fixed
+
+- Shortened the MCP Registry description to satisfy the official 100-character limit.
+- Added automated metadata consistency checks for package, manifest and Registry versions.
+- Added CI coverage for Registry name/package identity and the eight-tool manifest.
+- Public installation examples now point to 0.3.1.
+
 ## [0.3.0] - 2026-10-01
 
 ### Added

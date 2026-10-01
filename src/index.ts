@@ -14,7 +14,7 @@ import {
   reviewPipeline
 } from "./logic.js";
 
-const VERSION = "0.3.0";
+const VERSION = "0.3.1";
 
 const evidenceSchema = z.object({
   source: z.string(),

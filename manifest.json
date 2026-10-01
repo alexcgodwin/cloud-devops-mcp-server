@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.1.0",
-  "description": "Model Context Protocol server for Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
+  "version": "0.2.0",
+  "description": "MCP v2 server for evidence-backed Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -16,34 +16,19 @@
     "command": "node",
     "args": ["dist/index.js"]
   },
+  "capabilities": {
+    "protocol": "2026-07-28",
+    "structuredContent": true,
+    "readOnly": true,
+    "artifactParsing": ["terraform-plan-json", "iam-policy-json", "kubernetes-yaml", "github-actions-yaml"]
+  },
   "tools": [
-    {
-      "name": "assess_terraform_change",
-      "category": "infrastructure-risk"
-    },
-    {
-      "name": "build_incident_runbook",
-      "category": "incident-response"
-    },
-    {
-      "name": "review_cicd_pipeline",
-      "category": "delivery-readiness"
-    },
-    {
-      "name": "estimate_slo_error_budget",
-      "category": "sre"
-    },
-    {
-      "name": "review_iam_policy",
-      "category": "cloud-security"
-    },
-    {
-      "name": "review_kubernetes_deployment",
-      "category": "kubernetes"
-    },
-    {
-      "name": "review_github_actions_workflow",
-      "category": "ci-cd-security"
-    }
+    {"name": "assess_terraform_change", "category": "infrastructure-risk"},
+    {"name": "build_incident_runbook", "category": "incident-response"},
+    {"name": "review_cicd_pipeline", "category": "delivery-readiness"},
+    {"name": "estimate_slo_error_budget", "category": "sre"},
+    {"name": "review_iam_policy", "category": "cloud-security"},
+    {"name": "review_kubernetes_deployment", "category": "kubernetes"},
+    {"name": "review_github_actions_workflow", "category": "ci-cd-security"}
   ]
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
+import { pathToFileURL } from "node:url";
+import { McpServer } from "@modelcontextprotocol/server";
+import { serveStdio } from "@modelcontextprotocol/server/stdio";
+import * as z from "zod/v4";
 import {
   assessTerraformChange,
   buildIncidentRunbook,
@@ -12,136 +13,286 @@ import {
   reviewPipeline
 } from "./logic.js";
 
-const server = new McpServer({
-  name: "cloud-devops-mcp-server",
-  version: "0.1.0"
+const VERSION = "0.2.0";
+
+const evidenceSchema = z.object({
+  source: z.string(),
+  ruleId: z.string(),
+  detail: z.string()
 });
 
-function jsonResponse(payload: unknown) {
+const confidenceSchema = z.enum(["high", "medium", "low"]);
+const readinessSchema = z.enum(["production-ready", "needs-review", "needs-hardening", "not-ready"]);
+const riskSchema = z.enum(["low", "medium", "high", "critical"]);
+
+const readOnlyAnnotations = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false
+} as const;
+
+function toolResult(payload: Record<string, unknown>) {
   return {
-    content: [
-      {
-        type: "text" as const,
-        text: JSON.stringify(payload, null, 2)
-      }
-    ]
+    content: [{ type: "text" as const, text: JSON.stringify(payload, null, 2) }],
+    structuredContent: payload
   };
 }
 
-server.tool(
-  "assess_terraform_change",
-  "Assess Terraform or infrastructure-as-code change risk before deployment.",
-  {
-    changedResources: z
-      .array(z.enum(["network", "iam", "database", "kubernetes", "compute", "observability", "ci_cd", "dns"]))
-      .min(1)
-      .describe("Infrastructure resource classes changed by the pull request or deployment."),
-    includesIamChanges: z.boolean().optional().describe("Whether identity, access policy or role changes are included."),
-    includesPublicIngress: z.boolean().optional().describe("Whether public access, listener or ingress changes are included."),
-    modifiesStatefulResources: z.boolean().optional().describe("Whether databases, volumes, queues or persistent resources are modified."),
-    hasRollbackPlan: z.boolean().optional().describe("Whether the change has a documented rollback or forward-fix plan."),
-    hasPeerReview: z.boolean().optional().describe("Whether another engineer reviewed the change."),
-    hasTerraformPlan: z.boolean().optional().describe("Whether terraform plan or equivalent preview was generated and reviewed.")
-  },
-  async (input) => jsonResponse(assessTerraformChange(input))
-);
+export function createServer() {
+  const server = new McpServer(
+    { name: "cloud-devops-mcp-server", version: VERSION },
+    {
+      instructions:
+        "Use these read-only Cloud DevOps tools for evidence-backed review. Prefer raw Terraform plans, IAM policies, Kubernetes manifests and GitHub Actions workflow YAML when available. Treat unknown evidence as unknown rather than assuming a failed control."
+    }
+  );
 
-server.tool(
-  "build_incident_runbook",
-  "Create a practical incident response runbook for a cloud service symptom.",
-  {
-    service: z.string().min(2).describe("Service, platform or application name."),
-    environment: z.enum(["dev", "staging", "production"]).describe("Environment where the incident is happening."),
-    severity: z.enum(["sev1", "sev2", "sev3", "sev4"]).describe("Incident severity."),
-    symptom: z.string().min(5).describe("Observed symptom or user impact."),
-    signals: z.array(z.string()).optional().describe("Metrics, logs, traces, alerts or other signals already observed.")
-  },
-  async (input) => jsonResponse(buildIncidentRunbook(input))
-);
+  server.registerTool(
+    "assess_terraform_change",
+    {
+      title: "Assess Terraform Change",
+      description: "Assess Terraform or infrastructure-as-code change risk from structured facts or Terraform plan JSON.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        changedResources: z
+          .array(z.enum(["network", "iam", "database", "kubernetes", "compute", "observability", "ci_cd", "dns"]))
+          .min(1)
+          .optional()
+          .describe("Infrastructure resource classes changed by the pull request or deployment."),
+        terraformPlanJson: z.string().min(2).optional().describe("Optional raw Terraform plan JSON. When supplied, the server derives resource classes and evidence."),
+        includesIamChanges: z.boolean().optional(),
+        includesPublicIngress: z.boolean().optional(),
+        modifiesStatefulResources: z.boolean().optional(),
+        hasRollbackPlan: z.boolean().optional(),
+        hasPeerReview: z.boolean().optional(),
+        hasTerraformPlan: z.boolean().optional()
+      }).refine((value) => Boolean(value.terraformPlanJson || value.changedResources?.length), {
+        message: "Provide changedResources or terraformPlanJson."
+      }),
+      outputSchema: z.object({
+        riskScore: z.number(),
+        riskLevel: riskSchema,
+        changedResources: z.array(z.string()),
+        evidence: z.array(evidenceSchema),
+        uncertainties: z.array(z.string()),
+        assessmentConfidence: confidenceSchema,
+        checklist: z.array(z.string()),
+        recommendedReleasePath: z.string()
+      })
+    },
+    async (input) => toolResult(assessTerraformChange(input))
+  );
 
-server.tool(
-  "review_cicd_pipeline",
-  "Review CI/CD readiness for production deployment and recommend release gates.",
-  {
-    pipelineName: z.string().min(2).describe("Pipeline or workflow name."),
-    deploymentStrategy: z.enum(["rolling", "blue_green", "canary", "recreate", "manual"]).describe("Deployment strategy used by the pipeline."),
-    environments: z.array(z.string()).min(1).describe("Environments promoted through the delivery path."),
-    hasAutomatedTests: z.boolean().optional().describe("Whether automated tests run before deployment."),
-    hasSecurityScan: z.boolean().optional().describe("Whether dependency, container or static scans run before deployment."),
-    hasRollback: z.boolean().optional().describe("Whether rollback is automated or documented and tested."),
-    hasArtifactVersioning: z.boolean().optional().describe("Whether artifacts are immutable and traceable to source control."),
-    hasManualApprovalForProduction: z.boolean().optional().describe("Whether production requires approval or controlled promotion.")
-  },
-  async (input) => jsonResponse(reviewPipeline(input))
-);
+  server.registerTool(
+    "build_incident_runbook",
+    {
+      title: "Build Incident Runbook",
+      description: "Create a practical incident response runbook for a cloud service symptom.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        service: z.string().min(2),
+        environment: z.enum(["dev", "staging", "production"]),
+        severity: z.enum(["sev1", "sev2", "sev3", "sev4"]),
+        symptom: z.string().min(5),
+        signals: z.array(z.string()).optional()
+      }),
+      outputSchema: z.object({
+        title: z.string(),
+        context: z.object({
+          service: z.string(),
+          environment: z.string(),
+          symptom: z.string(),
+          signals: z.array(z.string())
+        }),
+        firstFifteenMinutes: z.array(z.string()),
+        triageSteps: z.array(z.string()),
+        communication: z.array(z.string()),
+        mitigation: z.array(z.string()),
+        rcaEvidence: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(buildIncidentRunbook(input))
+  );
 
-server.tool(
-  "estimate_slo_error_budget",
-  "Calculate SLO error budget for downtime and optional request failure budget.",
-  {
-    sloTargetPercent: z.number().gt(0).lt(100).describe("Target availability percentage, for example 99.9."),
-    periodDays: z.number().int().positive().describe("SLO window in days."),
-    observedDowntimeMinutes: z.number().min(0).describe("Downtime already consumed in minutes."),
-    requestVolume: z.number().int().positive().optional().describe("Optional total request volume for the SLO window."),
-    failedRequests: z.number().int().min(0).optional().describe("Optional failed request count for the SLO window.")
-  },
-  async (input) => jsonResponse(estimateSloBudget(input))
-);
+  server.registerTool(
+    "review_cicd_pipeline",
+    {
+      title: "Review CI/CD Pipeline",
+      description: "Review CI/CD readiness for production deployment while separating missing evidence from failed controls.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        pipelineName: z.string().min(2),
+        deploymentStrategy: z.enum(["rolling", "blue_green", "canary", "recreate", "manual"]),
+        environments: z.array(z.string()).min(1),
+        hasAutomatedTests: z.boolean().optional(),
+        hasSecurityScan: z.boolean().optional(),
+        hasRollback: z.boolean().optional(),
+        hasArtifactVersioning: z.boolean().optional(),
+        hasManualApprovalForProduction: z.boolean().optional()
+      }),
+      outputSchema: z.object({
+        pipelineName: z.string(),
+        readinessScore: z.number(),
+        readinessLevel: readinessSchema,
+        assessmentConfidence: confidenceSchema,
+        deploymentStrategy: z.string(),
+        strengths: z.array(z.string()),
+        findings: z.array(z.string()),
+        uncertainties: z.array(z.string()),
+        recommendedGates: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(reviewPipeline(input))
+  );
 
-server.tool(
-  "review_iam_policy",
-  "Review AWS IAM policy risk for least privilege, wildcard access and privilege-escalation paths.",
-  {
-    policyName: z.string().min(2).describe("IAM policy, role or permission set name."),
-    actions: z.array(z.string()).min(1).describe("Allowed IAM actions or service actions in the policy."),
-    resources: z.array(z.string()).min(1).describe("Resource ARNs or resource patterns affected by the policy."),
-    hasWildcardActions: z.boolean().optional().describe("Whether the policy includes broad action wildcards such as * or service:*"),
-    hasWildcardResources: z.boolean().optional().describe("Whether the policy allows access to * or broad resource wildcards."),
-    allowsPrivilegeEscalationActions: z
-      .boolean()
-      .optional()
-      .describe("Whether the policy allows privilege-escalation paths such as iam:PassRole, sts:AssumeRole or policy attachment."),
-    hasConditionBlocks: z.boolean().optional().describe("Whether the policy uses condition blocks to narrow access."),
-    usedByProduction: z.boolean().optional().describe("Whether this policy is used by production workloads or production operators.")
-  },
-  async (input) => jsonResponse(reviewIamPolicy(input))
-);
+  server.registerTool(
+    "estimate_slo_error_budget",
+    {
+      title: "Estimate SLO Error Budget",
+      description: "Calculate SLO downtime budget and optional request-failure budget with consistency checks.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        sloTargetPercent: z.number().gt(0).lt(100),
+        periodDays: z.number().int().positive(),
+        observedDowntimeMinutes: z.number().min(0),
+        requestVolume: z.number().int().positive().optional(),
+        failedRequests: z.number().int().min(0).optional()
+      }).refine((value) => (value.requestVolume === undefined) === (value.failedRequests === undefined), {
+        message: "requestVolume and failedRequests must be provided together."
+      }).refine((value) => value.requestVolume === undefined || value.failedRequests === undefined || value.failedRequests <= value.requestVolume, {
+        message: "failedRequests cannot exceed requestVolume."
+      }),
+      outputSchema: z.object({
+        sloTargetPercent: z.number(),
+        periodDays: z.number(),
+        allowedDowntimeMinutes: z.number(),
+        observedDowntimeMinutes: z.number(),
+        remainingDowntimeMinutes: z.number(),
+        budgetStatus: z.enum(["within-budget", "exhausted"]),
+        allowedFailedRequests: z.number().optional(),
+        failedRequests: z.number().optional(),
+        remainingFailedRequests: z.number().optional()
+      })
+    },
+    async (input) => toolResult(estimateSloBudget(input))
+  );
 
-server.tool(
-  "review_kubernetes_deployment",
-  "Review Kubernetes workload production readiness and operational safety controls.",
-  {
-    workloadName: z.string().min(2).describe("Deployment, StatefulSet or workload name."),
-    namespace: z.string().min(1).describe("Kubernetes namespace."),
-    replicas: z.number().int().min(0).describe("Configured replica count."),
-    hasReadinessProbe: z.boolean().optional().describe("Whether the workload has a readiness probe."),
-    hasLivenessProbe: z.boolean().optional().describe("Whether the workload has a liveness probe."),
-    hasResourceRequests: z.boolean().optional().describe("Whether CPU and memory requests are configured."),
-    hasResourceLimits: z.boolean().optional().describe("Whether CPU and memory limits are configured."),
-    hasPodDisruptionBudget: z.boolean().optional().describe("Whether a PodDisruptionBudget protects voluntary disruption."),
-    usesLatestTag: z.boolean().optional().describe("Whether containers use the mutable latest tag."),
-    runsAsRoot: z.boolean().optional().describe("Whether the workload runs as root or lacks restricted security context."),
-    exposesPublicService: z.boolean().optional().describe("Whether the workload is reachable from the public internet.")
-  },
-  async (input) => jsonResponse(reviewKubernetesDeployment(input))
-);
+  server.registerTool(
+    "review_iam_policy",
+    {
+      title: "Review IAM Policy",
+      description: "Review AWS IAM policy risk from explicit facts or a raw policy JSON document.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        policyName: z.string().min(2),
+        actions: z.array(z.string()).min(1).optional(),
+        resources: z.array(z.string()).min(1).optional(),
+        policyJson: z.string().min(2).optional().describe("Raw IAM policy JSON. The server derives wildcard and privilege-escalation evidence."),
+        hasWildcardActions: z.boolean().optional(),
+        hasWildcardResources: z.boolean().optional(),
+        allowsPrivilegeEscalationActions: z.boolean().optional(),
+        hasConditionBlocks: z.boolean().optional(),
+        usedByProduction: z.boolean().optional()
+      }).refine((value) => Boolean(value.policyJson || (value.actions?.length && value.resources?.length)), {
+        message: "Provide policyJson or both actions and resources."
+      }),
+      outputSchema: z.object({
+        policyName: z.string(),
+        riskScore: z.number(),
+        riskLevel: riskSchema,
+        assessmentConfidence: confidenceSchema,
+        actions: z.array(z.string()),
+        resources: z.array(z.string()),
+        strengths: z.array(z.string()),
+        findings: z.array(z.string()),
+        uncertainties: z.array(z.string()),
+        evidence: z.array(evidenceSchema),
+        recommendedControls: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(reviewIamPolicy(input))
+  );
 
-server.tool(
-  "review_github_actions_workflow",
-  "Review GitHub Actions workflow security, release safety and production deployment readiness.",
-  {
-    workflowName: z.string().min(2).describe("Workflow name."),
-    triggers: z.array(z.string()).min(1).describe("Workflow triggers such as push, pull_request, workflow_dispatch or pull_request_target."),
-    deploysToProduction: z.boolean().optional().describe("Whether this workflow deploys or promotes to production."),
-    usesPinnedActions: z.boolean().optional().describe("Whether actions are pinned to trusted versions or commit SHAs."),
-    hasLeastPrivilegePermissions: z.boolean().optional().describe("Whether the workflow sets explicit least-privilege token permissions."),
-    hasSecretScanning: z.boolean().optional().describe("Whether secret scanning or credential guardrails are present."),
-    hasDependencyCaching: z.boolean().optional().describe("Whether dependency caching is configured where appropriate."),
-    hasEnvironmentProtection: z.boolean().optional().describe("Whether production environments require reviewers or protected deployment rules."),
-    hasConcurrencyControl: z.boolean().optional().describe("Whether concurrency prevents overlapping deployments.")
-  },
-  async (input) => jsonResponse(reviewGitHubActionsWorkflow(input))
-);
+  server.registerTool(
+    "review_kubernetes_deployment",
+    {
+      title: "Review Kubernetes Deployment",
+      description: "Review Kubernetes production readiness from structured facts or multi-document Kubernetes YAML.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        workloadName: z.string().min(2).optional(),
+        namespace: z.string().min(1).optional(),
+        replicas: z.number().int().min(0).optional(),
+        manifestYaml: z.string().min(2).optional().describe("Deployment/StatefulSet/DaemonSet YAML, optionally with Service, Ingress and PodDisruptionBudget documents."),
+        hasReadinessProbe: z.boolean().optional(),
+        hasLivenessProbe: z.boolean().optional(),
+        hasResourceRequests: z.boolean().optional(),
+        hasResourceLimits: z.boolean().optional(),
+        hasPodDisruptionBudget: z.boolean().optional(),
+        usesLatestTag: z.boolean().optional(),
+        runsAsRoot: z.boolean().optional(),
+        exposesPublicService: z.boolean().optional()
+      }).refine((value) => Boolean(value.manifestYaml || value.workloadName), {
+        message: "Provide workloadName or manifestYaml."
+      }),
+      outputSchema: z.object({
+        workloadName: z.string(),
+        namespace: z.string(),
+        readinessScore: z.number(),
+        readinessLevel: readinessSchema,
+        assessmentConfidence: confidenceSchema,
+        strengths: z.array(z.string()),
+        findings: z.array(z.string()),
+        uncertainties: z.array(z.string()),
+        evidence: z.array(evidenceSchema),
+        recommendedControls: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(reviewKubernetesDeployment(input))
+  );
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+  server.registerTool(
+    "review_github_actions_workflow",
+    {
+      title: "Review GitHub Actions Workflow",
+      description: "Review GitHub Actions security and deployment readiness from structured facts or raw workflow YAML.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        workflowName: z.string().min(2),
+        workflowYaml: z.string().min(2).optional().describe("Raw GitHub Actions workflow YAML. The server derives triggers, action pinning, token permissions, caching and concurrency."),
+        triggers: z.array(z.string()).min(1).optional(),
+        deploysToProduction: z.boolean().optional(),
+        usesPinnedActions: z.boolean().optional(),
+        hasLeastPrivilegePermissions: z.boolean().optional(),
+        hasSecretScanning: z.boolean().optional(),
+        hasDependencyCaching: z.boolean().optional(),
+        hasEnvironmentProtection: z.boolean().optional(),
+        hasConcurrencyControl: z.boolean().optional()
+      }).refine((value) => Boolean(value.workflowYaml || value.triggers?.length), {
+        message: "Provide triggers or workflowYaml."
+      }),
+      outputSchema: z.object({
+        workflowName: z.string(),
+        workflowScore: z.number(),
+        readinessLevel: readinessSchema,
+        assessmentConfidence: confidenceSchema,
+        triggers: z.array(z.string()),
+        strengths: z.array(z.string()),
+        findings: z.array(z.string()),
+        uncertainties: z.array(z.string()),
+        evidence: z.array(evidenceSchema),
+        recommendedControls: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(reviewGitHubActionsWorkflow(input))
+  );
+
+  return server;
+}
+
+const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : undefined;
+if (invokedPath === import.meta.url) {
+  void serveStdio(createServer);
+  console.error(`cloud-devops-mcp-server v${VERSION} running on stdio`);
+}

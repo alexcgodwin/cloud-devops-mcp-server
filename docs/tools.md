@@ -2,7 +2,7 @@
 
 ## `assess_terraform_change`
 
-Scores deployment risk from infrastructure change characteristics.
+Scores deployment risk from infrastructure change characteristics or raw Terraform plan JSON. Raw plans produce rule-tagged evidence and automatically derive resource classes, IAM changes, public exposure and stateful-resource changes.
 
 Use it for:
 
@@ -42,7 +42,7 @@ Use it for:
 
 ## `review_iam_policy`
 
-Reviews IAM policies for wildcard access, privilege-escalation paths, missing conditions and production blast radius.
+Reviews IAM policies for wildcard access, privilege-escalation paths, missing conditions and production blast radius. Supply raw IAM policy JSON to derive actions, resources and escalation evidence automatically.
 
 Use it for:
 
@@ -52,7 +52,7 @@ Use it for:
 
 ## `review_kubernetes_deployment`
 
-Reviews Kubernetes workload controls such as probes, replicas, resource requests, resource limits, disruption budgets, image tags and security context.
+Reviews Kubernetes workload controls such as probes, replicas, resource requests, resource limits, disruption budgets, image tags, security context and public exposure. Multi-document Kubernetes YAML can be parsed directly.
 
 Use it for:
 
@@ -62,7 +62,7 @@ Use it for:
 
 ## `review_github_actions_workflow`
 
-Reviews GitHub Actions workflows for action pinning, token permissions, production protections, secret guardrails and deployment concurrency.
+Reviews GitHub Actions workflows for action pinning, token permissions, production protections, secret guardrails and deployment concurrency. Raw workflow YAML can be parsed directly; repository-side settings that cannot be proven from YAML remain explicitly unknown.
 
 Use it for:
 

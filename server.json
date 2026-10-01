@@ -1,24 +1,18 @@
 {
-  "name": "cloud-devops-mcp-server",
-  "version": "0.1.0",
-  "description": "MCP server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO error budget calculations.",
-  "author": "Alex C. Godwin",
-  "license": "MIT",
-  "repository": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
-  "runtime": {
-    "type": "node",
-    "command": "node",
-    "args": [
-      "dist/index.js"
-    ]
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.alexcgodwin/cloud-devops-mcp-server",
+  "title": "Cloud DevOps MCP Server",
+  "description": "Read-only Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
+  "version": "0.2.0",
+  "repository": {
+    "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
+    "source": "github",
+    "id": "1398827812"
   },
-  "tools": [
-    "assess_terraform_change",
-    "build_incident_runbook",
-    "review_cicd_pipeline",
-    "estimate_slo_error_budget",
-    "review_iam_policy",
-    "review_kubernetes_deployment",
-    "review_github_actions_workflow"
-  ]
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "transport": "stdio",
+      "releaseStatus": "npm-package-pending"
+    }
+  }
 }

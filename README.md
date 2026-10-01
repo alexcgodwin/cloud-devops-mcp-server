@@ -4,9 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Cloud%20DevOps-blue)](server.json)
 
-Cloud DevOps MCP Server is a Model Context Protocol server by Alex C. Godwin. It gives AI clients practical Cloud DevOps tools for infrastructure risk review, incident response, CI/CD readiness and SLO error budget analysis.
+Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It gives MCP clients practical Cloud DevOps tools for infrastructure risk review, incident response, CI/CD readiness and SLO error budget analysis.
 
-This project is intentionally focused on engineering judgment rather than generic chat. The server exposes tools that return structured operational guidance an assistant can use during platform work, pull request review, production readiness checks and incident preparation.
+The v0.2 line adds evidence-backed analysis. Tools can inspect Terraform plan JSON, AWS IAM policy JSON, Kubernetes YAML and GitHub Actions workflow YAML directly instead of relying only on pre-classified boolean inputs. Results include validated structured content, evidence, uncertainties and assessment confidence.
 
 ## Table of contents
 
@@ -40,13 +40,13 @@ AI assistants are more useful in engineering work when they can call focused too
 
 | Tool | Purpose |
 | --- | --- |
-| `assess_terraform_change` | Scores Terraform or IaC deployment risk using changed resource classes and release controls. |
+| `assess_terraform_change` | Scores Terraform/IaC risk and can derive evidence from raw Terraform plan JSON. |
 | `build_incident_runbook` | Produces a practical incident response runbook for a service, symptom, environment and severity. |
-| `review_cicd_pipeline` | Reviews CI/CD maturity and recommends gates for safer production delivery. |
-| `estimate_slo_error_budget` | Calculates remaining downtime and optional request failure budget for an SLO window. |
-| `review_iam_policy` | Reviews IAM policy risk, wildcard access and privilege-escalation paths. |
-| `review_kubernetes_deployment` | Reviews Kubernetes workload production readiness controls. |
-| `review_github_actions_workflow` | Reviews GitHub Actions workflow security and production deployment safety. |
+| `review_cicd_pipeline` | Reviews CI/CD maturity while separating failed controls from unknown evidence. |
+| `estimate_slo_error_budget` | Calculates downtime and request-failure budgets with consistency validation. |
+| `review_iam_policy` | Parses IAM policy JSON and detects wildcard scope and privilege-escalation paths. |
+| `review_kubernetes_deployment` | Parses Kubernetes YAML for probes, resources, disruption protection, image and exposure risks. |
+| `review_github_actions_workflow` | Parses workflow YAML for triggers, immutable action pins, permissions, caching and concurrency. |
 
 ## Architecture
 
@@ -84,7 +84,7 @@ Cloud DevOps MCP Server is designed for MCP clients that support stdio servers, 
 - Claude Code
 - Other clients that follow the Model Context Protocol stdio transport
 
-ChatGPT in a web browser does not currently load local `mcpServers` JSON from your laptop. To use this local server from your computer, connect it through a desktop MCP client such as Cursor, Claude Desktop or VS Code.
+Use any MCP host that supports local stdio servers. The server does not require cloud credentials or a hosted endpoint.
 
 ## Configuration
 
@@ -136,10 +136,10 @@ Example output shape:
 
 ```json
 {
-  "riskScore": 60,
-  "riskLevel": "high",
+  "riskScore": 78,
+  "riskLevel": "critical",
   "changedResources": ["network", "iam", "kubernetes"],
-  "recommendedReleasePath": "Use staged rollout, peer review and post-apply validation before broad release."
+  "recommendedReleasePath": "Change-advisory review, maintenance window and staged execution are recommended."
 }
 ```
 
@@ -179,10 +179,11 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Roadmap
 
-- Add Terraform plan JSON parsing.
-- Add hosted HTTP transport for remote MCP clients.
-- Add cloud inventory read-only checks for AWS, Azure and Kubernetes.
-- Add signed hosted MCP authentication for remote clients.
+- Expand Terraform plan evidence rules across AWS, Azure and Google Cloud resources.
+- Add read-only cloud inventory checks with explicitly scoped credentials.
+- Add hosted Streamable HTTP transport with authentication and tenant isolation.
+- Publish the npm package, then add the package entry to `server.json` for MCP Registry distribution.
+- Add signed release provenance and automated registry publication.
 
 ## Author
 

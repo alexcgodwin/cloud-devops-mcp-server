@@ -1,11 +1,11 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Model Context Protocol server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO calculations.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {
-    "cloud-devops-mcp-server": "./dist/index.js"
+    "cloud-devops-mcp-server": "dist/index.js"
   },
   "files": [
     "dist",
@@ -39,7 +39,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server.git"
+    "url": "git+https://github.com/alexcgodwin/cloud-devops-mcp-server.git"
   },
   "bugs": {
     "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server/issues"

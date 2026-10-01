@@ -135,7 +135,7 @@ See [docs/configuration.md](docs/configuration.md) for npm, global-install and s
 
 ## Public release verification
 
-The published `0.2.1` package was acceptance-tested from a clean directory using the npm-installed CLI and the exact public `npx` command. The test discovered all seven tools, executed all seven successfully through stdio, verified structured outputs, rejected malformed input, and found no credential, private-key, token or `.env` files in the published package.
+The published `0.3.1` package was acceptance-tested from a clean directory using both the npm-installed CLI and the exact public `npx` command. The test discovered all eight tools, executed all eight successfully through stdio, verified the new cross-domain bundle analysis, rejected malformed input, and found no credential, private-key, token or `.env` files in the published package. npm also exposes SLSA provenance for the trusted GitHub Actions publish.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 

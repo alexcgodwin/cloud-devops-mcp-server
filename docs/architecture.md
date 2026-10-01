@@ -1,28 +1,32 @@
 # Architecture
 
-Cloud DevOps MCP Server is a local stdio MCP server. It is designed to run inside an MCP-compatible client and expose deterministic tools for Cloud DevOps analysis.
+Cloud DevOps MCP Server v0.2 is a local stdio MCP v2 server built on the 2026-07-28 protocol line. It exposes deterministic, read-only Cloud DevOps analysis tools.
 
 ## Runtime flow
 
 ```mermaid
 sequenceDiagram
   participant Client as MCP client
-  participant Server as MCP server
-  participant Logic as Tool logic
+  participant Server as MCP v2 server
+  participant Parser as Artifact parser
+  participant Logic as Decision logic
 
-  Client->>Server: Call tool with structured input
-  Server->>Logic: Validate and process input
-  Logic-->>Server: Return structured result
-  Server-->>Client: Send MCP text response
+  Client->>Server: Call tool with structured facts or raw artifact
+  Server->>Parser: Validate and parse evidence when supplied
+  Parser->>Logic: Normalized facts + evidence
+  Logic-->>Server: Score, findings, uncertainty, confidence
+  Server-->>Client: Text content + validated structuredContent
 ```
 
 ## Design principles
 
-- Keep the first release credential-free and zero-cost.
-- Prefer clear inputs over broad natural-language prompts.
-- Return structured guidance that can be reviewed and audited.
-- Keep cloud execution out of scope until safety controls are explicit.
+- Keep the server credential-free and zero-cost for local advisory use.
+- Prefer evidence from Terraform plans, IAM policies, Kubernetes manifests and workflow YAML.
+- Never convert absent optional evidence into an automatic failure.
+- Return structured, auditable results with rule-tagged evidence.
+- Keep cloud execution and infrastructure mutation out of scope until separate safety controls exist.
+- Keep protocol code in `src/index.ts` and deterministic analysis in `src/logic.ts`.
 
-## Tool boundary
+## Safety boundary
 
-This server does not deploy, modify infrastructure, delete resources or connect to cloud accounts. It provides engineering analysis that can support human review.
+The current server does not deploy, modify or delete infrastructure. It does not call cloud APIs or require cloud credentials. Raw artifacts are parsed in-process and are not uploaded by the server.

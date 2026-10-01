@@ -1,20 +1,68 @@
 # Configuration
 
-Cloud DevOps MCP Server currently runs as a local stdio MCP server.
+Cloud DevOps MCP Server runs as a local stdio MCP server and is published on npm as `cloud-devops-mcp-server`.
 
-## Build first
+## Recommended public configuration
+
+Use the published npm package so clients do not depend on a local source checkout.
+
+```json
+{
+  "mcpServers": {
+    "cloud-devops": {
+      "command": "npx",
+      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+    }
+  }
+}
+```
+
+On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wrapper:
+
+```json
+{
+  "mcpServers": {
+    "cloud-devops": {
+      "command": "npx.cmd",
+      "args": ["-y", "cloud-devops-mcp-server@0.2.1"]
+    }
+  }
+}
+```
+
+## Global install
+
+Install once and use the binary directly:
+
+```bash
+npm install -g cloud-devops-mcp-server@0.2.1
+```
+
+Then configure the client with:
+
+```json
+{
+  "mcpServers": {
+    "cloud-devops": {
+      "command": "cloud-devops-mcp-server"
+    }
+  }
+}
+```
+
+## Source-development configuration
+
+For local development, build the repository and point the client to the generated entry point:
 
 ```bash
 npm install
 npm run build
 ```
 
-## Generic MCP client
-
 ```json
 {
   "mcpServers": {
-    "cloud-devops": {
+    "cloud-devops-dev": {
       "command": "node",
       "args": ["/absolute/path/to/cloud-devops-mcp-server/dist/index.js"]
     }
@@ -22,44 +70,8 @@ npm run build
 }
 ```
 
-## Windows local path example
+## Security
 
-```json
-{
-  "mcpServers": {
-    "cloud-devops": {
-      "command": "node",
-      "args": [
-        "C:\\Users\\Owner\\Downloads\\cloud-devops-mcp-server-bootstrap\\dist\\index.js"
-      ]
-    }
-  }
-}
-```
+The server does not require cloud credentials for its current advisory toolset. Do not add AWS, Azure, GitHub or other credentials unless a future tool explicitly documents a read-only integration that requires them.
 
-## GitHub MCP side-by-side
-
-If you want GitHub tools available in the same client, add a separate GitHub MCP server next to this server. Do not paste tokens into chat or commit them to git.
-
-```json
-{
-  "mcpServers": {
-    "cloud-devops": {
-      "command": "node",
-      "args": [
-        "C:\\Users\\Owner\\Downloads\\cloud-devops-mcp-server-bootstrap\\dist\\index.js"
-      ]
-    },
-    "github": {
-      "command": "github-mcp-server",
-      "env": {
-        "GITHUB_TOKEN": "PASTE_YOUR_TOKEN_HERE_LOCALLY_ONLY"
-      }
-    }
-  }
-}
-```
-
-## Important client note
-
-ChatGPT in Chrome does not read this local JSON file from your laptop. Use Cursor, Claude Desktop, VS Code or another MCP client for local stdio servers.
+Keep tokens and secrets out of MCP configuration files that are committed to source control.

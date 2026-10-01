@@ -2,28 +2,47 @@
 
 ## The MCP client cannot start the server
 
-Run the server directly:
+Test the published package directly:
 
 ```bash
-node dist/index.js
+npx -y cloud-devops-mcp-server@0.2.1
 ```
 
-If `dist/index.js` does not exist, build the project:
+On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
+
+```powershell
+npx.cmd -y cloud-devops-mcp-server@0.2.1
+```
+
+A successfully started stdio MCP server waits for protocol messages; it is normal for it to remain running without printing interactive prompts.
+
+## PowerShell says running scripts is disabled
+
+Do not change the machine execution policy just to run this package. Use the Windows command shim instead:
+
+```powershell
+npm.cmd --version
+npx.cmd -y cloud-devops-mcp-server@0.2.1
+```
+
+## The client cannot resolve npx
+
+Install the package globally:
 
 ```bash
-npm run build
+npm install -g cloud-devops-mcp-server@0.2.1
 ```
 
-## The client says the path does not exist
+Then set the MCP client command to:
 
-Use an absolute path to `dist/index.js`. On Windows, escape backslashes in JSON:
-
-```json
-"C:\\Users\\Owner\\Downloads\\cloud-devops-mcp-server-bootstrap\\dist\\index.js"
+```text
+cloud-devops-mcp-server
 ```
 
-## The GitHub token does not work
+## Source-development path does not exist
 
-Keep GitHub as a separate MCP server and use a fine-grained token with the smallest required access. For read-only testing, start with repository metadata, contents, pull requests and actions as read-only.
+For source development only, run `npm run build` and point the client to the generated `dist/index.js` using an absolute path.
 
-Never paste the token into chat and never commit it to git.
+## Credentials
+
+The current advisory server does not require AWS, Azure, GitHub or Kubernetes credentials. Do not add tokens or cloud credentials to its configuration.

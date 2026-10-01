@@ -12,10 +12,13 @@ npm run check
 ```
 
 4. Confirm the MCP contract test lists all registered tools and validates structured output.
-5. Confirm CI uses immutable action SHAs and least-privilege token permissions.
-6. Commit the release changes and create a GitHub release from the reviewed commit.
-7. Publish the npm package before adding an npm `packages` entry to `server.json`.
-8. After package publication, validate and publish `server.json` to the MCP Registry.
+5. Confirm authenticated Streamable HTTP integration tests pass when the release changes transport code.
+6. Confirm CI uses immutable action SHAs and least-privilege token permissions.
+7. Commit the release changes through a protected pull request and wait for CI.
+8. Create the GitHub release from the reviewed `main` commit. The release event triggers trusted npm publishing through GitHub Actions OIDC.
+9. Verify the npm version, `latest` dist-tag and SLSA provenance after registry processing.
+10. Validate and publish `server.json` to the MCP Registry.
+11. Run a clean public-install acceptance test against the published npm package.
 
 ## Versioning
 

@@ -13,8 +13,14 @@ import {
   reviewKubernetesDeployment,
   reviewPipeline
 } from "./logic.js";
+import {
+  reviewCloudIdentityPolicy,
+  reviewKubernetesSecurity,
+  reviewSoftwareSupplyChain,
+  reviewTerraformSecurity
+} from "./intelligence.js";
 
-const VERSION = "0.3.1";
+const VERSION = "0.4.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -47,6 +53,22 @@ const changePathSchema = z.object({
   sequence: z.array(z.string()),
   impact: z.string()
 });
+const securityFindingSchema = z.object({
+  ruleId: z.string(),
+  severity: z.enum(["medium", "high", "critical"]),
+  title: z.string(),
+  evidence: z.array(z.string()),
+  remediation: z.array(z.string())
+});
+const securitySummaryShape = {
+  riskScore: z.number(),
+  riskLevel: riskSchema,
+  findingCount: z.number(),
+  criticalFindings: z.number(),
+  highFindings: z.number(),
+  mediumFindings: z.number(),
+  assessmentConfidence: confidenceSchema
+} as const;
 
 const readOnlyAnnotations = {
   readOnlyHint: true,
@@ -67,7 +89,7 @@ export function createServer() {
     { name: "cloud-devops-mcp-server", version: VERSION },
     {
       instructions:
-        "Use these read-only Cloud DevOps tools for evidence-backed review. Prefer raw Terraform plans, IAM policies, Kubernetes manifests and GitHub Actions workflow YAML when available. Treat unknown evidence as unknown rather than assuming a failed control."
+        "Use these read-only Cloud DevOps tools for evidence-backed review, multi-cloud identity policy analysis, Terraform and Kubernetes security checks, and supply-chain correlation. Prefer raw artifacts when available. Treat unknown evidence as unknown rather than assuming a failed control."
     }
   );
 
@@ -411,11 +433,135 @@ export function createServer() {
     async (input) => toolResult(reviewGitHubActionsWorkflow(input))
   );
 
+  server.registerTool(
+    "review_cloud_identity_policy",
+    {
+      title: "Review Cloud Identity Policy",
+      description: "Apply deterministic AWS IAM, Azure RBAC or GCP IAM policy packs to a raw policy document.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        provider: z.enum(["aws", "azure", "gcp"]),
+        policyName: z.string().min(2),
+        policyJson: z.string().min(2).max(4_000_000),
+        environment: z.enum(["dev", "staging", "production"]).optional()
+      }),
+      outputSchema: z.object({
+        provider: z.enum(["aws", "azure", "gcp"]),
+        policyPack: z.string(),
+        policyName: z.string(),
+        environment: z.enum(["dev", "staging", "production"]),
+        ...securitySummaryShape,
+        facts: z.array(z.string()),
+        findings: z.array(securityFindingSchema),
+        recommendedGate: z.enum(["block", "security-review", "standard-review"])
+      })
+    },
+    async (input) => toolResult(reviewCloudIdentityPolicy(input))
+  );
+
+  server.registerTool(
+    "review_terraform_security",
+    {
+      title: "Review Terraform Security",
+      description: "Inspect Terraform plan JSON for destructive changes, public exposure, encryption, deletion protection and IAM wildcard risk.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        terraformPlanJson: z.string().min(2).max(4_000_000),
+        environment: z.enum(["dev", "staging", "production"]).optional()
+      }),
+      outputSchema: z.object({
+        environment: z.enum(["dev", "staging", "production"]),
+        policyPack: z.string(),
+        changedResources: z.number(),
+        destructiveChanges: z.number(),
+        replacements: z.number(),
+        ...securitySummaryShape,
+        findings: z.array(securityFindingSchema),
+        recommendedGate: z.enum(["block", "change-advisory-review", "standard-review"])
+      })
+    },
+    async (input) => toolResult(reviewTerraformSecurity(input))
+  );
+
+  server.registerTool(
+    "review_kubernetes_security",
+    {
+      title: "Review Kubernetes Security",
+      description: "Apply Kubernetes workload security rules for privileged mode, host access, capabilities, service accounts, seccomp, filesystems and network policy.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        manifestYaml: z.string().min(2).max(4_000_000),
+        environment: z.enum(["dev", "staging", "production"]).optional()
+      }),
+      outputSchema: z.object({
+        environment: z.enum(["dev", "staging", "production"]),
+        policyPack: z.string(),
+        workloadCount: z.number(),
+        publicExposureObjects: z.number(),
+        networkPolicyPresent: z.boolean(),
+        ...securitySummaryShape,
+        findings: z.array(securityFindingSchema),
+        recommendedGate: z.enum(["block", "security-review", "standard-review"])
+      })
+    },
+    async (input) => toolResult(reviewKubernetesSecurity(input))
+  );
+
+  server.registerTool(
+    "review_software_supply_chain",
+    {
+      title: "Review Software Supply Chain",
+      description: "Correlate CycloneDX or SPDX SBOM quality with CI action pinning, Kubernetes image immutability, artifact signing and provenance.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        sbomJson: z.string().min(2).max(4_000_000),
+        workflowYaml: z.string().min(2).max(2_000_000).optional(),
+        kubernetesManifestYaml: z.string().min(2).max(4_000_000).optional(),
+        artifactSigned: z.boolean().optional(),
+        hasProvenance: z.boolean().optional(),
+        environment: z.enum(["dev", "staging", "production"]).optional()
+      }),
+      outputSchema: z.object({
+        environment: z.enum(["dev", "staging", "production"]),
+        policyPack: z.string(),
+        sbomFormat: z.enum(["CycloneDX", "SPDX"]),
+        sbomSpecVersion: z.string(),
+        componentCount: z.number(),
+        metadataCoverage: z.object({
+          versionsPresentPercent: z.number(),
+          hashesPresentPercent: z.number(),
+          purlPresentPercent: z.number(),
+          licensesPresentPercent: z.number()
+        }),
+        mutableActionReferences: z.boolean(),
+        mutableRuntimeImages: z.boolean(),
+        artifactSigned: z.boolean().nullable(),
+        hasProvenance: z.boolean().nullable(),
+        ...securitySummaryShape,
+        findings: z.array(securityFindingSchema),
+        correlationPaths: z.array(z.object({
+          pathId: z.string(),
+          severity: z.enum(["high", "critical"]),
+          sequence: z.array(z.string()),
+          impact: z.string()
+        })),
+        recommendedGate: z.enum(["block", "supply-chain-review", "standard-review"])
+      })
+    },
+    async (input) => toolResult(reviewSoftwareSupplyChain(input))
+  );
+
   return server;
 }
 
 const invokedPath = process.argv[1] ? pathToFileURL(process.argv[1]).href : undefined;
 if (invokedPath === import.meta.url) {
-  void serveStdio(createServer);
-  console.error(`cloud-devops-mcp-server v${VERSION} running on stdio`);
+  if (process.argv.includes("--http")) {
+    const { startHttpServer } = await import("./http.js");
+    await startHttpServer(createServer);
+    console.error(`cloud-devops-mcp-server v${VERSION} running on authenticated Streamable HTTP`);
+  } else {
+    void serveStdio(createServer);
+    console.error(`cloud-devops-mcp-server v${VERSION} running on stdio`);
+  }
 }

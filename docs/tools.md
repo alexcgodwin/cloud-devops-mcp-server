@@ -94,3 +94,81 @@ Use it for:
 - CI/CD security review.
 - Production deployment workflow review.
 - Release gate hardening.
+
+
+## `review_cloud_identity_policy`
+
+Applies provider-specific identity policy packs to raw JSON.
+
+Supported packs:
+
+- `aws-identity-v1`
+- `azure-identity-v1`
+- `gcp-identity-v1`
+
+Examples of detected risk include administrative wildcards, `iam:PassRole`, broad Azure RBAC roles, role-assignment mutation, GCP Owner/Editor, service-account token creation and public IAM principals.
+
+Use it for:
+
+- Multi-cloud IAM/RBAC pull request review.
+- Privilege-escalation screening.
+- Production access-policy review.
+- Comparing identity posture across AWS, Azure and GCP.
+
+## `review_terraform_security`
+
+Performs a deeper security-focused Terraform plan review than the general change-risk tool.
+
+Current rules cover:
+
+- Destructive stateful changes.
+- Resource replacement.
+- Public CIDRs.
+- Sensitive ports exposed publicly.
+- Public data services.
+- Encryption disabled.
+- Deletion protection disabled.
+- S3 public-access-block weakening.
+- IAM wildcard signals.
+
+Use it for security review of `terraform show -json` plan output before apply.
+
+## `review_kubernetes_security`
+
+Applies Kubernetes workload security controls to multi-document YAML.
+
+Current rules cover:
+
+- Privileged containers.
+- `allowPrivilegeEscalation`.
+- Root execution.
+- Host network/PID/IPC namespaces.
+- `hostPath` storage.
+- Dangerous Linux capabilities.
+- `hostPort`.
+- Default service-account token use.
+- Missing seccomp.
+- Missing read-only root filesystem.
+- Public Service/Ingress without NetworkPolicy in the supplied bundle.
+
+Use it alongside `review_kubernetes_deployment`: the deployment tool focuses on operational readiness, while this tool focuses on workload security posture.
+
+## `review_software_supply_chain`
+
+Parses CycloneDX or SPDX JSON and correlates software inventory with delivery and runtime evidence.
+
+It measures:
+
+- Version coverage.
+- Hash/checksum coverage.
+- Package URL coverage.
+- License metadata coverage.
+
+Optional correlation inputs:
+
+- GitHub Actions workflow YAML.
+- Kubernetes manifest YAML.
+- Artifact signing status.
+- Build provenance status.
+
+Cross-domain rules detect mutable CI action references combined with mutable runtime images, and SBOMs that are not cryptographically tied to a signed/provenanced artifact.

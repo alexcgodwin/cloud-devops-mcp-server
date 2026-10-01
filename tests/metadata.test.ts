@@ -31,10 +31,16 @@ describe("release metadata", () => {
     expect(server.description.length).toBeGreaterThan(0);
   });
 
-  it("declares all eight public tools", () => {
+  it("declares all twelve public tools", () => {
     const names = manifest.tools.map((tool: { name: string }) => tool.name);
-    expect(names).toHaveLength(8);
-    expect(names).toContain("assess_cloud_change_bundle");
+    expect(names).toHaveLength(12);
+    expect(names).toEqual(expect.arrayContaining([
+      "assess_cloud_change_bundle",
+      "review_cloud_identity_policy",
+      "review_terraform_security",
+      "review_kubernetes_security",
+      "review_software_supply_chain"
+    ]));
     expect(new Set(names).size).toBe(names.length);
   });
 });

@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.3.1",
-  "description": "MCP v2 server for evidence-backed Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
+  "version": "0.4.0",
+  "description": "MCP v2 server for evidence-backed Cloud DevOps risk, security, supply-chain and reliability analysis.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -12,16 +12,34 @@
   "runtime": {
     "type": "node",
     "node": ">=20",
-    "transport": "stdio",
+    "defaultTransport": "stdio",
     "command": "node",
-    "args": ["dist/index.js"]
+    "args": ["dist/index.js"],
+    "optionalTransport": {
+      "type": "streamable-http",
+      "args": ["dist/index.js", "--http"],
+      "authentication": "bearer",
+      "remoteTlsRequired": true
+    }
   },
   "capabilities": {
     "protocol": "2026-07-28",
     "structuredContent": true,
     "readOnly": true,
     "crossDomainCorrelation": true,
-    "artifactParsing": ["terraform-plan-json", "iam-policy-json", "kubernetes-yaml", "github-actions-yaml"]
+    "multiCloudIdentityPolicyPacks": ["aws", "azure", "gcp"],
+    "supplyChainAnalysis": true,
+    "authenticatedStreamableHttp": true,
+    "artifactParsing": [
+      "terraform-plan-json",
+      "iam-policy-json",
+      "azure-rbac-json",
+      "gcp-iam-json",
+      "kubernetes-yaml",
+      "github-actions-yaml",
+      "cyclonedx-json",
+      "spdx-json"
+    ]
   },
   "tools": [
     {"name": "assess_cloud_change_bundle", "category": "cross-domain-risk"},
@@ -31,6 +49,10 @@
     {"name": "estimate_slo_error_budget", "category": "sre"},
     {"name": "review_iam_policy", "category": "cloud-security"},
     {"name": "review_kubernetes_deployment", "category": "kubernetes"},
-    {"name": "review_github_actions_workflow", "category": "ci-cd-security"}
+    {"name": "review_github_actions_workflow", "category": "ci-cd-security"},
+    {"name": "review_cloud_identity_policy", "category": "multi-cloud-identity"},
+    {"name": "review_terraform_security", "category": "terraform-security"},
+    {"name": "review_kubernetes_security", "category": "kubernetes-security"},
+    {"name": "review_software_supply_chain", "category": "software-supply-chain"}
   ]
 }

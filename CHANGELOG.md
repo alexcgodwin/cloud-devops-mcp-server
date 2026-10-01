@@ -4,6 +4,25 @@ All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.
 
+## [0.4.0] - 2026-10-01
+
+### Added
+
+- AWS, Azure and GCP identity policy packs through `review_cloud_identity_policy`.
+- Deeper Terraform security analysis for destructive stateful changes, sensitive public ports, public data services, encryption, deletion protection, S3 public-access controls and IAM wildcards.
+- Kubernetes security-policy analysis for privileged containers, host namespaces, hostPath, Linux capabilities, default service-account tokens, hostPort, seccomp, read-only root filesystems and NetworkPolicy.
+- CycloneDX and SPDX SBOM parsing plus software supply-chain correlation across CI action pinning, container image immutability, artifact signing and build provenance.
+- Optional bearer-authenticated Streamable HTTP serving through the MCP v2 HTTP handler.
+- Host/Origin validation, minimum bearer-token length and HTTPS reverse-proxy requirements for non-local HTTP binding.
+- End-to-end authenticated Streamable HTTP client tests.
+- Four new public MCP tools, bringing the tool count to twelve.
+
+### Changed
+
+- Runtime, package, manifest and Registry metadata advanced to 0.4.0.
+- Local stdio remains the default transport; remote HTTP is explicit opt-in.
+- Security and architecture documentation now cover the authenticated HTTP trust boundary.
+
 ## [0.3.1] - 2026-10-01
 
 ### Fixed

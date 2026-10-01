@@ -13,7 +13,7 @@ describe("MCP server contract", () => {
 
     try {
       const { tools } = await client.listTools();
-      expect(tools).toHaveLength(8);
+      expect(tools).toHaveLength(12);
 
       for (const tool of tools) {
         expect(tool.outputSchema).toBeDefined();
@@ -128,6 +128,89 @@ describe("MCP server contract", () => {
             hasDependencyCaching: true,
             hasEnvironmentProtection: true,
             hasConcurrencyControl: true
+          }
+        },
+        {
+          name: "review_cloud_identity_policy",
+          arguments: {
+            provider: "aws",
+            policyName: "reader",
+            policyJson: JSON.stringify({
+              Version: "2012-10-17",
+              Statement: [{
+                Effect: "Allow",
+                Action: ["s3:GetObject"],
+                Resource: ["arn:aws:s3:::example-bucket/*"],
+                Condition: { StringEquals: { "aws:PrincipalOrgID": "o-example" } }
+              }]
+            }),
+            environment: "staging"
+          }
+        },
+        {
+          name: "review_terraform_security",
+          arguments: {
+            environment: "staging",
+            terraformPlanJson: JSON.stringify({
+              resource_changes: [{
+                address: "aws_instance.api",
+                type: "aws_instance",
+                change: {
+                  actions: ["update"],
+                  before: { instance_type: "t3.small" },
+                  after: { instance_type: "t3.medium" }
+                }
+              }]
+            })
+          }
+        },
+        {
+          name: "review_kubernetes_security",
+          arguments: {
+            environment: "staging",
+            manifestYaml: `apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  template:
+    spec:
+      serviceAccountName: api
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: example/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+`
+          }
+        },
+        {
+          name: "review_software_supply_chain",
+          arguments: {
+            environment: "staging",
+            artifactSigned: true,
+            hasProvenance: true,
+            sbomJson: JSON.stringify({
+              bomFormat: "CycloneDX",
+              specVersion: "1.6",
+              components: [{
+                type: "library",
+                name: "example",
+                version: "1.0.0",
+                purl: "pkg:npm/example@1.0.0",
+                hashes: [{ alg: "SHA-256", content: "abc" }],
+                licenses: [{ license: { id: "MIT" } }]
+              }]
+            })
           }
         }
       ];

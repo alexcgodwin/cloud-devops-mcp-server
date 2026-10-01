@@ -286,3 +286,109 @@ Output excerpt:
   "findings": []
 }
 ```
+
+
+## Multi-cloud identity policy pack
+
+Example Azure RBAC input:
+
+```json
+{
+  "provider": "azure",
+  "policyName": "platform-owner",
+  "environment": "production",
+  "policyJson": "{\"properties\":{\"roleName\":\"Owner\",\"assignableScopes\":[\"/\"],\"permissions\":[{\"actions\":[\"*\"],\"dataActions\":[]}]}}"
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "provider": "azure",
+  "policyPack": "azure-identity-v1",
+  "riskLevel": "critical",
+  "recommendedGate": "block"
+}
+```
+
+## Terraform security review
+
+Input:
+
+```json
+{
+  "environment": "production",
+  "terraformPlanJson": "{\"resource_changes\":[{\"address\":\"aws_security_group.admin\",\"type\":\"aws_security_group\",\"change\":{\"actions\":[\"update\"],\"after\":{\"ingress\":[{\"from_port\":22,\"to_port\":22,\"cidr_blocks\":[\"0.0.0.0/0\"]}]}}}]}"
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "policyPack": "terraform-security-v1",
+  "riskLevel": "critical",
+  "findings": [
+    {
+      "ruleId": "TF-SEC-PUBLIC-SENSITIVE-PORT",
+      "severity": "critical"
+    }
+  ]
+}
+```
+
+## Kubernetes security policy review
+
+Input excerpt:
+
+```json
+{
+  "environment": "production",
+  "manifestYaml": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api\nspec:\n  template:\n    spec:\n      containers:\n        - name: api\n          image: example/api:latest\n          securityContext:\n            privileged: true"
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "policyPack": "kubernetes-security-v1",
+  "riskLevel": "critical",
+  "recommendedGate": "block"
+}
+```
+
+## Software supply-chain review
+
+Input excerpt:
+
+```json
+{
+  "environment": "production",
+  "artifactSigned": false,
+  "hasProvenance": false,
+  "sbomJson": "{\"bomFormat\":\"CycloneDX\",\"specVersion\":\"1.6\",\"components\":[{\"type\":\"library\",\"name\":\"example\",\"version\":\"1.0.0\"}]}",
+  "workflowYaml": "name: CI\non: [push]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4",
+  "kubernetesManifestYaml": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: api\nspec:\n  template:\n    spec:\n      containers:\n        - name: api\n          image: example/api:latest"
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "policyPack": "software-supply-chain-v1",
+  "riskLevel": "critical",
+  "correlationPaths": [
+    {
+      "pathId": "SC-CORR-MUTABLE-BUILD-RUNTIME",
+      "severity": "critical"
+    },
+    {
+      "pathId": "SC-CORR-UNVERIFIED-ARTIFACT",
+      "severity": "critical"
+    }
+  ]
+}
+```

@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cloud-devops": {
+      "command": "node",
+      "args": ["dist/index.js"]
+    }
+  }
+}

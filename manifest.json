@@ -1,0 +1,37 @@
+{
+  "name": "Cloud DevOps MCP Server",
+  "slug": "cloud-devops-mcp-server",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for Cloud DevOps risk review, incident response, CI/CD readiness and SLO analysis.",
+  "author": {
+    "name": "Alex C. Godwin",
+    "url": "https://github.com/alexcgodwin"
+  },
+  "repository": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
+  "license": "MIT",
+  "runtime": {
+    "type": "node",
+    "node": ">=20",
+    "transport": "stdio",
+    "command": "node",
+    "args": ["dist/index.js"]
+  },
+  "tools": [
+    {
+      "name": "assess_terraform_change",
+      "category": "infrastructure-risk"
+    },
+    {
+      "name": "build_incident_runbook",
+      "category": "incident-response"
+    },
+    {
+      "name": "review_cicd_pipeline",
+      "category": "delivery-readiness"
+    },
+    {
+      "name": "estimate_slo_error_budget",
+      "category": "sre"
+    }
+  ]
+}

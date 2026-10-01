@@ -1,0 +1,8 @@
+src
+tests
+.github
+.env.example
+.mcp.json
+Dockerfile
+vitest.config.ts
+tsconfig.json

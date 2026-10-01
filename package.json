@@ -9,9 +9,12 @@
   },
   "files": [
     "dist",
+    "docs",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE",
-    "server.json"
+    "server.json",
+    "manifest.json"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",

@@ -1,8 +1,27 @@
 # Cloud DevOps MCP Server
 
+[![CI](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/MCP-Cloud%20DevOps-blue)](server.json)
+
 Cloud DevOps MCP Server is a Model Context Protocol server by Alex C. Godwin. It gives AI clients practical Cloud DevOps tools for infrastructure risk review, incident response, CI/CD readiness and SLO error budget analysis.
 
 This project is intentionally focused on engineering judgment rather than generic chat. The server exposes tools that return structured operational guidance an assistant can use during platform work, pull request review, production readiness checks and incident preparation.
+
+## Table of contents
+
+- [Why this exists](#why-this-exists)
+- [Tools](#tools)
+- [Architecture](#architecture)
+- [Quickstart](#quickstart)
+- [MCP clients](#mcp-clients)
+- [Configuration](#configuration)
+- [Example tool input](#example-tool-input)
+- [Docker](#docker)
+- [Development](#development)
+- [Security model](#security-model)
+- [Roadmap](#roadmap)
+- [Author](#author)
 
 ## Why this exists
 
@@ -48,7 +67,19 @@ Run the server locally:
 npm start
 ```
 
-## MCP client configuration
+## MCP clients
+
+Cloud DevOps MCP Server is designed for MCP clients that support stdio servers, including:
+
+- Cursor
+- Claude Desktop
+- VS Code with MCP support
+- Claude Code
+- Other clients that follow the Model Context Protocol stdio transport
+
+ChatGPT in a web browser does not currently load local `mcpServers` JSON from your laptop. To use this local server from your computer, connect it through a desktop MCP client such as Cursor, Claude Desktop or VS Code.
+
+## Configuration
 
 Use the built `dist/index.js` file from your local checkout.
 
@@ -62,6 +93,23 @@ Use the built `dist/index.js` file from your local checkout.
   }
 }
 ```
+
+Windows example:
+
+```json
+{
+  "mcpServers": {
+    "cloud-devops": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\Owner\\Downloads\\cloud-devops-mcp-server-bootstrap\\dist\\index.js"
+      ]
+    }
+  }
+}
+```
+
+See [docs/configuration.md](docs/configuration.md) for client-specific setup notes.
 
 ## Example tool input
 
@@ -88,6 +136,15 @@ Example output shape:
 }
 ```
 
+## Docker
+
+Build and run the server in a container:
+
+```bash
+docker build -t cloud-devops-mcp-server .
+docker run --rm -i cloud-devops-mcp-server
+```
+
 ## Development
 
 ```bash
@@ -98,6 +155,8 @@ npm run check
 ```
 
 The core decision logic lives in `src/logic.ts` and the MCP tool registration lives in `src/index.ts`.
+
+More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.md](RELEASE.md) and [docs/architecture.md](docs/architecture.md).
 
 ## Security model
 

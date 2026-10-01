@@ -4,6 +4,7 @@
   "description": "MCP server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO error budget calculations.",
   "author": "Alex C. Godwin",
   "license": "MIT",
+  "repository": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
   "runtime": {
     "type": "node",
     "command": "node",

@@ -6,9 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Cloud%20DevOps-blue)](server.json)
 
-Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It gives MCP clients practical Cloud DevOps tools for infrastructure risk review, incident response, CI/CD readiness and SLO error budget analysis.
+Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
-The v0.3 line adds cross-domain change correlation on top of evidence-backed analysis. Tools can inspect Terraform plan JSON, AWS IAM policy JSON, Kubernetes YAML and GitHub Actions workflow YAML directly, while `assess_cloud_change_bundle` connects those findings into one release-risk view with domain summaries, correlated findings and potential change paths.
+The v0.4 line adds AWS/Azure/GCP identity policy packs, deeper Terraform and Kubernetes security analysis, CycloneDX/SPDX supply-chain correlation, and an optional authenticated Streamable HTTP transport. Stdio remains the default local transport.
 
 ## Table of contents
 
@@ -19,6 +19,7 @@ The v0.3 line adds cross-domain change correlation on top of evidence-backed ana
 - [Install from npm](#install-from-npm)
 - [MCP clients](#mcp-clients)
 - [Configuration](#configuration)
+- [Authenticated Streamable HTTP](#authenticated-streamable-http)
 - [Public release verification](#public-release-verification)
 - [Example tool input](#example-tool-input)
 - [Demo outputs](#demo-outputs)
@@ -38,8 +39,12 @@ AI assistants are more useful in engineering work when they can call focused too
 - CI/CD delivery readiness review.
 - SLO error budget calculations.
 - AWS IAM least-privilege review.
-- Kubernetes workload production readiness review.
+- AWS, Azure and GCP identity policy packs.
+- Terraform destructive-change, public exposure and encryption security analysis.
+- Kubernetes workload production readiness and security-policy analysis.
 - GitHub Actions workflow security and deployment review.
+- CycloneDX/SPDX SBOM quality and software supply-chain correlation.
+- Optional authenticated Streamable HTTP serving for self-hosted remote access.
 
 ## Tools
 
@@ -53,15 +58,22 @@ AI assistants are more useful in engineering work when they can call focused too
 | `review_iam_policy` | Parses IAM policy JSON and detects wildcard scope and privilege-escalation paths. |
 | `review_kubernetes_deployment` | Parses Kubernetes YAML for probes, resources, disruption protection, image and exposure risks. |
 | `review_github_actions_workflow` | Parses workflow YAML for triggers, immutable action pins, permissions, caching and concurrency. |
+| `review_cloud_identity_policy` | Applies AWS IAM, Azure RBAC or GCP IAM policy packs to raw policy JSON. |
+| `review_terraform_security` | Reviews Terraform plan JSON for destructive changes, public exposure, encryption, deletion protection and wildcard IAM. |
+| `review_kubernetes_security` | Reviews privileged mode, host access, service accounts, capabilities, seccomp, root filesystems and NetworkPolicy. |
+| `review_software_supply_chain` | Correlates CycloneDX/SPDX SBOM quality with CI action pinning, image immutability, signatures and provenance. |
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-  Client["MCP client"] --> Transport["stdio transport"]
-  Transport --> Server["Cloud DevOps MCP server"]
-  Server --> DomainTools["Domain analyzers"]
-  DomainTools --> Correlator["Cross-domain correlation engine"]
+  LocalClient["Local MCP client"] --> Stdio["stdio"]
+  RemoteClient["Remote MCP client"] --> HTTPS["HTTPS reverse proxy / gateway"]
+  HTTPS --> AuthHTTP["Bearer-authenticated Streamable HTTP"]
+  Stdio --> Server["Cloud DevOps MCP server"]
+  AuthHTTP --> Server
+  Server --> DomainTools["Domain + policy-pack analyzers"]
+  DomainTools --> Correlator["Cross-domain and supply-chain correlation"]
   DomainTools --> Output["Structured guidance"]
   Correlator --> Output
 ```
@@ -71,13 +83,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.3.1
+npx -y cloud-devops-mcp-server@0.4.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.3.1
+npx.cmd -y cloud-devops-mcp-server@0.4.0
 ```
 
 ## Install from npm
@@ -85,7 +97,7 @@ npx.cmd -y cloud-devops-mcp-server@0.3.1
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.3.1
+npm install -g cloud-devops-mcp-server@0.4.0
 cloud-devops-mcp-server
 ```
 
@@ -93,7 +105,7 @@ The package is published on npm as `cloud-devops-mcp-server` and registered in t
 
 ## MCP clients
 
-Cloud DevOps MCP Server is designed for MCP clients that support stdio servers, including:
+Cloud DevOps MCP Server supports local stdio clients and MCP clients capable of connecting to Streamable HTTP endpoints. Common local clients include:
 
 - Cursor
 - Claude Desktop
@@ -101,7 +113,7 @@ Cloud DevOps MCP Server is designed for MCP clients that support stdio servers, 
 - Claude Code
 - Other clients that follow the Model Context Protocol stdio transport
 
-Use any MCP host that supports local stdio servers. The server does not require cloud credentials or a hosted endpoint.
+Use stdio for normal local operation. For self-hosted remote access, start the optional authenticated Streamable HTTP endpoint and place non-local deployments behind an HTTPS reverse proxy or gateway.
 
 ## Configuration
 
@@ -112,7 +124,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.3.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
     }
   }
 }
@@ -125,17 +137,28 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.3.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
     }
   }
 }
 ```
 
-See [docs/configuration.md](docs/configuration.md) for npm, global-install and source-development configuration options.
+See [docs/configuration.md](docs/configuration.md) for npm, global-install, source-development and authenticated Streamable HTTP configuration options.
+
+## Authenticated Streamable HTTP
+
+Local loopback example:
+
+```powershell
+$env:CLOUD_DEVOPS_MCP_BEARER_TOKEN="<random secret at least 32 characters>"
+npm run start:http
+```
+
+The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bearer <token>`. A non-local bind additionally requires `CLOUD_DEVOPS_MCP_ALLOWED_HOSTS` and an HTTPS `CLOUD_DEVOPS_MCP_PUBLIC_BASE_URL` so remote traffic is expected to terminate TLS at a reverse proxy or gateway.
 
 ## Public release verification
 
-The published `0.3.1` package was acceptance-tested from a clean directory using both the npm-installed CLI and the exact public `npx` command. The test discovered all eight tools, executed all eight successfully through stdio, verified the new cross-domain bundle analysis, rejected malformed input, and found no credential, private-key, token or `.env` files in the published package. npm also exposes SLSA provenance for the trusted GitHub Actions publish.
+The v0.4.0 release candidate passes 37 automated tests, including a real authenticated Streamable HTTP client/server connection, twelve-tool MCP contract coverage, provider policy-pack tests, Terraform/Kubernetes security tests and SBOM correlation tests. The clean public npm acceptance record is updated after publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -192,20 +215,21 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Security model
 
-- The server runs locally over stdio.
-- It does not require cloud credentials.
-- It does not call external APIs.
-- It does not write to infrastructure or mutate user systems.
+- Stdio remains the default and requires no secrets.
+- Optional Streamable HTTP requires a bearer token of at least 32 characters.
+- Non-local HTTP binds require an explicit Host allowlist and an HTTPS public base URL for reverse-proxy/gateway termination.
+- Host and Origin validation are enabled through the official MCP Fastify adapter.
+- The analysis tools do not require cloud credentials or call cloud APIs.
+- The server does not write to infrastructure or mutate user systems.
 - It returns advisory guidance only; engineers remain responsible for review, approval and execution.
 
 ## Roadmap
 
-- Expand Terraform plan evidence rules across AWS, Azure and Google Cloud resources.
-- Add read-only cloud inventory checks with explicitly scoped credentials.
-- Add hosted Streamable HTTP transport with authentication and tenant isolation.
-- Add signed release provenance, SBOM generation and automated npm/MCP Registry publication.
-- Expand cross-domain correlation with policy packs for identity, data, networking and supply-chain risk.
+- Add optional read-only cloud inventory connectors with narrowly scoped credentials.
+- Add OAuth/OIDC resource-server authentication for multi-user hosted deployments.
 - Add machine-readable policy profiles for production, staging and regulated workloads.
+- Add vulnerability-database enrichment for SBOM components without weakening offline deterministic analysis.
+- Expand policy packs for data classification, secrets management, network segmentation and cloud organization guardrails.
 
 ## Author
 

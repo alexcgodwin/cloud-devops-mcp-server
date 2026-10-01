@@ -20,6 +20,7 @@ npm run build
 npm test
 npm run test:coverage
 npm run check
+npm run start:http
 ```
 
 ## Project layout
@@ -27,8 +28,12 @@ npm run check
 | Path | Purpose |
 | --- | --- |
 | `src/index.ts` | MCP v2 server factory, tool schemas, annotations and structured outputs. |
-| `src/logic.ts` | Deterministic Cloud DevOps analysis and artifact parsing. |
-| `tests/logic.test.ts` | Unit and edge-case tests for decision logic and parsers. |
+| `src/logic.ts` | Core deterministic Cloud DevOps analysis and cross-domain correlation. |
+| `src/intelligence.ts` | Multi-cloud identity, Terraform/Kubernetes security and SBOM policy packs. |
+| `src/http.ts` | Authenticated Streamable HTTP serving and remote-mode security controls. |
+| `tests/logic.test.ts` | Unit and edge-case tests for core decision logic and parsers. |
+| `tests/intelligence.test.ts` | Policy-pack and supply-chain tests. |
+| `tests/http.test.ts` | Real authenticated Streamable HTTP integration tests. |
 | `tests/mcp.test.ts` | In-memory MCP client/server contract tests. |
 | `docs/` | Architecture, configuration and tool reference docs. |
 | `server.json` | MCP Registry-format server metadata. |

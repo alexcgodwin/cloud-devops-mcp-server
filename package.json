@@ -1,7 +1,7 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.3.1",
-  "description": "A Model Context Protocol server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO calculations.",
+  "version": "0.4.0",
+  "description": "Read-only MCP server for Cloud DevOps risk, multi-cloud identity, Terraform/Kubernetes security, supply-chain, incident and SLO analysis.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {
@@ -22,7 +22,8 @@
     "start": "node dist/index.js",
     "test": "vitest run",
     "check": "npm run build && npm run test:coverage && npm audit --omit=dev --audit-level=high",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "start:http": "node dist/index.js --http"
   },
   "keywords": [
     "mcp",
@@ -33,7 +34,12 @@
     "terraform",
     "kubernetes",
     "incident-response",
-    "ci-cd"
+    "ci-cd",
+    "azure",
+    "gcp",
+    "sbom",
+    "supply-chain",
+    "cloud-security"
   ],
   "author": "Alex C. Godwin",
   "license": "MIT",
@@ -49,7 +55,10 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@modelcontextprotocol/fastify": "^2.0.0",
+    "@modelcontextprotocol/node": "^2.1.0",
     "@modelcontextprotocol/server": "^2.2.0",
+    "fastify": "^5.12.5",
     "yaml": "^2.9.1",
     "zod": "^4.2.0"
   },

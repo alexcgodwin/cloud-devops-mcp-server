@@ -1,6 +1,6 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A Model Context Protocol server for Cloud DevOps engineering analysis, incident runbooks, CI/CD readiness and SLO calculations.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",

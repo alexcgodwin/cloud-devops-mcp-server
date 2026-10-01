@@ -4,6 +4,24 @@ All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.
 
+## [0.3.0] - 2026-10-01
+
+### Added
+
+- New `assess_cloud_change_bundle` MCP tool for cross-domain release analysis.
+- Correlation across Terraform, AWS IAM, Kubernetes and GitHub Actions evidence.
+- Domain risk summaries, correlated finding IDs, change-path sequencing and combined release gates.
+- Correlation rules for public exposure, privileged production delivery, mutable supply chains, public-plus-privilege blast radius, root-capable public workloads and high-risk IAM changes inside Terraform.
+- Multi-domain confidence and uncertainty aggregation.
+- Contract coverage for all eight MCP tools.
+
+### Changed
+
+- MCP server runtime version advanced to 0.3.0.
+- Registry and npm metadata now declare version 0.3.0.
+- Public installation examples point to the 0.3.0 package.
+- Roadmap now focuses on deeper policy packs, provenance and authenticated remote transport rather than cross-tool correlation.
+
 ## [0.2.1] - 2026-10-01
 
 ### Fixed

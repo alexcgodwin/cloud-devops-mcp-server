@@ -13,7 +13,7 @@ describe("MCP server contract", () => {
 
     try {
       const { tools } = await client.listTools();
-      expect(tools).toHaveLength(7);
+      expect(tools).toHaveLength(8);
 
       for (const tool of tools) {
         expect(tool.outputSchema).toBeDefined();
@@ -23,6 +23,34 @@ describe("MCP server contract", () => {
       }
 
       const calls = [
+        {
+          name: "assess_cloud_change_bundle",
+          arguments: {
+            changeName: "contract-test",
+            environment: "staging",
+            terraform: {
+              changedResources: ["compute"],
+              hasRollbackPlan: true,
+              hasPeerReview: true,
+              hasTerraformPlan: true
+            },
+            kubernetesWorkloads: [
+              {
+                workloadName: "api",
+                namespace: "staging",
+                replicas: 2,
+                hasReadinessProbe: true,
+                hasLivenessProbe: true,
+                hasResourceRequests: true,
+                hasResourceLimits: true,
+                hasPodDisruptionBudget: true,
+                usesLatestTag: false,
+                runsAsRoot: false,
+                exposesPublicService: false
+              }
+            ]
+          }
+        },
         {
           name: "assess_terraform_change",
           arguments: {

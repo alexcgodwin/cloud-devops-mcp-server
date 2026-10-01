@@ -5,13 +5,13 @@
 Test the published package directly:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.2.1
+npx -y cloud-devops-mcp-server@0.3.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.2.1
+npx.cmd -y cloud-devops-mcp-server@0.3.0
 ```
 
 A successfully started stdio MCP server waits for protocol messages; it is normal for it to remain running without printing interactive prompts.
@@ -22,7 +22,7 @@ Do not change the machine execution policy just to run this package. Use the Win
 
 ```powershell
 npm.cmd --version
-npx.cmd -y cloud-devops-mcp-server@0.2.1
+npx.cmd -y cloud-devops-mcp-server@0.3.0
 ```
 
 ## The client cannot resolve npx
@@ -30,7 +30,7 @@ npx.cmd -y cloud-devops-mcp-server@0.2.1
 Install the package globally:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.2.1
+npm install -g cloud-devops-mcp-server@0.3.0
 ```
 
 Then set the MCP client command to:

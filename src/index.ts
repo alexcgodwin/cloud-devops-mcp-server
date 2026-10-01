@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/server";
 import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import * as z from "zod/v4";
 import {
+  assessCloudChangeBundle,
   assessTerraformChange,
   buildIncidentRunbook,
   estimateSloBudget,
@@ -13,7 +14,7 @@ import {
   reviewPipeline
 } from "./logic.js";
 
-const VERSION = "0.2.1";
+const VERSION = "0.3.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -24,6 +25,28 @@ const evidenceSchema = z.object({
 const confidenceSchema = z.enum(["high", "medium", "low"]);
 const readinessSchema = z.enum(["production-ready", "needs-review", "needs-hardening", "not-ready"]);
 const riskSchema = z.enum(["low", "medium", "high", "critical"]);
+const correlatedSeveritySchema = z.enum(["medium", "high", "critical"]);
+const domainSummarySchema = z.object({
+  domain: z.string(),
+  riskScore: z.number(),
+  riskLevel: riskSchema,
+  evidenceCount: z.number(),
+  uncertaintyCount: z.number()
+});
+const correlatedFindingSchema = z.object({
+  ruleId: z.string(),
+  severity: correlatedSeveritySchema,
+  title: z.string(),
+  domains: z.array(z.string()),
+  evidence: z.array(z.string()),
+  remediation: z.array(z.string())
+});
+const changePathSchema = z.object({
+  pathId: z.string(),
+  severity: correlatedSeveritySchema,
+  sequence: z.array(z.string()),
+  impact: z.string()
+});
 
 const readOnlyAnnotations = {
   readOnlyHint: true,
@@ -82,6 +105,106 @@ export function createServer() {
       })
     },
     async (input) => toolResult(assessTerraformChange(input))
+  );
+
+  server.registerTool(
+    "assess_cloud_change_bundle",
+    {
+      title: "Assess Cloud Change Bundle",
+      description: "Correlate Terraform, IAM, Kubernetes and GitHub Actions evidence into one deployment-risk assessment with cross-domain change paths.",
+      annotations: readOnlyAnnotations,
+      inputSchema: z.object({
+        changeName: z.string().min(2),
+        environment: z.enum(["dev", "staging", "production"]),
+        terraform: z.object({
+          changedResources: z
+            .array(z.enum(["network", "iam", "database", "kubernetes", "compute", "observability", "ci_cd", "dns"]))
+            .min(1)
+            .optional(),
+          terraformPlanJson: z.string().min(2).optional(),
+          includesIamChanges: z.boolean().optional(),
+          includesPublicIngress: z.boolean().optional(),
+          modifiesStatefulResources: z.boolean().optional(),
+          hasRollbackPlan: z.boolean().optional(),
+          hasPeerReview: z.boolean().optional(),
+          hasTerraformPlan: z.boolean().optional()
+        }).refine((value) => Boolean(value.terraformPlanJson || value.changedResources?.length), {
+          message: "Terraform evidence requires changedResources or terraformPlanJson."
+        }).optional(),
+        iamPolicies: z.array(z.object({
+          policyName: z.string().min(2),
+          actions: z.array(z.string()).min(1).optional(),
+          resources: z.array(z.string()).min(1).optional(),
+          policyJson: z.string().min(2).optional(),
+          hasWildcardActions: z.boolean().optional(),
+          hasWildcardResources: z.boolean().optional(),
+          allowsPrivilegeEscalationActions: z.boolean().optional(),
+          hasConditionBlocks: z.boolean().optional(),
+          usedByProduction: z.boolean().optional()
+        }).refine((value) => Boolean(value.policyJson || (value.actions?.length && value.resources?.length)), {
+          message: "Each IAM policy requires policyJson or both actions and resources."
+        })).max(10).optional(),
+        kubernetesWorkloads: z.array(z.object({
+          workloadName: z.string().min(2).optional(),
+          namespace: z.string().min(1).optional(),
+          replicas: z.number().int().min(0).optional(),
+          manifestYaml: z.string().min(2).optional(),
+          hasReadinessProbe: z.boolean().optional(),
+          hasLivenessProbe: z.boolean().optional(),
+          hasResourceRequests: z.boolean().optional(),
+          hasResourceLimits: z.boolean().optional(),
+          hasPodDisruptionBudget: z.boolean().optional(),
+          usesLatestTag: z.boolean().optional(),
+          runsAsRoot: z.boolean().optional(),
+          exposesPublicService: z.boolean().optional()
+        }).refine((value) => Boolean(value.manifestYaml || value.workloadName), {
+          message: "Each Kubernetes workload requires workloadName or manifestYaml."
+        })).max(10).optional(),
+        githubWorkflows: z.array(z.object({
+          workflowName: z.string().min(2),
+          workflowYaml: z.string().min(2).optional(),
+          triggers: z.array(z.string()).min(1).optional(),
+          deploysToProduction: z.boolean().optional(),
+          usesPinnedActions: z.boolean().optional(),
+          hasLeastPrivilegePermissions: z.boolean().optional(),
+          hasSecretScanning: z.boolean().optional(),
+          hasDependencyCaching: z.boolean().optional(),
+          hasEnvironmentProtection: z.boolean().optional(),
+          hasConcurrencyControl: z.boolean().optional()
+        }).refine((value) => Boolean(value.workflowYaml || value.triggers?.length), {
+          message: "Each GitHub Actions workflow requires workflowYaml or triggers."
+        })).max(10).optional()
+      }).refine((value) => {
+        const domains = [
+          Boolean(value.terraform),
+          Boolean(value.iamPolicies?.length),
+          Boolean(value.kubernetesWorkloads?.length),
+          Boolean(value.githubWorkflows?.length)
+        ].filter(Boolean).length;
+        return domains >= 2;
+      }, {
+        message: "Provide evidence from at least two domains."
+      }),
+      outputSchema: z.object({
+        changeName: z.string(),
+        environment: z.string(),
+        bundleRiskScore: z.number(),
+        bundleRiskLevel: riskSchema,
+        baseRiskScore: z.number(),
+        correlationAdjustment: z.number(),
+        environmentRiskAdjustment: z.number(),
+        assessmentConfidence: confidenceSchema,
+        suppliedDomains: z.array(z.string()),
+        domainSummary: z.array(domainSummarySchema),
+        correlatedFindingCount: z.number(),
+        correlatedFindings: z.array(correlatedFindingSchema),
+        changePaths: z.array(changePathSchema),
+        uncertainties: z.array(z.string()),
+        releaseGate: z.enum(["hold-for-remediation", "change-advisory-review", "staged-release", "standard-review"]),
+        recommendedActions: z.array(z.string())
+      })
+    },
+    async (input) => toolResult(assessCloudChangeBundle(input))
   );
 
   server.registerTool(

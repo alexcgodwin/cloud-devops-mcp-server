@@ -98,6 +98,15 @@ export interface GitHubWorkflowReviewInput {
   hasConcurrencyControl?: boolean;
 }
 
+export interface CloudChangeBundleInput {
+  changeName: string;
+  environment: "dev" | "staging" | "production";
+  terraform?: TerraformChangeInput;
+  iamPolicies?: IamPolicyReviewInput[];
+  kubernetesWorkloads?: KubernetesDeploymentReviewInput[];
+  githubWorkflows?: GitHubWorkflowReviewInput[];
+}
+
 const resourceWeights: Record<ChangedResource, number> = {
   network: 16,
   iam: 18,
@@ -874,5 +883,443 @@ export function reviewGitHubActionsWorkflow(input: GitHubWorkflowReviewInput) {
       "Fail closed when tests, security checks or policy gates fail.",
       "Keep secrets in managed secret stores and rotate credentials used by workflows."
     ]
+  };
+}
+
+
+type CorrelatedSeverity = "medium" | "high" | "critical";
+
+interface CorrelatedFinding {
+  ruleId: string;
+  severity: CorrelatedSeverity;
+  title: string;
+  domains: string[];
+  evidence: string[];
+  remediation: string[];
+}
+
+interface ChangePath {
+  pathId: string;
+  severity: CorrelatedSeverity;
+  sequence: string[];
+  impact: string;
+}
+
+function confidenceValue(value: AssessmentConfidence): number {
+  if (value === "high") return 1;
+  if (value === "medium") return 0.65;
+  return 0.3;
+}
+
+function confidenceFromAverage(value: number): AssessmentConfidence {
+  if (value >= 0.8) return "high";
+  if (value >= 0.5) return "medium";
+  return "low";
+}
+
+function evidenceDetails(items: EvidenceItem[], fallback: string): string[] {
+  return items.length > 0 ? items.map((item) => `${item.ruleId}: ${item.detail}`) : [fallback];
+}
+
+export function assessCloudChangeBundle(input: CloudChangeBundleInput) {
+  const suppliedDomains = [
+    input.terraform ? "terraform" : undefined,
+    input.iamPolicies?.length ? "iam" : undefined,
+    input.kubernetesWorkloads?.length ? "kubernetes" : undefined,
+    input.githubWorkflows?.length ? "github_actions" : undefined
+  ].filter((value): value is string => Boolean(value));
+
+  if (suppliedDomains.length < 2) {
+    throw new Error("Provide evidence from at least two domains: Terraform, IAM, Kubernetes or GitHub Actions.");
+  }
+
+  const terraform = input.terraform ? assessTerraformChange(input.terraform) : undefined;
+  const iam = (input.iamPolicies ?? []).map((policy) => ({
+    input: policy,
+    result: reviewIamPolicy(policy),
+    derived: policy.policyJson ? analyzeIamPolicy(policy.policyJson) : undefined
+  }));
+  const kubernetes = (input.kubernetesWorkloads ?? []).map((workload) => ({
+    input: workload,
+    result: reviewKubernetesDeployment(workload),
+    derived: workload.manifestYaml ? analyzeKubernetesManifest(workload.manifestYaml) : undefined
+  }));
+  const github = (input.githubWorkflows ?? []).map((workflow) => ({
+    input: workflow,
+    result: reviewGitHubActionsWorkflow(workflow),
+    derived: workflow.workflowYaml ? analyzeGitHubWorkflow(workflow.workflowYaml) : undefined
+  }));
+
+  const terraformDerived = input.terraform?.terraformPlanJson
+    ? analyzeTerraformPlan(input.terraform.terraformPlanJson)
+    : undefined;
+
+  const terraformPublic =
+    terraformDerived?.includesPublicIngress === true ||
+    input.terraform?.includesPublicIngress === true;
+  const terraformStateful =
+    terraformDerived?.modifiesStatefulResources === true ||
+    input.terraform?.modifiesStatefulResources === true;
+  const terraformIam =
+    terraformDerived?.includesIamChanges === true ||
+    input.terraform?.includesIamChanges === true ||
+    input.terraform?.changedResources?.includes("iam") === true;
+
+  const iamEscalation = iam.some(({ input: policy, derived }) => {
+    if (derived?.escalationActions.length) return true;
+    if (policy.allowsPrivilegeEscalationActions === true) return true;
+    return (policy.actions ?? []).some((action) => {
+      const value = action.toLowerCase();
+      return privilegeEscalationActions.some((candidate) => value === candidate) ||
+        /^iam:(attach|put|create|update).*/.test(value);
+    });
+  });
+
+  const iamWildcard = iam.some(({ input: policy, derived }) =>
+    derived?.wildcardActions === true ||
+    derived?.wildcardResources === true ||
+    policy.hasWildcardActions === true ||
+    policy.hasWildcardResources === true ||
+    (policy.actions ?? []).some((action) => action.includes("*")) ||
+    (policy.resources ?? []).some((resource) => resource.includes("*"))
+  );
+
+  const kubernetesPublic = kubernetes.some(({ input: workload, derived }) =>
+    derived?.exposesPublicService === true || workload.exposesPublicService === true
+  );
+  const kubernetesMutableImage = kubernetes.some(({ input: workload, derived }) =>
+    derived?.usesLatestTag === true || workload.usesLatestTag === true
+  );
+  const kubernetesRoot = kubernetes.some(({ input: workload, derived }) =>
+    derived?.runsAsRoot === true || workload.runsAsRoot === true
+  );
+
+  const githubProduction = github.some(({ input: workflow, derived }) =>
+    derived?.deploysToProduction === true || workflow.deploysToProduction === true
+  );
+  const githubPrTarget = github.some(({ input: workflow, derived }) =>
+    derived?.triggers.includes("pull_request_target") === true ||
+    workflow.triggers?.includes("pull_request_target") === true
+  );
+  const githubUnpinned = github.some(({ input: workflow, derived }) =>
+    derived?.usesPinnedActions === false || workflow.usesPinnedActions === false
+  );
+  const githubUnprotected = github.some(({ input: workflow }) =>
+    workflow.deploysToProduction === true && workflow.hasEnvironmentProtection === false
+  ) || github.some(({ result }) =>
+    result.findings.some((finding) => finding.includes("protected environments"))
+  );
+
+  const domainSummary: Array<{
+    domain: string;
+    riskScore: number;
+    riskLevel: RiskLevel;
+    evidenceCount: number;
+    uncertaintyCount: number;
+  }> = [];
+  const domainConfidenceValues: number[] = [];
+
+  if (terraform) {
+    domainSummary.push({
+      domain: "terraform",
+      riskScore: terraform.riskScore,
+      riskLevel: terraform.riskLevel,
+      evidenceCount: terraform.evidence.length,
+      uncertaintyCount: terraform.uncertainties.length
+    });
+    domainConfidenceValues.push(confidenceValue(terraform.assessmentConfidence));
+  }
+
+  if (iam.length > 0) {
+    const riskScore = Math.max(...iam.map(({ result }) => result.riskScore));
+    const evidenceCount = iam.reduce((total, { result }) => total + result.evidence.length, 0);
+    const uncertaintyCount = iam.reduce((total, { result }) => total + result.uncertainties.length, 0);
+    domainSummary.push({
+      domain: "iam",
+      riskScore,
+      riskLevel: riskLevel(riskScore),
+      evidenceCount,
+      uncertaintyCount
+    });
+    domainConfidenceValues.push(
+      iam.reduce((total, { result }) => total + confidenceValue(result.assessmentConfidence), 0) / iam.length
+    );
+  }
+
+  if (kubernetes.length > 0) {
+    const riskScore = Math.max(...kubernetes.map(({ result }) => 100 - result.readinessScore));
+    const evidenceCount = kubernetes.reduce((total, { result }) => total + result.evidence.length, 0);
+    const uncertaintyCount = kubernetes.reduce((total, { result }) => total + result.uncertainties.length, 0);
+    domainSummary.push({
+      domain: "kubernetes",
+      riskScore,
+      riskLevel: riskLevel(riskScore),
+      evidenceCount,
+      uncertaintyCount
+    });
+    domainConfidenceValues.push(
+      kubernetes.reduce((total, { result }) => total + confidenceValue(result.assessmentConfidence), 0) / kubernetes.length
+    );
+  }
+
+  if (github.length > 0) {
+    const riskScore = Math.max(...github.map(({ result }) => 100 - result.workflowScore));
+    const evidenceCount = github.reduce((total, { result }) => total + result.evidence.length, 0);
+    const uncertaintyCount = github.reduce((total, { result }) => total + result.uncertainties.length, 0);
+    domainSummary.push({
+      domain: "github_actions",
+      riskScore,
+      riskLevel: riskLevel(riskScore),
+      evidenceCount,
+      uncertaintyCount
+    });
+    domainConfidenceValues.push(
+      github.reduce((total, { result }) => total + confidenceValue(result.assessmentConfidence), 0) / github.length
+    );
+  }
+
+  const findings: CorrelatedFinding[] = [];
+  const paths: ChangePath[] = [];
+  let correlationBonus = 0;
+
+  const addFinding = (
+    finding: CorrelatedFinding,
+    bonus: number,
+    sequence: string[],
+    impact: string
+  ) => {
+    findings.push(finding);
+    correlationBonus += bonus;
+    paths.push({
+      pathId: finding.ruleId,
+      severity: finding.severity,
+      sequence,
+      impact
+    });
+  };
+
+  if (terraformPublic && kubernetesPublic) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-PUBLIC-EXPOSURE",
+        severity: "critical",
+        title: "Infrastructure and workload layers both introduce public exposure",
+        domains: ["terraform", "kubernetes"],
+        evidence: [
+          ...evidenceDetails(terraform?.evidence.filter((item) => item.ruleId === "TF-PUBLIC-INGRESS") ?? [], "Terraform inputs indicate public ingress."),
+          ...kubernetes.flatMap(({ result }) => evidenceDetails(result.evidence.filter((item) => item.ruleId === "K8S-PUBLIC"), "Kubernetes inputs indicate a public Service or Ingress."))
+        ],
+        remediation: [
+          "Confirm whether public exposure is required at both layers.",
+          "Restrict CIDRs, listeners and service exposure to the minimum necessary path.",
+          "Require TLS, authentication and network-policy validation before release."
+        ]
+      },
+      18,
+      ["Terraform network exposure", "Kubernetes public Service/Ingress", "Application workload"],
+      "The same change can expose the workload through both infrastructure and cluster networking controls."
+    );
+  }
+
+  if (iamEscalation && githubProduction && (githubUnprotected || githubPrTarget)) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-PRIVILEGED-PROD-DELIVERY",
+        severity: "critical",
+        title: "Production delivery path intersects with privilege-escalating IAM capability",
+        domains: ["iam", "github_actions"],
+        evidence: [
+          ...iam.flatMap(({ result }) => evidenceDetails(result.evidence.filter((item) => item.ruleId === "IAM-PRIV-ESC"), "IAM inputs include privilege-escalation-capable actions.")),
+          ...github.flatMap(({ result }) => result.findings.filter((finding) =>
+            finding.includes("protected environments") || finding.includes("pull_request_target")
+          ))
+        ],
+        remediation: [
+          "Remove or isolate privilege-escalation permissions from deployment identities.",
+          "Require protected production environments and trusted deployment triggers.",
+          "Separate build identity from deployment identity and use short-lived credentials."
+        ]
+      },
+      24,
+      ["GitHub Actions production workflow", "Deployment identity", "Privilege-escalating IAM capability", "Production resources"],
+      "A compromised or insufficiently protected delivery path could have an enlarged authorization blast radius."
+    );
+  }
+
+  if (githubUnpinned && kubernetesMutableImage) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-MUTABLE-SUPPLY-CHAIN",
+        severity: "high",
+        title: "Mutable CI dependencies and mutable runtime images appear in the same release path",
+        domains: ["github_actions", "kubernetes"],
+        evidence: [
+          ...github.flatMap(({ result }) => result.findings.filter((finding) => finding.includes("full commit SHAs"))),
+          ...kubernetes.flatMap(({ result }) => evidenceDetails(result.evidence.filter((item) => item.ruleId === "K8S-MUTABLE-IMAGE"), "Kubernetes inputs indicate a mutable image tag."))
+        ],
+        remediation: [
+          "Pin external GitHub Actions to immutable full commit SHAs.",
+          "Deploy container images by digest or immutable version tag.",
+          "Record commit-to-artifact-to-image provenance for every production release."
+        ]
+      },
+      16,
+      ["Mutable GitHub Action reference", "Build/release workflow", "Mutable container image", "Kubernetes runtime"],
+      "Two mutable supply-chain points make release reproduction and integrity verification weaker."
+    );
+  }
+
+  if ((terraformPublic || kubernetesPublic) && (iamEscalation || iamWildcard)) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-PUBLIC-PRIVILEGE-BLAST-RADIUS",
+        severity: "critical",
+        title: "Public exposure overlaps with broad or privilege-escalating IAM",
+        domains: ["terraform", "iam", "kubernetes"].filter((domain) =>
+          domain !== "terraform" || Boolean(terraform)
+        ),
+        evidence: [
+          terraformPublic ? "Terraform evidence indicates public network exposure." : "Kubernetes evidence indicates public workload exposure.",
+          iamEscalation ? "IAM evidence includes privilege-escalation-capable permissions." : "IAM evidence includes wildcard scope."
+        ],
+        remediation: [
+          "Reduce public exposure and IAM scope before the same release reaches production.",
+          "Use separate identities and network boundaries for internet-facing workloads.",
+          "Add explicit compensating controls and approval evidence if exposure is intentional."
+        ]
+      },
+      18,
+      ["Public entry point", "Internet-facing workload", "Broad or escalating IAM permissions"],
+      "An exposed workload combined with excessive authorization increases the potential impact of a workload compromise."
+    );
+  }
+
+  if (kubernetesRoot && (terraformPublic || kubernetesPublic)) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-PUBLIC-ROOT-WORKLOAD",
+        severity: "high",
+        title: "Publicly reachable workload can run with root-level container context",
+        domains: ["kubernetes", ...(terraformPublic ? ["terraform"] : [])],
+        evidence: [
+          ...kubernetes.flatMap(({ result }) => evidenceDetails(result.evidence.filter((item) => item.ruleId === "K8S-ROOT"), "Kubernetes inputs indicate root execution.")),
+          terraformPublic ? "Terraform inputs indicate public ingress." : "Kubernetes inputs indicate public exposure."
+        ],
+        remediation: [
+          "Enforce runAsNonRoot and a restricted security context.",
+          "Drop unnecessary Linux capabilities and use read-only root filesystems where possible.",
+          "Reduce external reachability until the workload security context is hardened."
+        ]
+      },
+      14,
+      ["Public entry point", "Kubernetes workload", "Root-capable container context"],
+      "Internet reachability combined with root execution increases runtime blast radius."
+    );
+  }
+
+  if (terraformIam && iam.some(({ result }) => result.riskScore >= 50)) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-IAC-IAM-HIGH-RISK",
+        severity: "high",
+        title: "The infrastructure change modifies IAM while supplied IAM policy evidence is high risk",
+        domains: ["terraform", "iam"],
+        evidence: [
+          "Terraform change set includes IAM resources.",
+          ...iam.filter(({ result }) => result.riskScore >= 50).flatMap(({ result }) => result.findings)
+        ],
+        remediation: [
+          "Require focused IAM peer review before applying the Terraform change.",
+          "Use policy simulation or access analysis to prove the required permission set.",
+          "Split unrelated IAM changes from infrastructure rollout where practical."
+        ]
+      },
+      12,
+      ["Terraform IAM change", "High-risk IAM policy", "Deployment identity or workload permissions"],
+      "The same change set can introduce both authorization changes and the infrastructure that consumes them."
+    );
+  }
+
+  if (terraformStateful && input.terraform?.hasRollbackPlan === false) {
+    addFinding(
+      {
+        ruleId: "BUNDLE-STATEFUL-NO-ROLLBACK",
+        severity: "high",
+        title: "Stateful infrastructure changes lack an explicit rollback or forward-fix plan",
+        domains: ["terraform"],
+        evidence: [
+          ...evidenceDetails(terraform?.evidence.filter((item) => item.ruleId === "TF-STATEFUL") ?? [], "Terraform inputs indicate stateful-resource modification."),
+          "Rollback plan is explicitly marked absent."
+        ],
+        remediation: [
+          "Document restore, migration reversal or forward-fix procedures before apply.",
+          "Confirm backup integrity and recovery time expectations.",
+          "Define an owner and measurable rollback trigger."
+        ]
+      },
+      12,
+      ["Stateful Terraform change", "Deployment", "Potential data migration or persistence impact"],
+      "A stateful change without a tested recovery path can turn a deployment failure into a prolonged data or availability incident."
+    );
+  }
+
+  const domainRisks = domainSummary.map((domain) => domain.riskScore);
+  const maxDomainRisk = Math.max(...domainRisks);
+  const averageDomainRisk = domainRisks.reduce((total, value) => total + value, 0) / domainRisks.length;
+  const baseRiskScore = Math.round(maxDomainRisk * 0.6 + averageDomainRisk * 0.4);
+  const correlationAdjustment = Math.min(correlationBonus, 40);
+  const environmentRiskAdjustment = input.environment === "production" ? 5 : input.environment === "staging" ? 2 : 0;
+  const bundleRiskScore = Math.min(
+    100,
+    baseRiskScore + correlationAdjustment + environmentRiskAdjustment
+  );
+
+  const allUncertainties = [
+    ...(terraform?.uncertainties.map((value) => `terraform: ${value}`) ?? []),
+    ...iam.flatMap(({ result, input: policy }) => result.uncertainties.map((value) => `iam/${policy.policyName}: ${value}`)),
+    ...kubernetes.flatMap(({ result }) => result.uncertainties.map((value) => `kubernetes/${result.workloadName}: ${value}`)),
+    ...github.flatMap(({ result, input: workflow }) => result.uncertainties.map((value) => `github_actions/${workflow.workflowName}: ${value}`))
+  ];
+
+  const averageConfidence = domainConfidenceValues.reduce((total, value) => total + value, 0) /
+    domainConfidenceValues.length;
+  const assessmentConfidence = confidenceFromAverage(averageConfidence);
+
+  const releaseGate =
+    bundleRiskScore >= 75
+      ? "hold-for-remediation"
+      : bundleRiskScore >= 50
+        ? "change-advisory-review"
+        : bundleRiskScore >= 25
+          ? "staged-release"
+          : "standard-review";
+
+  const recommendedActions = Array.from(new Set([
+    ...findings.flatMap((finding) => finding.remediation),
+    ...(bundleRiskScore >= 75
+      ? ["Do not broadly release until critical correlated findings are remediated or explicitly accepted by accountable owners."]
+      : []),
+    ...(allUncertainties.length > 0
+      ? ["Resolve unknown controls with artifact or repository evidence before treating the bundle assessment as complete."]
+      : [])
+  ]));
+
+  return {
+    changeName: input.changeName,
+    environment: input.environment,
+    bundleRiskScore,
+    bundleRiskLevel: riskLevel(bundleRiskScore),
+    baseRiskScore,
+    correlationAdjustment,
+    environmentRiskAdjustment,
+    assessmentConfidence,
+    suppliedDomains,
+    domainSummary,
+    correlatedFindingCount: findings.length,
+    correlatedFindings: findings,
+    changePaths: paths,
+    uncertainties: allUncertainties,
+    releaseGate,
+    recommendedActions
   };
 }

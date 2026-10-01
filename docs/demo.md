@@ -2,6 +2,91 @@
 
 This page shows practical examples of what Cloud DevOps MCP Server returns to an MCP client.
 
+## Cross-domain cloud change bundle
+
+Input excerpt:
+
+```json
+{
+  "changeName": "payments-production-release",
+  "environment": "production",
+  "terraform": {
+    "changedResources": ["network", "iam", "kubernetes"],
+    "includesIamChanges": true,
+    "includesPublicIngress": true,
+    "hasRollbackPlan": true,
+    "hasPeerReview": true,
+    "hasTerraformPlan": true
+  },
+  "iamPolicies": [
+    {
+      "policyName": "payments-deployer",
+      "actions": ["iam:PassRole"],
+      "resources": ["*"],
+      "hasConditionBlocks": false,
+      "usedByProduction": true
+    }
+  ],
+  "kubernetesWorkloads": [
+    {
+      "workloadName": "payments-api",
+      "namespace": "production",
+      "replicas": 2,
+      "hasReadinessProbe": true,
+      "hasLivenessProbe": true,
+      "hasResourceRequests": true,
+      "hasResourceLimits": true,
+      "hasPodDisruptionBudget": true,
+      "usesLatestTag": false,
+      "runsAsRoot": false,
+      "exposesPublicService": true
+    }
+  ],
+  "githubWorkflows": [
+    {
+      "workflowName": "deploy-production",
+      "triggers": ["push"],
+      "deploysToProduction": true,
+      "usesPinnedActions": true,
+      "hasLeastPrivilegePermissions": true,
+      "hasSecretScanning": true,
+      "hasDependencyCaching": true,
+      "hasEnvironmentProtection": false,
+      "hasConcurrencyControl": true
+    }
+  ]
+}
+```
+
+Output excerpt:
+
+```json
+{
+  "bundleRiskLevel": "critical",
+  "releaseGate": "hold-for-remediation",
+  "suppliedDomains": [
+    "terraform",
+    "iam",
+    "kubernetes",
+    "github_actions"
+  ],
+  "correlatedFindings": [
+    {
+      "ruleId": "BUNDLE-PUBLIC-EXPOSURE",
+      "severity": "critical",
+      "domains": ["terraform", "kubernetes"]
+    },
+    {
+      "ruleId": "BUNDLE-PRIVILEGED-PROD-DELIVERY",
+      "severity": "critical",
+      "domains": ["iam", "github_actions"]
+    }
+  ]
+}
+```
+
+The bundle tool does not replace the individual reviewers. It reuses their evidence and then evaluates combinations that increase release risk across layers.
+
 ## Terraform change risk
 
 Input:
@@ -18,7 +103,7 @@ Input:
 }
 ```
 
-Output:
+Output excerpt:
 
 ```json
 {
@@ -39,7 +124,11 @@ Input:
   "environment": "production",
   "severity": "sev2",
   "symptom": "Elevated 5xx errors after deployment",
-  "signals": ["error rate above 8%", "latency p95 above 2s", "new release deployed 20 minutes ago"]
+  "signals": [
+    "error rate above 8%",
+    "latency p95 above 2s",
+    "new release deployed 20 minutes ago"
+  ]
 }
 ```
 
@@ -50,14 +139,7 @@ Output excerpt:
   "title": "payments-api SEV2 incident runbook",
   "firstFifteenMinutes": [
     "Acknowledge the incident and assign an incident commander.",
-    "Confirm customer impact, affected regions, affected services and start time.",
-    "Open dashboards for traffic, errors, latency, saturation, deployments and infrastructure events.",
-    "Freeze non-essential deployments until impact is understood."
-  ],
-  "communication": [
-    "Post an incident update every 15 minutes until the service is stable.",
-    "Keep customer-facing updates short, factual and time-stamped.",
-    "Separate investigation detail from executive summary."
+    "Confirm customer impact, affected regions, affected services and start time."
   ]
 }
 ```
@@ -79,20 +161,14 @@ Input:
 }
 ```
 
-Output:
+Output excerpt:
 
 ```json
 {
   "pipelineName": "prod-api-release",
   "readinessScore": 100,
   "readinessLevel": "production-ready",
-  "deploymentStrategy": "canary",
-  "strengths": [
-    "Automated tests are present.",
-    "Security scanning is part of the delivery path.",
-    "Rollback is defined.",
-    "Artifacts are traceable."
-  ]
+  "deploymentStrategy": "canary"
 }
 ```
 
@@ -110,18 +186,14 @@ Input:
 }
 ```
 
-Output:
+Output excerpt:
 
 ```json
 {
-  "sloTargetPercent": 99.9,
-  "periodDays": 30,
   "allowedDowntimeMinutes": 43.2,
-  "observedDowntimeMinutes": 18,
   "remainingDowntimeMinutes": 25.2,
   "budgetStatus": "within-budget",
   "allowedFailedRequests": 4999,
-  "failedRequests": 1200,
   "remainingFailedRequests": 3799
 }
 ```
@@ -133,11 +205,10 @@ Input:
 ```json
 {
   "policyName": "prod-admin-helper",
-  "environment": "production",
-  "allowedActions": ["iam:PassRole", "sts:AssumeRole", "s3:*"],
-  "allowedResources": ["*"],
+  "actions": ["iam:PassRole", "sts:AssumeRole", "s3:*"],
+  "resources": ["*"],
   "hasConditionBlocks": false,
-  "isAttachedToHumanUser": true
+  "usedByProduction": true
 }
 ```
 
@@ -146,11 +217,11 @@ Output excerpt:
 ```json
 {
   "policyName": "prod-admin-helper",
-  "riskScore": 100,
   "riskLevel": "critical",
   "findings": [
-    "Policy allows wildcard resources.",
-    "Policy includes actions commonly used in privilege-escalation paths."
+    "Replace wildcard actions with the smallest explicit action set required by the workload.",
+    "Scope wildcard resource patterns to the narrowest ARNs supported by each action.",
+    "Review privilege-escalation paths such as iam:PassRole, sts:AssumeRole, policy attachment and access-key creation."
   ]
 }
 ```
@@ -162,14 +233,14 @@ Input:
 ```json
 {
   "workloadName": "checkout-api",
-  "environment": "production",
-  "replicaCount": 3,
+  "namespace": "production",
+  "replicas": 3,
   "hasReadinessProbe": true,
   "hasLivenessProbe": true,
   "hasResourceRequests": true,
   "hasResourceLimits": true,
   "hasPodDisruptionBudget": true,
-  "usesLatestImageTag": false,
+  "usesLatestTag": false,
   "runsAsRoot": false,
   "exposesPublicService": false
 }
@@ -180,6 +251,7 @@ Output excerpt:
 ```json
 {
   "workloadName": "checkout-api",
+  "namespace": "production",
   "readinessScore": 100,
   "readinessLevel": "production-ready",
   "findings": []
@@ -193,13 +265,14 @@ Input:
 ```json
 {
   "workflowName": "deploy-production",
-  "runsOnPullRequestTarget": false,
+  "triggers": ["push"],
+  "deploysToProduction": true,
   "usesPinnedActions": true,
   "hasLeastPrivilegePermissions": true,
-  "usesEnvironmentProtection": true,
-  "hasConcurrencyControl": true,
   "hasSecretScanning": true,
-  "deploysToProduction": true
+  "hasDependencyCaching": true,
+  "hasEnvironmentProtection": true,
+  "hasConcurrencyControl": true
 }
 ```
 
@@ -208,7 +281,7 @@ Output excerpt:
 ```json
 {
   "workflowName": "deploy-production",
-  "readinessScore": 100,
+  "workflowScore": 100,
   "readinessLevel": "production-ready",
   "findings": []
 }

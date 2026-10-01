@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  assessCloudChangeBundle,
   assessTerraformChange,
   buildIncidentRunbook,
   estimateSloBudget,
@@ -311,5 +312,164 @@ jobs:
 
     expect(result.findings.join(" ")).not.toContain("full commit SHAs");
     expect(result.strengths.join(" ")).toContain("immutable commit SHAs");
+  });
+});
+
+
+describe("assessCloudChangeBundle", () => {
+  it("correlates public exposure, IAM privilege and unprotected production delivery", () => {
+    const terraformPlanJson = JSON.stringify({
+      resource_changes: [
+        {
+          address: "aws_security_group.web",
+          type: "aws_security_group",
+          change: {
+            actions: ["update"],
+            after: { ingress: [{ cidr_blocks: ["0.0.0.0/0"] }] }
+          }
+        },
+        {
+          address: "aws_iam_role.app",
+          type: "aws_iam_role",
+          change: { actions: ["update"], after: {} }
+        }
+      ]
+    });
+
+    const iamPolicyJson = JSON.stringify({
+      Version: "2012-10-17",
+      Statement: [
+        {
+          Effect: "Allow",
+          Action: ["iam:PassRole"],
+          Resource: "*"
+        }
+      ]
+    });
+
+    const kubernetesManifest = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: production
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: api
+          image: example/payments:latest
+          securityContext:
+            runAsUser: 0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-api
+spec:
+  type: LoadBalancer
+`;
+
+    const workflowYaml = `
+name: Deploy
+on:
+  push:
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+`;
+
+    const result = assessCloudChangeBundle({
+      changeName: "payments-production-release",
+      environment: "production",
+      terraform: {
+        terraformPlanJson,
+        hasRollbackPlan: true,
+        hasPeerReview: true
+      },
+      iamPolicies: [
+        {
+          policyName: "payments-deployer",
+          policyJson: iamPolicyJson,
+          usedByProduction: true
+        }
+      ],
+      kubernetesWorkloads: [
+        {
+          manifestYaml: kubernetesManifest
+        }
+      ],
+      githubWorkflows: [
+        {
+          workflowName: "deploy",
+          workflowYaml,
+          hasEnvironmentProtection: false
+        }
+      ]
+    });
+
+    expect(result.bundleRiskLevel).toBe("critical");
+    expect(result.releaseGate).toBe("hold-for-remediation");
+    expect(result.suppliedDomains).toHaveLength(4);
+    expect(result.correlatedFindings.map((finding) => finding.ruleId)).toEqual(
+      expect.arrayContaining([
+        "BUNDLE-PUBLIC-EXPOSURE",
+        "BUNDLE-PRIVILEGED-PROD-DELIVERY",
+        "BUNDLE-MUTABLE-SUPPLY-CHAIN",
+        "BUNDLE-PUBLIC-PRIVILEGE-BLAST-RADIUS",
+        "BUNDLE-PUBLIC-ROOT-WORKLOAD",
+        "BUNDLE-IAC-IAM-HIGH-RISK"
+      ])
+    );
+    expect(result.changePaths.length).toBe(result.correlatedFindingCount);
+  });
+
+  it("keeps a well-controlled multi-domain change low risk", () => {
+    const result = assessCloudChangeBundle({
+      changeName: "internal-worker",
+      environment: "dev",
+      terraform: {
+        changedResources: ["compute"],
+        hasRollbackPlan: true,
+        hasPeerReview: true,
+        hasTerraformPlan: true
+      },
+      kubernetesWorkloads: [
+        {
+          workloadName: "worker",
+          namespace: "dev",
+          replicas: 2,
+          hasReadinessProbe: true,
+          hasLivenessProbe: true,
+          hasResourceRequests: true,
+          hasResourceLimits: true,
+          hasPodDisruptionBudget: true,
+          usesLatestTag: false,
+          runsAsRoot: false,
+          exposesPublicService: false
+        }
+      ]
+    });
+
+    expect(result.bundleRiskLevel).toBe("low");
+    expect(result.releaseGate).toBe("standard-review");
+    expect(result.correlatedFindingCount).toBe(0);
+    expect(result.assessmentConfidence).toBe("high");
+  });
+
+  it("requires at least two evidence domains", () => {
+    expect(() =>
+      assessCloudChangeBundle({
+        changeName: "single-domain",
+        environment: "staging",
+        terraform: {
+          changedResources: ["compute"]
+        }
+      })
+    ).toThrow("at least two domains");
   });
 });

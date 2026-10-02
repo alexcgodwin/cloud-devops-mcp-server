@@ -65,3 +65,5 @@ Include:
 - Steps to reproduce.
 - Expected and actual behavior.
 - Impact and suggested mitigation, if known.
+
+- Production-observability integrations are opt-in, exact-allowlisted, read-only, bounded and redacted; Prometheus/Grafana use HTTPS except for loopback development endpoints, and credentials remain host-side.

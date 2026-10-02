@@ -1,15 +1,16 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.7 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.8 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has four separated capability planes:
+The server has five separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
 3. **Infrastructure operations plane** - optional Terraform validation/plan summaries and Kubernetes read-only runtime inspection.
 4. **Live multi-cloud read plane** - optional AWS, Azure and GCP inventory, managed Kubernetes, observability, FinOps and drift signals.
+5. **Production observability plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -80,6 +81,12 @@ GCP controls:
 - FinOps signals from unused persistent disks and reserved static IPs.
 
 Live inventory is normalized to bounded metadata. Provider tokens, keys and full arbitrary provider responses are not returned. The drift tool reports differences only; it has no reconciliation path.
+
+## Production observability plane
+
+`src/observability.ts` provides fixed, read-only integrations for Prometheus-compatible query APIs, Grafana alert APIs, AWS CloudWatch Logs Insights, allowlisted Kubernetes pod health and GitHub Actions run diagnostics. It also includes deterministic correlation across metrics, logs, alerts, Kubernetes and CI/CD evidence.
+
+Remote observability endpoints must be exactly allowlisted and use HTTPS unless they are loopback addresses. AWS accounts/regions/log groups, Kubernetes contexts/namespaces and GitHub repositories are separately allowlisted. Query windows and result sizes are bounded, sensitive token patterns are redacted, and host-side credentials are never returned.
 
 ## Audit and redaction
 

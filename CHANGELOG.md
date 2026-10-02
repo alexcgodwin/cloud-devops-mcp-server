@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 - Production Observability Intelligence
+
+- Added an opt-in, read-only production-observability plane.
+- Added bounded Prometheus instant/range queries and Grafana alert summaries.
+- Added allowlisted CloudWatch Logs Insights querying and Kubernetes pod-health summaries.
+- Added GitHub Actions failure diagnosis with bounded, redacted log evidence.
+- Added deterministic cross-signal incident correlation across metrics, logs, alerts, Kubernetes and CI/CD.
+- Added fail-closed endpoint/resource allowlists, host-side credentials and audit logging for the new integrations.
+- Added automated observability tests and v0.8 configuration/architecture documentation.
+
 All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.

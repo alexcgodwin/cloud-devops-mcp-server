@@ -1,7 +1,7 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.7.0",
-  "description": "Cloud DevOps MCP server for evidence-backed analysis plus opt-in Git/GitHub, Terraform, Kubernetes and live multi-cloud reads.",
+  "version": "0.8.0",
+  "description": "Cloud DevOps MCP server for evidence-backed analysis plus guarded Git/GitHub, infrastructure, cloud and observability reads.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {

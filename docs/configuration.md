@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.7.0
+npm install -g cloud-devops-mcp-server@0.8.0
 cloud-devops-mcp-server
 ```
 
@@ -151,3 +151,20 @@ The v0.7 cloud tools can verify identity, summarize bounded resource inventory, 
 AWS general inventory uses the Resource Groups Tagging API and therefore represents tagged resources. Untagged AWS resources can be absent from inventory and drift results. GCP general inventory requires Cloud Asset Inventory access for the configured identity.
 
 No cloud create, update, delete, start, stop, resize, attach, detach, policy mutation or deployment command is exposed. Resource results are bounded, and cloud credentials/tokens are never returned.
+
+## Production observability intelligence (v0.8)
+
+The production-observability plane is disabled by default. Enable it only for trusted, explicitly allowlisted targets:
+
+```text
+CLOUD_DEVOPS_MCP_OBSERVABILITY_ENABLED=true
+CLOUD_DEVOPS_MCP_ALLOWED_PROMETHEUS_URLS=https://prometheus.example.com
+CLOUD_DEVOPS_MCP_PROMETHEUS_BEARER_TOKEN=<optional bearer token>
+CLOUD_DEVOPS_MCP_ALLOWED_GRAFANA_URLS=https://grafana.example.com
+CLOUD_DEVOPS_MCP_GRAFANA_TOKEN=<optional service-account token>
+CLOUD_DEVOPS_MCP_ALLOWED_CLOUDWATCH_LOG_GROUPS=/aws/eks/prod
+```
+
+CloudWatch Logs reuses the AWS account, region and optional profile allowlists from the live-cloud plane. Kubernetes health reuses `CLOUD_DEVOPS_MCP_ALLOWED_KUBE_CONTEXTS` and `CLOUD_DEVOPS_MCP_ALLOWED_KUBE_NAMESPACES`. GitHub Actions diagnosis reuses `CLOUD_DEVOPS_MCP_ALLOWED_GITHUB_REPOSITORIES` and the host-side `CLOUD_DEVOPS_MCP_GITHUB_TOKEN`.
+
+Prometheus and Grafana endpoints must use HTTPS unless they are loopback addresses. Query windows, returned series, rows, pods, jobs and log evidence are bounded. Tokens are never accepted as MCP arguments or returned in tool output. This plane does not expose alert mutation, workflow reruns, Kubernetes mutation or arbitrary shell execution.

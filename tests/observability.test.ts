@@ -281,7 +281,7 @@ describe("production observability intelligence", () => {
     }, neverFetch)).rejects.toThrow(/disabled/i);
   });
 
-  it("exposes six observability tools only when the observability gate is enabled", async () => {
+  it("exposes twelve observability and operations-intelligence tools only when the observability gate is enabled", async () => {
     const server = createServer();
     const client = new Client({ name: "observability-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -289,14 +289,20 @@ describe("production observability intelligence", () => {
     await client.connect(clientTransport);
     try {
       const { tools } = await client.listTools();
-      expect(tools).toHaveLength(18);
+      expect(tools).toHaveLength(24);
       expect(tools.map((tool) => tool.name)).toEqual(expect.arrayContaining([
         "prometheus_query",
         "grafana_alert_summary",
         "cloudwatch_logs_query",
         "kubernetes_health_summary",
         "github_actions_failure_diagnosis",
-        "correlate_incident_signals"
+        "correlate_incident_signals",
+        "assess_cloud_health",
+        "correlate_deployment_incident",
+        "assess_observability_coverage",
+        "analyze_finops_waste",
+        "detect_configuration_drift",
+        "generate_operations_brief"
       ]));
       const observabilityTools = tools.filter((tool) => [
         "prometheus_query",
@@ -304,7 +310,13 @@ describe("production observability intelligence", () => {
         "cloudwatch_logs_query",
         "kubernetes_health_summary",
         "github_actions_failure_diagnosis",
-        "correlate_incident_signals"
+        "correlate_incident_signals",
+        "assess_cloud_health",
+        "correlate_deployment_incident",
+        "assess_observability_coverage",
+        "analyze_finops_waste",
+        "detect_configuration_drift",
+        "generate_operations_brief"
       ].includes(tool.name));
       expect(observabilityTools.every((tool) => tool.annotations?.readOnlyHint === true)).toBe(true);
       expect(observabilityTools.every((tool) => tool.annotations?.destructiveHint === false)).toBe(true);

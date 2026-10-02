@@ -1,6 +1,6 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Cloud DevOps MCP server for evidence-backed analysis plus guarded Git/GitHub, infrastructure, cloud and observability reads.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",

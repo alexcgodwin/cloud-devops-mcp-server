@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.1"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.1"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.8.0
+npm install -g cloud-devops-mcp-server@0.8.1
 cloud-devops-mcp-server
 ```
 
@@ -167,4 +167,4 @@ CLOUD_DEVOPS_MCP_ALLOWED_CLOUDWATCH_LOG_GROUPS=/aws/eks/prod
 
 CloudWatch Logs reuses the AWS account, region and optional profile allowlists from the live-cloud plane. Kubernetes health reuses `CLOUD_DEVOPS_MCP_ALLOWED_KUBE_CONTEXTS` and `CLOUD_DEVOPS_MCP_ALLOWED_KUBE_NAMESPACES`. GitHub Actions diagnosis reuses `CLOUD_DEVOPS_MCP_ALLOWED_GITHUB_REPOSITORIES` and the host-side `CLOUD_DEVOPS_MCP_GITHUB_TOKEN`.
 
-Prometheus and Grafana endpoints must use HTTPS unless they are loopback addresses. Query windows, returned series, rows, pods, jobs and log evidence are bounded. Tokens are never accepted as MCP arguments or returned in tool output. This plane does not expose alert mutation, workflow reruns, Kubernetes mutation or arbitrary shell execution.
+Prometheus and Grafana endpoints must use HTTPS unless they are loopback addresses. Query windows, returned series, rows, pods, jobs and log evidence are bounded. Tokens are never accepted as MCP arguments or returned in tool output. The same gate also exposes six supplied-evidence intelligence tools for cloud health, deployment/incident correlation, observability coverage, FinOps correlation, cross-runtime drift and operations briefs. These analysis tools make no external calls. This plane does not expose alert mutation, workflow reruns, Kubernetes mutation or arbitrary shell execution.

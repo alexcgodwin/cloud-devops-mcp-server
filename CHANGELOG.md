@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.1 - Operations Intelligence Completion
+
+- Added `assess_cloud_health` to combine cloud alarms, metrics, logs, Kubernetes health, CI/CD, SLO and drift evidence into one bounded health assessment.
+- Added `correlate_deployment_incident` with a post-deployment evidence timeline that reports correlation strength without claiming root cause.
+- Added `assess_observability_coverage` for metrics, logs, alerts, dashboards, SLOs, tracing, deployment markers and runbooks.
+- Added `analyze_finops_waste` to correlate cloud waste signals with Terraform ownership and Kubernetes utilization evidence.
+- Added `detect_configuration_drift` for combined cloud-resource and Kubernetes-workload drift analysis.
+- Added `generate_operations_brief` for concise service health, incident, SLO, drift and FinOps summaries.
+- Preserved the v0.8 fail-closed observability gate and read-only/non-destructive boundary.
+- Verification: 79/79 tests pass; coverage 85.58% statements, 72.17% branches, 85.58% functions, 88.97% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.8.0 - Production Observability Intelligence
 
 - Added an opt-in, read-only production-observability plane.

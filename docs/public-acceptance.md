@@ -1,6 +1,6 @@
 # Public Release Acceptance
 
-Release: `cloud-devops-mcp-server@0.6.0`  
+Release: `cloud-devops-mcp-server@0.6.0`
 Date: 2026-10-01
 
 This acceptance record was verified against the publicly published npm package and the official MCP Registry, not only the repository source checkout.

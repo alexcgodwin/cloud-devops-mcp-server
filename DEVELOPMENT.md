@@ -32,6 +32,7 @@ npm run start:http
 | `src/intelligence.ts` | Multi-cloud identity, Terraform/Kubernetes security and SBOM policy packs. |
 | `src/http.ts` | Authenticated Streamable HTTP serving and remote-mode security controls. |
 | `src/infrastructure.ts` | Opt-in Terraform validation/plan summaries and Kubernetes read-only runtime operations. |
+| `src/cloud.ts` | Opt-in allowlisted AWS/Azure/GCP inventory, observability, FinOps and drift reads. |
 | `tests/logic.test.ts` | Unit and edge-case tests for core decision logic and parsers. |
 | `tests/intelligence.test.ts` | Policy-pack and supply-chain tests. |
 | `tests/http.test.ts` | Real authenticated Streamable HTTP integration tests. |

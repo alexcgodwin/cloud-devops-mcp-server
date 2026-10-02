@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.6.0",
-  "description": "MCP v2 server for Cloud DevOps analysis plus opt-in controlled Git/GitHub, Terraform and Kubernetes operations.",
+  "version": "0.7.0",
+  "description": "MCP v2 server for Cloud DevOps analysis plus opt-in Git/GitHub, infrastructure and live multi-cloud read operations.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -28,6 +28,9 @@
     "readOnlyByDefault": true,
     "controlledExecution": true,
     "infrastructureOperations": true,
+    "liveMultiCloudInventory": true,
+    "liveCloudProviders": ["aws", "azure", "gcp"],
+    "cloudMutation": false,
     "terraformApply": false,
     "kubernetesMutation": false,
     "crossDomainCorrelation": true,

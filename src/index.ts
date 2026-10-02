@@ -39,8 +39,16 @@ import {
   terraformPlanSummary,
   terraformValidate
 } from "./infrastructure.js";
+import {
+  cloudDriftCompare,
+  cloudFinOpsSignals,
+  cloudInventorySummary,
+  cloudKubernetesClusters,
+  cloudObservabilitySummary,
+  cloudWhoAmI
+} from "./cloud.js";
 
-const VERSION = "0.6.0";
+const VERSION = "0.7.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -988,6 +996,149 @@ export function createServer() {
         })
       },
       async (input) => toolResult(await kubectlRolloutStatus(input))
+    );
+  }
+
+
+  if (process.env.CLOUD_DEVOPS_MCP_CLOUD_INVENTORY_ENABLED === "true") {
+    const liveReadAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    } as const;
+
+    const cloudScopeSchema = z.object({
+      provider: z.enum(["aws", "azure", "gcp"]),
+      region: z.string().optional(),
+      profile: z.string().optional(),
+      subscriptionId: z.string().optional(),
+      projectId: z.string().optional()
+    });
+
+    server.registerTool(
+      "cloud_whoami",
+      {
+        title: "Cloud Identity",
+        description: "Verify the active allowlisted AWS, Azure or GCP identity/scope before live reads. No credentials or tokens are returned.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema,
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          subject: z.string(),
+          region: z.string()
+        })
+      },
+      async (input) => toolResult(await cloudWhoAmI(input))
+    );
+
+    server.registerTool(
+      "cloud_inventory_summary",
+      {
+        title: "Cloud Inventory Summary",
+        description: "Read a bounded live resource inventory from an explicitly allowlisted AWS account/region, Azure subscription or GCP project.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema,
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          source: z.string(),
+          resourceCount: z.number(),
+          typeCounts: z.record(z.string(), z.number()),
+          resources: z.array(z.object({
+            id: z.string(),
+            name: z.string(),
+            type: z.string(),
+            location: z.string(),
+            state: z.string().optional()
+          }))
+        })
+      },
+      async (input) => toolResult(await cloudInventorySummary(input))
+    );
+
+    server.registerTool(
+      "cloud_kubernetes_clusters",
+      {
+        title: "Cloud Kubernetes Clusters",
+        description: "List EKS, AKS or GKE clusters from an explicitly allowlisted cloud scope without changing cluster or cloud state.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema,
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          clusterCount: z.number(),
+          clusters: z.array(z.object({
+            name: z.string(),
+            location: z.string(),
+            state: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await cloudKubernetesClusters(input))
+    );
+
+    server.registerTool(
+      "cloud_observability_summary",
+      {
+        title: "Cloud Observability Summary",
+        description: "Read bounded observability configuration signals: CloudWatch alarms, Azure metric alerts or GCP logging sinks.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema,
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          signalType: z.string(),
+          configuredCount: z.number(),
+          stateCounts: z.record(z.string(), z.number())
+        })
+      },
+      async (input) => toolResult(await cloudObservabilitySummary(input))
+    );
+
+    server.registerTool(
+      "cloud_finops_signals",
+      {
+        title: "Cloud FinOps Signals",
+        description: "Identify bounded, read-only cost-waste signals such as unattached disks/volumes and unassociated static public IPs in an allowlisted cloud scope.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema,
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          findingCount: z.number(),
+          findings: z.array(z.object({
+            ruleId: z.string(),
+            resourceId: z.string(),
+            detail: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await cloudFinOpsSignals(input))
+    );
+
+    server.registerTool(
+      "cloud_drift_compare",
+      {
+        title: "Cloud Drift Compare",
+        description: "Compare expected resource identifiers with the bounded live inventory of an allowlisted cloud scope. It reports drift only and never reconciles resources.",
+        annotations: liveReadAnnotations,
+        inputSchema: cloudScopeSchema.extend({
+          expectedResourceIds: z.array(z.string().min(1).max(1000)).min(1).max(500),
+          includeUnexpected: z.boolean().optional()
+        }),
+        outputSchema: z.object({
+          provider: z.enum(["aws", "azure", "gcp"]),
+          scope: z.string(),
+          expectedCount: z.number(),
+          liveCount: z.number(),
+          missingExpected: z.array(z.string()),
+          unexpectedLive: z.array(z.string()),
+          driftDetected: z.boolean()
+        })
+      },
+      async (input) => toolResult(await cloudDriftCompare(input))
     );
   }
 

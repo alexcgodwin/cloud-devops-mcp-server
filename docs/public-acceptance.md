@@ -1,191 +1,192 @@
 # Public Release Acceptance
 
-Release: `cloud-devops-mcp-server@0.10.0`
+Release: `cloud-devops-mcp-server@0.11.0`
 Date: 2026-10-02
 
-This acceptance record was verified against repository CI, the publicly published npm package, a clean npm installation, a real MCP stdio client, the private OpsChugex v0.10 core integration, and the official MCP Registry publication workflow.
+This acceptance record was verified against repository CI, the publicly published npm package, a clean npm installation, a real MCP stdio client, the private OpsChugex v0.11 governance integration, and the official MCP Registry publication workflow.
 
 ## Release status
 
 | Check | Result |
 | --- | --- |
-| GitHub release | v0.10.0 published |
-| npm exact version | 0.10.0 publicly available |
-| npm latest dist-tag | 0.10.0 |
+| GitHub release | v0.11.0 published |
+| npm exact version | 0.11.0 publicly available |
+| npm latest dist-tag | 0.11.0 |
 | npm trusted publish | GitHub Actions OIDC with provenance |
 | Clean npm install audit | 0 vulnerabilities |
-| MCP Registry schema validation | Pass |
-| MCP Registry authentication | GitHub Actions OIDC |
-| MCP Registry publication | Successfully published version 0.10.0 |
-| Repository quality gate | 95 of 95 tests pass |
-| Statement coverage | 85.65% |
-| Branch coverage | 71.94% |
-| Function coverage | 85.10% |
-| Line coverage | 89.12% |
+| MCP Registry publication | Successfully published version 0.11.0 |
+| Repository quality gate | 101 of 101 tests pass |
+| Statement coverage | 85.68% |
+| Branch coverage | 72.02% |
+| Function coverage | 85.30% |
+| Line coverage | 89.08% |
 | Production dependency audit | 0 vulnerabilities |
 
 ## Clean public-install acceptance
-A fresh temporary directory installed:
 
+A fresh temporary directory installed:
 ```powershell
-npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.10.0 @modelcontextprotocol/client@2.2.0
+npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.11.0 @modelcontextprotocol/client@2.2.0
 ```
 
 The clean installation completed with zero reported vulnerabilities.
 
 A real MCP client spawned the npm-installed package over stdio and verified:
 
-| Configuration | Tool count | Root-cause tool | Result |
-| --- | ---: | --- | --- |
-| Default analysis | 12 | Absent | Pass |
-| v0.10 root-cause gateway enabled | 13 | Present | Pass |
-| v0.9 tracing/SLO plane enabled | 18 | Absent | Pass |
-| v0.8 observability + v0.9 tracing enabled | 30 | Absent | Pass |
-| All optional capability planes enabled | 53 | Present | Pass |
+| Configuration | Tool count | Root cause | Governance | Result |
+| --- | ---: | --- | --- | --- |
+| Default analysis | 12 | Absent | Absent | Pass |
+| v0.10 root-cause gateway | 13 | Present | Absent | Pass |
+| v0.11 governance gateway | 13 | Absent | Present | Pass |
+| Both OpsChugex gateways | 14 | Present | Present | Pass |
+| Observability + tracing | 30 | Absent | Absent | Pass |
+| All optional capability planes | 54 | Present | Present | Pass |
 
-The default public surface therefore remains unchanged at twelve tools. The v0.10 commercial gateway appears only when explicitly enabled.
+The default public surface remains unchanged at twelve tools.
 
-## v0.10 automated root-cause intelligence acceptance
+The v0.10 and v0.11 OpsChugex gateways are independently opt-in.
 
-The v0.10 public package adds one optional tool:
+## v0.11 policy and governance acceptance
 
-- `diagnose_root_cause`
+The public v0.11 package adds one optional tool:
 
-The tool accepts bounded incident evidence from:
+- `assess_governance_policy`
 
-- Metrics
-- Logs
-- Distributed traces
-- Kubernetes
-- Cloud-provider signals
-- Terraform and infrastructure changes
-- CI/CD and deployment evidence
-The public MCP validates incident context and evidence, then forwards the request to a host-configured private OpsChugex service.
+The public contract accepts bounded resource evidence for AWS, Azure, GCP, Kubernetes and generic resources.
+Callers may select a development, staging, production or regulated profile and may provide owner-attributed, time-bounded exception metadata.
 
-The public MIT package does not contain the proprietary cause-ranking weights, contradiction rules, commercial correlation logic, or future remediation logic.
+The public package returns the private service response as structured governance evidence, including:
 
-Returned assessments include:
+- `pass`, `review`, or `block`
+- governance score
+- control findings
+- severity
+- exception-applied state
+- evidence gaps
+- expired exception identifiers
+- concise assessment summary
 
-- Ranked probable causes
-- Evidence-strength scores
-- Confidence labels
-- Supporting evidence IDs
-- Contradicting evidence IDs
-- Supporting evidence domains
-- A concise reasoning summary
-- Recommended next checks
-- Explicit limitations
+## Intellectual-property boundary
 
-Evidence scores are evidence-strength indicators. They are not statistical probabilities and do not prove causation.
+The public MIT repository contains:
 
-## End-to-end gateway acceptance
+- MCP input and output schemas
+- request bounds
+- HTTPS endpoint validation
+- host-side bearer-token handling
+- read-only MCP registration
+- response-schema validation
+- documentation and gateway tests
 
-A local instance of the private OpsChugex v0.10 core was started on loopback for acceptance testing.
+The public MIT repository does not contain:
 
-The clean npm-installed public MCP was configured only through host environment variables and called `diagnose_root_cause` through a real MCP stdio client.
+- governance profile rule tables
+- control thresholds
+- scoring weights
+- control-to-severity mapping logic
+- exception-evaluation algorithms
+- policy enforcement or remediation logic
+Those capabilities remain in the private proprietary `OpsChugex/cloud-operations-core` repository.
 
-The test supplied four incident evidence domains around a synthetic checkout deployment:
+A public-source leak check searched for private implementation identifiers including the private profile table, severity weights, required-tag rules, exception evaluator, and specific private control-rule identifiers. No matches were found.
 
-- CI/CD deployment evidence
-- Kubernetes rollout failure evidence
-- Distributed trace latency evidence
-- Application log version-error evidence
+## End-to-end governance acceptance
+
+A local instance of the private OpsChugex v0.11 core was started on loopback for acceptance testing.
+
+The clean npm-installed public v0.11 MCP called `assess_governance_policy` through a real MCP stdio client.
+
+The synthetic test supplied one production application-load-balancer resource with complete evidence except that public exposure was enabled.
+
 The end-to-end result was:
 
 ```json
 {
-  "service": "checkout",
-  "assessment": "strong",
-  "topCause": "deployment_regression",
-  "topConfidence": "strong",
-  "topScore": 88,
-  "domainCount": 4
+  "organization": "OpsChugex",
+  "profile": "production",
+  "decision": "block",
+  "score": 84,
+  "findingCount": 1,
+  "blockedFindingCount": 1,
+  "topControl": "network.public_exposure",
+  "topSeverity": "high",
+  "evidenceGaps": 0
 }
 ```
 
-This verifies the complete public-MCP-to-private-core request path without publishing the private ranking implementation.
+This verifies the complete public-MCP-to-private-policy-engine request path without publishing the private governance implementation.
+No production credentials, customer data or live customer infrastructure were used in this acceptance test.
 
-No production credentials, customer data, or live customer infrastructure were used in this acceptance test.
+## Public gateway security boundary
 
-## Security boundary
-
-The v0.10 gateway is disabled by default and requires:
+The v0.11 governance gateway is disabled by default and requires:
 
 ```text
-CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED=true
-CLOUD_DEVOPS_MCP_OPSCHUGEX_ROOT_CAUSE_URL=<host-configured endpoint>
+CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_URL=<host-configured endpoint>
 CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<host-side secret>
 ```
 
-Controls verified for the public gateway include:
+Controls verified include:
 
-- The endpoint cannot be supplied as an MCP tool argument.
-- The bearer token cannot be supplied as an MCP tool argument.
+- The governance endpoint cannot be supplied as an MCP argument.
+- The bearer token cannot be supplied as an MCP argument.
 - Remote endpoints must use HTTPS.
 - Plain HTTP is accepted only for loopback development.
 - The bearer token must be at least 32 characters.
-- Evidence is schema-validated and capped at 1,000 records.
-- The private-service response is schema-validated before it is returned.
-- `diagnose_root_cause` is marked read-only and non-destructive.
-- No v0.10 gateway path remediates or mutates cloud, Kubernetes, Terraform, CI/CD, tracing, or observability state.
-- The public package contains no proprietary root-cause scoring engine.
+- Resource evidence is capped at 2,000 records.
+- Governance exceptions are capped at 500 records.
+- The private-service response is schema-validated.
+- The tool is marked read-only and non-destructive.
+- No policy enforcement or infrastructure mutation is exposed.
 
 ## Private-core verification
 
-The private OpsChugex v0.10 core is maintained separately from the public MIT repository.
+The private OpsChugex v0.11 core remains private and proprietary.
+Its v0.11 verification completed with:
 
-Its verification completed with:
-
-- 7 of 7 tests passing
-- 90.58% statement coverage
-- 85.71% branch coverage
-- 96.15% function coverage
-- 95.58% line coverage
+- 14 of 14 tests passing
+- 86.62% statement coverage
+- 77.16% branch coverage
+- 97.43% function coverage
+- 91.83% line coverage
 - 0 production dependency vulnerabilities
-- Private GitHub Actions CI passing
+- private pull-request CI passing
+- private post-merge CI passing
 
-The private repository remains proprietary and is not published to npm or the MCP Registry.
+The private repository is not published to npm or the MCP Registry.
 
 ## Distribution verification
 
-The v0.10.0 release workflow completed successfully.
+The v0.11.0 release workflow completed successfully.
 
 The workflow:
 
 1. Verified release-version alignment.
 2. Ran the repository quality gate.
-3. Published `cloud-devops-mcp-server@0.10.0` to npm through OIDC.
+3. Published `cloud-devops-mcp-server@0.11.0` to npm through OIDC.
 4. Waited until the exact npm version was publicly readable.
 5. Installed and verified the pinned MCP Registry publisher.
 6. Authenticated to the MCP Registry through GitHub OIDC.
-7. Published `io.github.alexcgodwin/cloud-devops-mcp-server` version 0.10.0.
+7. Published `io.github.alexcgodwin/cloud-devops-mcp-server` version 0.11.0.
 
-Independent npm verification confirmed:
-
-```json
-{
-  "version": "0.10.0",
-  "dist-tags": {
-    "latest": "0.10.0"
-  }
-}
-```
-
+Independent npm verification confirmed `0.11.0` as the `latest` dist-tag.
 ## Final acceptance
 
-`cloud-devops-mcp-server@0.10.0` passes repository CI, automated tests, coverage thresholds, production dependency audit, npm trusted publication, clean public installation, real MCP stdio tool discovery, an end-to-end call into the private OpsChugex intelligence core, and official MCP Registry publication.
+`cloud-devops-mcp-server@0.11.0` passes repository CI, automated tests, coverage thresholds, production dependency audit, npm trusted publication, clean public installation, real MCP stdio discovery, an end-to-end call into the private OpsChugex governance engine, IP-boundary checks, and official MCP Registry publication.
 
-The release establishes the intended product boundary:
+The architecture now has two commercial gateways while keeping the product intelligence private:
 
 ```text
 Public Cloud DevOps MCP
         |
-        | bounded authenticated evidence contract
-        v
-Private OpsChugex Cloud Operations Core
+        +--> private root-cause API
         |
-        v
-Proprietary root-cause intelligence
+        +--> private governance API
+                    |
+                    v
+        OpsChugex Cloud Operations Core
+        proprietary intelligence
 ```
 
-This record supersedes the v0.9.0 public-acceptance record for the current release.
+This record supersedes the v0.10.0 public-acceptance record for the current release.

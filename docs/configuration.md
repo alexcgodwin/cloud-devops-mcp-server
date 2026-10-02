@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.4.0
+npm install -g cloud-devops-mcp-server@0.5.0
 cloud-devops-mcp-server
 ```
 
@@ -98,3 +98,16 @@ The analysis tools do not require AWS, Azure, GCP, GitHub or Kubernetes credenti
 The bearer token protects only optional HTTP transport access. Keep it out of source control, logs and screenshots. Rotate it if exposed.
 
 For multi-user or public SaaS deployments, use an OAuth/OIDC-aware gateway or future OAuth resource-server mode rather than sharing one static bearer token across users.
+
+## Controlled Git/GitHub execution (v0.5)
+
+Execution is disabled by default. Enable it only for trusted local repositories:
+
+```powershell
+$env:CLOUD_DEVOPS_MCP_EXECUTION_ENABLED="true"
+$env:CLOUD_DEVOPS_MCP_ALLOWED_REPOSITORIES="C:\path\to\repo"
+$env:CLOUD_DEVOPS_MCP_ALLOWED_GITHUB_REPOSITORIES="owner/repo"
+$env:CLOUD_DEVOPS_MCP_GITHUB_TOKEN="<fine-grained token>"
+```
+
+Optional controls: protected branches, allowed branch prefixes, remotes, workflows and audit-log path. Force-push is not implemented. Pulls are fast-forward only. Commits stage only explicitly named paths. PR merge requires passing checks plus `confirm: "MERGE"`; workflow dispatch requires an allowlisted workflow plus `confirm: "TRIGGER"`.

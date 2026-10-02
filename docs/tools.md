@@ -323,3 +323,22 @@ The returned assessment contains:
 - a concise summary
 
 The public MCP does not contain the private profile rules, policy thresholds, scoring weights or exception-evaluation algorithm. The tool is read-only and does not modify tags, IAM, network configuration, encryption, backups, Terraform, Kubernetes or cloud resources.
+
+## Optional v0.12 OpsChugex cloud security posture intelligence
+
+This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_SECURITY_ENABLED=true`.
+
+### `assess_cloud_security_posture`
+
+Accepts bounded factual evidence for cloud assets, identities, secret exposures and network reachability and forwards it to the host-configured private OpsChugex security service.
+
+The returned assessment contains:
+
+- security score and risk level
+- ordered security findings
+- critical-finding count
+- correlated attack paths
+- explicit evidence gaps
+- recommended next actions
+
+The public MCP does not contain the private detection thresholds, severity rules, scoring algorithm or attack-path correlation logic. The tool is read-only and does not rotate credentials, change IAM, modify network controls, alter encryption settings or remediate infrastructure.

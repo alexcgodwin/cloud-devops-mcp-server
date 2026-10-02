@@ -10,6 +10,8 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
+The v0.12 line adds an opt-in OpsChugex cloud security posture gateway. The public MCP forwards bounded cloud asset, identity, secret and network-reachability evidence to a host-configured private OpsChugex service and returns security score, risk level, ordered findings, attack paths, evidence gaps and recommendations. Proprietary security rules, severity thresholds, scoring and attack-path correlation are not included in this public MIT repository.
+
 The v0.11 line adds an opt-in OpsChugex policy and governance gateway. The public MCP sends bounded resource evidence and approved exception metadata to a host-configured private OpsChugex service and returns pass, review or block decisions with control findings and evidence gaps. Proprietary profiles, rules, weights and exception-processing logic are not included in this public MIT repository.
 
 The v0.10 line adds an opt-in OpsChugex root-cause intelligence gateway. The public MCP sends bounded incident evidence to a host-configured private OpsChugex service and returns evidence-ranked probable causes, contradictions, limitations and next checks. Proprietary ranking and correlation rules are not included in this public MIT repository.
@@ -55,6 +57,7 @@ AI assistants are more useful in engineering work when they can call focused too
 - Optional Grafana Tempo and Jaeger v3 trace reads, service dependency maps and SLO burn-rate intelligence.
 - Optional OpsChugex private root-cause intelligence across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD evidence.
 - Optional OpsChugex private policy and governance intelligence for development, staging, production and regulated profiles.
+- Optional OpsChugex private cloud security posture intelligence for exposure, identity, secrets and attack-path analysis.
 
 ## Tools
 
@@ -95,6 +98,12 @@ When explicitly enabled, v0.11 exposes `assess_governance_policy`. The tool acce
 
 The public MCP contains no proprietary governance profiles, policy rules, scoring weights, exception evaluation logic or enforcement capability. The service URL and token remain host-side and cannot be supplied as MCP arguments.
 
+### Optional OpsChugex cloud security posture intelligence
+
+When explicitly enabled, v0.12 exposes `assess_cloud_security_posture`. The tool accepts bounded asset, identity, secret and network-reachability evidence and forwards it to the private OpsChugex security engine. It returns a security score, risk level, ordered findings, correlated attack paths, evidence gaps and recommended next actions.
+
+The public MCP contains no proprietary security detection thresholds, severity rules, scoring logic or attack-path algorithm. It cannot rotate credentials, change IAM, modify network controls, alter encryption settings or remediate infrastructure.
+
 ### Optional infrastructure operations
 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
@@ -118,13 +127,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.11.0
+npx -y cloud-devops-mcp-server@0.12.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.11.0
+npx.cmd -y cloud-devops-mcp-server@0.12.0
 ```
 
 ## Install from npm
@@ -132,7 +141,7 @@ npx.cmd -y cloud-devops-mcp-server@0.11.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.11.0
+npm install -g cloud-devops-mcp-server@0.12.0
 cloud-devops-mcp-server
 ```
 
@@ -159,7 +168,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.11.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.12.0"]
     }
   }
 }
@@ -172,7 +181,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.11.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.12.0"]
     }
   }
 }
@@ -193,7 +202,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.11.0 release candidate passes 101 automated tests, with 85.68% statement, 72.02% branch, 85.30% function and 89.08% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
+The v0.12.0 release candidate passes 106 automated tests, with 85.71% statement, 72.10% branch, 85.49% function and 89.10% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -260,6 +269,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Optional production-observability reads require explicit endpoint/resource allowlists and host-managed credentials; returned logs and diagnostics are bounded and redacted.
 - Optional v0.10 root-cause intelligence uses a host-configured HTTPS endpoint and host-side token; neither is accepted as a tool argument, and the proprietary ranking engine remains outside the public repository.
 - Optional v0.11 governance intelligence uses a separately gated host-configured HTTPS endpoint and the same host-side OpsChugex token; proprietary policy rules and enforcement remain outside the public repository.
+- Optional v0.12 cloud security posture intelligence uses its own fail-closed gate and host-configured HTTPS endpoint; proprietary security scoring and attack-path correlation remain in the private OpsChugex core.
 - No cloud mutation tool is exposed.
 - Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
 - No generic shell tool or force-push capability is exposed.
@@ -268,8 +278,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Roadmap
 
-- **Current: v0.11.0 Policy & Governance Engine** - public gateway to private OpsChugex development, staging, production and regulated policy profiles, organization guardrails, tagging, encryption, network and IAM standards.
-- **v0.12.0 Cloud Security Posture Intelligence** - deeper AWS/Azure/GCP misconfiguration detection, attack-path correlation, secrets and exposure analysis.
+- **Current: v0.12.0 Cloud Security Posture Intelligence** - public gateway to private OpsChugex exposure, identity, secret and attack-path correlation.
 - **v0.13.0 Advanced FinOps Intelligence** - utilization trends, rightsizing evidence, cost anomalies, Kubernetes/cloud cost correlation and optimization plans.
 - **v0.14.0 Change Intelligence & Blast-Radius Analysis** - predict affected services and resources before Terraform, Kubernetes or CI/CD changes.
 - **v0.15.0 Controlled Remediation Gateway** - approval-gated safe fixes for selected cloud, Kubernetes and Terraform operational problems.

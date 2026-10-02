@@ -8,7 +8,7 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
-The v0.4 line adds AWS/Azure/GCP identity policy packs, deeper Terraform and Kubernetes security analysis, CycloneDX/SPDX supply-chain correlation, and an optional authenticated Streamable HTTP transport. Stdio remains the default local transport.
+The v0.5 line adds an opt-in Controlled Execution Gateway for allowlisted Git/GitHub operations while preserving read-only analysis as the default. It supports guarded fetch, fast-forward-only pull, branch creation, selected-file commit, push, pull requests, CI status, gated merge and allowlisted workflow dispatch.
 
 ## Table of contents
 
@@ -83,13 +83,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.4.0
+npx -y cloud-devops-mcp-server@0.5.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.4.0
+npx.cmd -y cloud-devops-mcp-server@0.5.0
 ```
 
 ## Install from npm
@@ -97,7 +97,7 @@ npx.cmd -y cloud-devops-mcp-server@0.4.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.4.0
+npm install -g cloud-devops-mcp-server@0.5.0
 cloud-devops-mcp-server
 ```
 
@@ -124,7 +124,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
     }
   }
 }
@@ -137,7 +137,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.4.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
     }
   }
 }
@@ -158,7 +158,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The published v0.4.0 package passes 37 automated tests and a separate clean-install acceptance run. The npm-installed server exposed all twelve tools over stdio, passed AWS/Azure/GCP policy-pack calls, Terraform and Kubernetes security reviews, CycloneDX supply-chain correlation, and an authenticated Streamable HTTP client/server test with invalid-token rejection. The npm release also carries SLSA provenance.
+The published v0.5.0 package passes 37 automated tests and a separate clean-install acceptance run. The npm-installed server exposed all twelve tools over stdio, passed AWS/Azure/GCP policy-pack calls, Terraform and Kubernetes security reviews, CycloneDX supply-chain correlation, and an authenticated Streamable HTTP client/server test with invalid-token rejection. The npm release also carries SLSA provenance.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -220,7 +220,9 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Non-local HTTP binds require an explicit Host allowlist and an HTTPS public base URL for reverse-proxy/gateway termination.
 - Host and Origin validation are enabled through the official MCP Fastify adapter.
 - The analysis tools do not require cloud credentials or call cloud APIs.
-- The server does not write to infrastructure or mutate user systems.
+- Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
+- No generic shell tool or force-push capability is exposed.
+- Direct commit/push on protected branches is blocked, and high-impact GitHub actions require explicit confirmation.
 - It returns advisory guidance only; engineers remain responsible for review, approval and execution.
 
 ## Roadmap

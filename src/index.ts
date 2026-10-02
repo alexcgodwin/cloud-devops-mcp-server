@@ -19,8 +19,20 @@ import {
   reviewSoftwareSupplyChain,
   reviewTerraformSecurity
 } from "./intelligence.js";
+import {
+  gitCommit,
+  gitCreateBranch,
+  gitFetch,
+  gitPullFfOnly,
+  gitPush,
+  gitStatus,
+  githubCheckPullRequest,
+  githubCreatePullRequest,
+  githubMergePullRequest,
+  githubTriggerWorkflow
+} from "./execution.js";
 
-const VERSION = "0.4.0";
+const VERSION = "0.5.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -89,7 +101,7 @@ export function createServer() {
     { name: "cloud-devops-mcp-server", version: VERSION },
     {
       instructions:
-        "Use these read-only Cloud DevOps tools for evidence-backed review, multi-cloud identity policy analysis, Terraform and Kubernetes security checks, and supply-chain correlation. Prefer raw artifacts when available. Treat unknown evidence as unknown rather than assuming a failed control."
+        "Use the evidence-backed Cloud DevOps analysis tools by default. Controlled Git/GitHub execution tools appear only when explicitly enabled and are restricted by repository, branch, remote and workflow allowlists. Prefer raw artifacts when available. Treat unknown evidence as unknown rather than assuming a failed control."
     }
   );
 
@@ -550,6 +562,260 @@ export function createServer() {
     },
     async (input) => toolResult(reviewSoftwareSupplyChain(input))
   );
+
+  if (process.env.CLOUD_DEVOPS_MCP_EXECUTION_ENABLED === "true") {
+    const mutatingAnnotations = {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true
+    } as const;
+    const remoteSyncAnnotations = {
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    } as const;
+
+    server.registerTool(
+      "git_status",
+      {
+        title: "Git Status",
+        description: "Inspect an allowlisted local repository without modifying it.",
+        annotations: readOnlyAnnotations,
+        inputSchema: z.object({ repositoryPath: z.string().min(1) }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          branch: z.string(),
+          clean: z.boolean(),
+          changedPaths: z.array(z.string()),
+          ahead: z.number().nullable(),
+          behind: z.number().nullable()
+        })
+      },
+      async (input) => toolResult(await gitStatus(input))
+    );
+
+    server.registerTool(
+      "git_fetch",
+      {
+        title: "Git Fetch",
+        description: "Fetch remote refs for an allowlisted repository using an allowlisted remote.",
+        annotations: remoteSyncAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          remote: z.string().optional(),
+          prune: z.boolean().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          remote: z.string(),
+          fetched: z.boolean(),
+          output: z.string()
+        })
+      },
+      async (input) => toolResult(await gitFetch(input))
+    );
+
+    server.registerTool(
+      "git_pull_ff_only",
+      {
+        title: "Git Pull Fast Forward Only",
+        description: "Pull the currently checked-out branch with --ff-only. Dirty working trees are rejected.",
+        annotations: remoteSyncAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          remote: z.string().optional(),
+          branch: z.string().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          remote: z.string(),
+          branch: z.string(),
+          updated: z.boolean(),
+          output: z.string()
+        })
+      },
+      async (input) => toolResult(await gitPullFfOnly(input))
+    );
+
+    server.registerTool(
+      "git_create_branch",
+      {
+        title: "Git Create Branch",
+        description: "Create and switch to an allowlisted non-protected branch from an approved local repository.",
+        annotations: mutatingAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          branch: z.string().min(1),
+          startPoint: z.string().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          branch: z.string(),
+          created: z.boolean(),
+          startPoint: z.string()
+        })
+      },
+      async (input) => toolResult(await gitCreateBranch(input))
+    );
+
+    server.registerTool(
+      "git_commit",
+      {
+        title: "Git Commit Selected Files",
+        description: "Stage only explicitly named repository paths and commit them on a non-protected branch. Supports dry-run preview.",
+        annotations: mutatingAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          files: z.array(z.string().min(1)).min(1).max(100),
+          message: z.string().min(1).max(160),
+          dryRun: z.boolean().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          branch: z.string(),
+          dryRun: z.boolean().optional(),
+          committed: z.boolean().optional(),
+          commitSha: z.string().optional(),
+          files: z.array(z.string()),
+          preview: z.string().optional()
+        })
+      },
+      async (input) => toolResult(await gitCommit(input))
+    );
+
+    server.registerTool(
+      "git_push",
+      {
+        title: "Git Push",
+        description: "Push only the current non-protected branch to an allowlisted remote. Force-push is never used. Supports dry-run.",
+        annotations: mutatingAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          remote: z.string().optional(),
+          dryRun: z.boolean().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          remote: z.string(),
+          branch: z.string(),
+          dryRun: z.boolean(),
+          pushed: z.boolean(),
+          output: z.string()
+        })
+      },
+      async (input) => toolResult(await gitPush(input))
+    );
+
+    server.registerTool(
+      "github_create_pull_request",
+      {
+        title: "GitHub Create Pull Request",
+        description: "Create a pull request from the current non-protected branch in an explicitly allowlisted GitHub repository.",
+        annotations: mutatingAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          title: z.string().min(1).max(256),
+          body: z.string().max(20000).optional(),
+          base: z.string().optional(),
+          draft: z.boolean().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          repository: z.string(),
+          number: z.number(),
+          url: z.string(),
+          state: z.string(),
+          head: z.string(),
+          base: z.string(),
+          draft: z.boolean()
+        })
+      },
+      async (input) => toolResult(await githubCreatePullRequest(input))
+    );
+
+    server.registerTool(
+      "github_check_pull_request",
+      {
+        title: "GitHub Check Pull Request",
+        description: "Inspect pull request mergeability and GitHub Actions check runs for an allowlisted repository.",
+        annotations: { ...readOnlyAnnotations, openWorldHint: true },
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          pullRequestNumber: z.number().int().positive()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          repository: z.string(),
+          number: z.number(),
+          url: z.string(),
+          state: z.string(),
+          draft: z.boolean(),
+          mergeable: z.boolean().nullable(),
+          mergeableState: z.string(),
+          headSha: z.string(),
+          base: z.string(),
+          checks: z.array(z.object({
+            name: z.string(),
+            status: z.string(),
+            conclusion: z.string().nullable()
+          })),
+          allChecksPassed: z.boolean()
+        })
+      },
+      async (input) => toolResult(await githubCheckPullRequest(input))
+    );
+
+    server.registerTool(
+      "github_merge_pull_request",
+      {
+        title: "GitHub Merge Pull Request",
+        description: "Merge an open PR only after CI checks pass and confirm is exactly MERGE. Direct protected-branch pushes remain blocked.",
+        annotations: { ...mutatingAnnotations, destructiveHint: true },
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          pullRequestNumber: z.number().int().positive(),
+          confirm: z.literal("MERGE"),
+          method: z.enum(["merge", "squash", "rebase"]).optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          repository: z.string(),
+          number: z.number(),
+          merged: z.boolean(),
+          commitSha: z.string(),
+          message: z.string()
+        })
+      },
+      async (input) => toolResult(await githubMergePullRequest(input))
+    );
+
+    server.registerTool(
+      "github_trigger_workflow",
+      {
+        title: "GitHub Trigger Workflow",
+        description: "Dispatch only an explicitly allowlisted GitHub Actions workflow. confirm must be exactly TRIGGER.",
+        annotations: { ...mutatingAnnotations, destructiveHint: true },
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          workflow: z.string().min(1),
+          ref: z.string().min(1),
+          inputs: z.record(z.string(), z.string()).optional(),
+          confirm: z.literal("TRIGGER")
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          repository: z.string(),
+          workflow: z.string(),
+          ref: z.string(),
+          triggered: z.boolean()
+        })
+      },
+      async (input) => toolResult(await githubTriggerWorkflow(input))
+    );
+  }
+
 
   return server;
 }

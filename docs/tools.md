@@ -200,3 +200,41 @@ Reads bounded metadata/status for allowlisted resources, contexts and namespaces
 ### `kubectl_rollout_status`
 
 Reads rollout readiness for an allowlisted Deployment, StatefulSet or DaemonSet with watch disabled and a bounded timeout.
+
+## Optional v0.7 live multi-cloud tools
+
+These tools appear only when `CLOUD_DEVOPS_MCP_CLOUD_INVENTORY_ENABLED=true`.
+
+### `cloud_whoami`
+
+Verifies the active allowlisted scope before live reads. AWS returns the STS caller ARN/account, Azure returns the active subscription identity, and GCP returns the active authenticated account. Tokens and credentials are never returned.
+
+### `cloud_inventory_summary`
+
+Returns bounded normalized resource metadata from:
+
+- AWS Resource Groups Tagging API (tagged resources; untagged resources may be absent).
+- Azure Resource Manager.
+- GCP Cloud Asset Inventory.
+
+The response contains identifiers, names, types, locations and type counts. It does not return arbitrary provider payloads.
+
+### `cloud_kubernetes_clusters`
+
+Lists managed Kubernetes control planes from EKS, AKS or GKE without changing cluster state.
+
+### `cloud_observability_summary`
+
+Summarizes configured CloudWatch alarms, Azure metric alerts or GCP logging sinks.
+
+### `cloud_finops_signals`
+
+Surfaces bounded waste signals without making cost-saving changes:
+
+- AWS available EBS volumes and unassociated Elastic IPs.
+- Azure unattached managed disks and unassociated public IPs.
+- GCP persistent disks with no users and reserved static addresses.
+
+### `cloud_drift_compare`
+
+Compares caller-supplied expected resource identifiers with the bounded live inventory and reports missing expected or unexpected live resources. It never reconciles drift.

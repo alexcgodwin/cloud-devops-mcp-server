@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.6.0
+npm install -g cloud-devops-mcp-server@0.7.0
 cloud-devops-mcp-server
 ```
 
@@ -126,3 +126,28 @@ CLOUD_DEVOPS_MCP_ALLOWED_KUBE_NAMESPACES=default,platform
 The Terraform layer provides check-only formatting, `terraform validate -json`, and a plan summary using `-refresh=false`, `-lock=false`, and no apply capability. Full plan JSON is not returned.
 
 The Kubernetes layer allows only configured contexts, namespaces and resource types. It returns bounded metadata/status summaries and rollout status. Secrets are excluded by default, and there are no apply, patch, delete, exec, port-forward or shell tools.
+
+## Live multi-cloud inventory and observability (v0.7)
+
+The live cloud layer is disabled by default and uses existing local cloud CLI authentication. It does not accept credentials through MCP tool arguments.
+
+```text
+CLOUD_DEVOPS_MCP_CLOUD_INVENTORY_ENABLED=true
+CLOUD_DEVOPS_MCP_ALLOWED_AWS_ACCOUNTS=123456789012
+CLOUD_DEVOPS_MCP_ALLOWED_AWS_REGIONS=ca-central-1
+CLOUD_DEVOPS_MCP_ALLOWED_AWS_PROFILES=prod-readonly
+CLOUD_DEVOPS_MCP_ALLOWED_AZURE_SUBSCRIPTIONS=00000000-0000-0000-0000-000000000000
+CLOUD_DEVOPS_MCP_ALLOWED_GCP_PROJECTS=my-project-id
+```
+
+Provider requirements:
+
+- AWS: AWS CLI authenticated with a read-only principal. The server verifies the caller account with STS before AWS live reads.
+- Azure: Azure CLI authenticated to an explicitly allowlisted subscription.
+- GCP: gcloud authenticated to an explicitly allowlisted project.
+
+The v0.7 cloud tools can verify identity, summarize bounded resource inventory, list managed Kubernetes clusters, summarize observability configuration, surface limited FinOps waste signals, and compare expected resource identifiers with live inventory.
+
+AWS general inventory uses the Resource Groups Tagging API and therefore represents tagged resources. Untagged AWS resources can be absent from inventory and drift results. GCP general inventory requires Cloud Asset Inventory access for the configured identity.
+
+No cloud create, update, delete, start, stop, resize, attach, detach, policy mutation or deployment command is exposed. Resource results are bounded, and cloud credentials/tokens are never returned.

@@ -1,7 +1,7 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.6.0",
-  "description": "Cloud DevOps MCP server for evidence-backed analysis plus opt-in controlled Git/GitHub, Terraform and Kubernetes operations.",
+  "version": "0.7.0",
+  "description": "Cloud DevOps MCP server for evidence-backed analysis plus opt-in Git/GitHub, Terraform, Kubernetes and live multi-cloud reads.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {
@@ -35,11 +35,15 @@
     "kubernetes",
     "incident-response",
     "ci-cd",
+    "aws",
     "azure",
     "gcp",
     "sbom",
     "supply-chain",
-    "cloud-security"
+    "cloud-security",
+    "observability",
+    "finops",
+    "cloud-inventory"
   ],
   "author": "Alex C. Godwin",
   "license": "MIT",

@@ -4,6 +4,18 @@ All notable changes to Cloud DevOps MCP Server will be documented in this file.
 
 The format follows Keep a Changelog, and this project uses semantic versioning.
 
+## 0.7.0 - Live Multi-Cloud Observability and Inventory
+
+- Added an opt-in live AWS/Azure/GCP read plane backed by fixed provider CLI commands.
+- Added cloud identity verification and explicit AWS account/region/profile, Azure subscription and GCP project allowlists.
+- Added bounded normalized cloud inventory summaries and managed Kubernetes cluster discovery for EKS, AKS and GKE.
+- Added observability configuration summaries for CloudWatch alarms, Azure metric alerts and GCP logging sinks.
+- Added FinOps signals for unattached/unused storage and unassociated/reserved static public IP resources.
+- Added expected-vs-live resource drift comparison with no reconciliation or mutation path.
+- Cloud credentials remain host-managed and are never accepted through tool arguments or returned in MCP responses.
+- No cloud create/update/delete/start/stop/resize/attach/detach/policy mutation operations are exposed.
+- Verification: 57/57 tests pass; coverage 84.71% statements, 70.70% branches, 85.75% functions, 88.08% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.6.0 - Infrastructure Validation and Runtime Read Layer
 
 - Added opt-in Terraform format checking, JSON validation and non-apply plan summaries.

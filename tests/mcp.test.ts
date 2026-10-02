@@ -42,6 +42,7 @@ describe("MCP server contract", () => {
         expect(tool.annotations?.readOnlyHint).toBe(true);
         expect(tool.annotations?.destructiveHint).toBe(false);
         expect(tool.annotations?.idempotentHint).toBe(true);
+        expect(tool.annotations?.openWorldHint).toBe(false);
       }
 
       const calls = [

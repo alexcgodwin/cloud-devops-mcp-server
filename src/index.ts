@@ -97,7 +97,7 @@ export function createServer() {
     "assess_terraform_change",
     {
       title: "Assess Terraform Change",
-      description: "Evaluate Terraform/IaC release risk using plan evidence plus change-governance facts such as rollback, peer review and stateful impact. Use this for overall change/release decisions; for security-only inspection of a raw Terraform plan, use review_terraform_security.",
+      description: "Evaluate Terraform/IaC release risk using plan evidence plus change-governance facts such as rollback, peer review and stateful impact. Use this for overall change/release decisions; for security-only inspection of a raw Terraform plan, use review_terraform_security. It analyzes supplied evidence only and never applies a plan, changes infrastructure, or writes Terraform state.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         changedResources: z
@@ -133,7 +133,7 @@ export function createServer() {
     "assess_cloud_change_bundle",
     {
       title: "Assess Cloud Change Bundle",
-      description: "Correlate evidence from at least two domains (Terraform, IAM, Kubernetes, GitHub Actions) into one deployment-risk assessment and identify cross-domain change paths. Use domain-specific review tools when only one evidence domain is available.",
+      description: "Correlate evidence from at least two domains (Terraform, IAM, Kubernetes, GitHub Actions) into one deployment-risk assessment and identify cross-domain change paths. Use domain-specific review tools when only one evidence domain is available. It analyzes caller-supplied artifacts only and does not query providers, clusters, GitHub, or deploy changes.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         changeName: z.string().min(2).describe("Name or identifier for the cloud change bundle being assessed."),
@@ -234,7 +234,7 @@ export function createServer() {
     "build_incident_runbook",
     {
       title: "Build Incident Runbook",
-      description: "Generate a practical incident-response runbook from a known service symptom, severity, environment and optional signals. Use this to structure response actions and evidence collection; it does not diagnose an incident from live telemetry.",
+      description: "Generate a practical incident-response runbook from a known service symptom, severity, environment and optional signals. Use this to structure response actions and evidence collection; do not use it to fetch or diagnose from live telemetry. It does not execute remediation or make changes to the service.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         service: z.string().min(2).describe("Service or application name affected by the incident."),
@@ -265,7 +265,7 @@ export function createServer() {
     "review_cicd_pipeline",
     {
       title: "Review CI/CD Pipeline",
-      description: "Evaluate generic CI/CD production-readiness controls from structured pipeline facts, separating missing evidence from failed controls. Use this for platform-agnostic delivery process review; for raw GitHub Actions YAML, use review_github_actions_workflow.",
+      description: "Evaluate generic CI/CD production-readiness controls from structured pipeline facts, separating missing evidence from failed controls. Use this for platform-agnostic delivery process review; for raw GitHub Actions YAML, use review_github_actions_workflow. It is analysis-only and does not trigger builds, deployments, approvals, or pipeline changes.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         pipelineName: z.string().min(2).describe("Human-readable name of the CI/CD pipeline being reviewed."),
@@ -296,7 +296,7 @@ export function createServer() {
     "estimate_slo_error_budget",
     {
       title: "Estimate SLO Error Budget",
-      description: "Calculate remaining SLO downtime budget and, when request counts are supplied, remaining failed-request budget for a fixed period. Use this as a deterministic budget calculator; it does not query monitoring systems or predict future reliability.",
+      description: "Calculate remaining SLO downtime budget and, when request counts are supplied, remaining failed-request budget for a fixed period. Use this as a deterministic budget calculator; do not use it to fetch monitoring data or forecast reliability. It performs no external calls and changes no service state.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         sloTargetPercent: z.number().gt(0).lt(100).describe("Target service availability percentage for the measurement period, such as 99.9."),
@@ -328,7 +328,7 @@ export function createServer() {
     "review_iam_policy",
     {
       title: "Review IAM Policy",
-      description: "Evaluate AWS IAM policy risk from structured facts or raw policy JSON, including wildcard scope, privilege-escalation actions and conditions. Use this for AWS IAM operational risk; for provider-specific AWS/Azure/GCP policy-pack checks, use review_cloud_identity_policy.",
+      description: "Evaluate AWS IAM policy risk from structured facts or raw policy JSON, including wildcard scope, privilege-escalation actions and conditions. Use this for AWS IAM operational risk; for provider-specific AWS/Azure/GCP policy-pack checks, use review_cloud_identity_policy. It analyzes supplied policy data only and does not call AWS or modify IAM.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         policyName: z.string().min(2).describe("Name of the AWS IAM policy being assessed."),
@@ -364,7 +364,7 @@ export function createServer() {
     "review_kubernetes_deployment",
     {
       title: "Review Kubernetes Deployment",
-      description: "Evaluate Kubernetes workload production readiness and reliability from structured facts or multi-document YAML, including probes, resources, replicas, disruption protection and exposure. Use this for deployability/readiness; for workload security hardening, use review_kubernetes_security.",
+      description: "Evaluate Kubernetes workload production readiness and reliability from structured facts or multi-document YAML, including probes, resources, replicas, disruption protection and exposure. Use this for deployability/readiness; for workload security hardening, use review_kubernetes_security. It examines supplied evidence only and does not connect to a Kubernetes cluster.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         workloadName: z.string().min(2).optional().describe("Workload name when raw manifest YAML is not the only source of identity."),
@@ -402,7 +402,7 @@ export function createServer() {
     "review_github_actions_workflow",
     {
       title: "Review GitHub Actions Workflow",
-      description: "Evaluate GitHub Actions workflow security and deployment readiness from structured facts or raw workflow YAML, including triggers, action pinning, token permissions, caching, environment protection and concurrency. Use review_cicd_pipeline for generic non-GitHub delivery-process review.",
+      description: "Evaluate GitHub Actions workflow security and deployment readiness from structured facts or raw workflow YAML, including triggers, action pinning, token permissions, caching, environment protection and concurrency. Use review_cicd_pipeline for generic non-GitHub delivery-process review. It examines supplied evidence only and does not call GitHub or dispatch workflows.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         workflowName: z.string().min(2).describe("Human-readable name of the GitHub Actions workflow being reviewed."),
@@ -438,7 +438,7 @@ export function createServer() {
     "review_cloud_identity_policy",
     {
       title: "Review Cloud Identity Policy",
-      description: "Apply deterministic provider-specific identity policy packs to raw AWS IAM, Azure RBAC or GCP IAM policy documents. Use this for cross-cloud identity security analysis; use review_iam_policy when assessing AWS IAM from mixed structured facts or policy JSON.",
+      description: "Apply deterministic provider-specific identity policy packs to raw AWS IAM, Azure RBAC or GCP IAM policy documents. Use this for cross-cloud identity security analysis; use review_iam_policy when assessing AWS IAM from mixed structured facts or policy JSON. It analyzes supplied policy JSON only and does not call cloud APIs or change permissions.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         provider: z.enum(["aws", "azure", "gcp"]).describe("Cloud provider whose identity policy syntax and policy pack should be applied."),
@@ -464,7 +464,7 @@ export function createServer() {
     "review_terraform_security",
     {
       title: "Review Terraform Security",
-      description: "Inspect raw Terraform plan JSON for security-relevant changes such as destructive actions, public exposure, encryption gaps, deletion protection and IAM wildcard risk. Use this for Terraform security posture; use assess_terraform_change for broader release/change risk and governance.",
+      description: "Inspect raw Terraform plan JSON for security-relevant changes such as destructive actions, public exposure, encryption gaps, deletion protection and IAM wildcard risk. Use this for Terraform security posture; use assess_terraform_change for broader release/change risk and governance. It parses the supplied plan only and does not execute Terraform or write state.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         terraformPlanJson: z.string().min(2).max(4_000_000).describe("Raw Terraform plan JSON, typically produced by terraform show -json, to inspect for security-relevant resource changes."),
@@ -488,7 +488,7 @@ export function createServer() {
     "review_kubernetes_security",
     {
       title: "Review Kubernetes Security",
-      description: "Apply Kubernetes workload security rules to manifest YAML for privileged mode, host access, Linux capabilities, service accounts, seccomp, filesystem settings and network policy. Use this for security hardening; use review_kubernetes_deployment for reliability and production-readiness checks.",
+      description: "Apply Kubernetes workload security rules to manifest YAML for privileged mode, host access, Linux capabilities, service accounts, seccomp, filesystem settings and network policy. Use this for security hardening; use review_kubernetes_deployment for reliability and production-readiness checks. It analyzes supplied YAML only and does not connect to a cluster.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         manifestYaml: z.string().min(2).max(4_000_000).describe("Raw multi-document Kubernetes YAML containing workloads and related policy objects to evaluate for security hardening."),
@@ -512,7 +512,7 @@ export function createServer() {
     "review_software_supply_chain",
     {
       title: "Review Software Supply Chain",
-      description: "Correlate CycloneDX/SPDX SBOM quality with CI action pinning, Kubernetes image immutability, artifact signing and build provenance to assess software-supply-chain risk. Use this when an SBOM is available and supply-chain evidence needs to be evaluated together.",
+      description: "Correlate CycloneDX/SPDX SBOM quality with CI action pinning, Kubernetes image immutability, artifact signing and build provenance to assess software-supply-chain risk. Use this when an SBOM is available and supply-chain evidence needs to be evaluated together. It analyzes supplied artifacts only and does not call registries, CI systems, or clusters.",
       annotations: readOnlyAnnotations,
       inputSchema: z.object({
         sbomJson: z.string().min(2).max(4_000_000).describe("CycloneDX or SPDX SBOM JSON used as the primary software-supply-chain evidence."),

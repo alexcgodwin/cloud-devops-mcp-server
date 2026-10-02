@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.9.0
+npm install -g cloud-devops-mcp-server@0.10.0
 cloud-devops-mcp-server
 ```
 
@@ -186,3 +186,17 @@ Tempo and Jaeger URLs are exact allowlists. Remote URLs must use HTTPS; plain HT
 `trace_search` caps each query window at six hours and returns at most 100 trace summaries. Tempo searches can use bounded TraceQL. Jaeger searches use the stable v3 JSON/HTTP trace-summary API. `trace_summary` retrieves one trace by a 64-bit or 128-bit hexadecimal trace ID and normalizes up to 5,000 OpenTelemetry-style spans.
 
 The remaining tracing tools operate only on caller-supplied normalized evidence and do not make external calls. The plane exposes no OTLP ingestion, trace deletion, sampling-policy changes, backend storage mutation or arbitrary tracing API access.
+
+## OpsChugex root-cause intelligence gateway (v0.10)
+
+The commercial root-cause tool is disabled by default and uses a separate feature gate:
+
+```text
+CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_ROOT_CAUSE_URL=https://api.opschugex.com/v1/root-cause/diagnose
+CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<random secret at least 32 characters>
+```
+
+The URL is configured by the host and is never accepted as an MCP tool argument. Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback development. The bearer token remains host-side and is never returned in tool output.
+
+When enabled, `diagnose_root_cause` accepts at most 1,000 bounded evidence records across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD. The public MCP forwards the validated evidence to the private OpsChugex intelligence service and validates the returned assessment schema. It contains no proprietary ranking weights, cause-family rules or automated remediation logic.

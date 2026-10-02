@@ -292,3 +292,13 @@ Calculates short- and long-window request-failure burn rates against a supplied 
 Correlates representative trace evidence with SLO burn, dependency edges and optional deployment timing. It reports evidence strength and problematic dependencies without assigning or ranking a root cause.
 
 The live trace tools are bounded and read-only. The analysis tools make no external calls. No v0.9 tool ingests traces, mutates sampling, deletes telemetry or changes tracing-backend state.
+
+## Optional v0.10 OpsChugex root-cause intelligence
+
+This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED=true`.
+
+### `diagnose_root_cause`
+
+Accepts bounded incident evidence from metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD and forwards it to the host-configured private OpsChugex intelligence service. The response contains evidence-ranked probable causes, supporting and contradicting evidence IDs, evidence-strength scores, limitations and recommended next checks.
+
+The public MCP does not contain the ranking algorithm, does not accept endpoint URLs or credentials as tool arguments, and does not remediate the incident. Evidence scores are not statistical probabilities and should not be treated as proof of causation.

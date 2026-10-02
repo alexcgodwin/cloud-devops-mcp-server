@@ -57,8 +57,9 @@ import {
 } from "./observability.js";
 import { registerOperationsIntelligenceTools } from "./operations-intelligence.js";
 import { registerTracingTools } from "./tracing.js";
+import { registerOpsChugexRootCauseTool } from "./opschugex.js";
 
-const VERSION = "0.9.0";
+const VERSION = "0.10.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1375,6 +1376,10 @@ export function createServer() {
 
   if (process.env.CLOUD_DEVOPS_MCP_TRACING_ENABLED === "true") {
     registerTracingTools(server);
+  }
+
+  if (process.env.CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED === "true") {
+    registerOpsChugexRootCauseTool(server);
   }
 
   return server;

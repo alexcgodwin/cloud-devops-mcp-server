@@ -364,3 +364,26 @@ The returned assessment contains:
 - evidence gaps and a concise summary
 
 The public MCP does not contain the private savings factors, anomaly thresholds, prioritization, confidence or portfolio-deduplication algorithm. The tool is read-only and does not resize, terminate, purchase commitments, mutate Kubernetes, change storage tiers or perform billing actions.
+
+## Optional v0.14 OpsChugex change intelligence and blast-radius analysis
+
+This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_CHANGE_INTELLIGENCE_ENABLED=true`.
+
+### `analyze_change_blast_radius`
+
+Accepts bounded factual planned-change items, topology nodes/edges and readiness evidence and forwards it to the host-configured private OpsChugex change-intelligence service.
+
+The returned assessment contains:
+
+- risk level and deterministic risk score
+- direct target count
+- impacted topology node count
+- critical/customer-facing impact counts
+- affected environments
+- blockers and warnings
+- evidence gaps
+- impacted nodes with dependency depth
+- representative blast paths
+- recommendations and summary
+
+The public MCP does not contain the private dependency-propagation algorithm, risk weights, blocker rules or readiness-scoring logic. The tool is read-only and cannot execute, approve or roll back a change.

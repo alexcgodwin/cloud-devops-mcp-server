@@ -10,6 +10,8 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
+The v0.14 line adds an opt-in OpsChugex change-intelligence and blast-radius gateway. The public MCP forwards bounded planned-change, topology and readiness evidence to a host-configured private OpsChugex service and returns change risk, impacted topology nodes, representative blast paths, blockers, warnings and evidence gaps. Proprietary dependency propagation, risk weighting and blocker rules are not included in this public MIT repository.
+
 The v0.13 line adds an opt-in OpsChugex advanced FinOps gateway. The public MCP forwards bounded cloud-cost, utilization and Kubernetes allocation evidence to a host-configured private OpsChugex service and returns optimization opportunities, cost anomalies, low/high savings ranges, confidence, cost correlations and evidence gaps. Proprietary savings factors, anomaly thresholds, prioritization and deduplication are not included in this public MIT repository.
 
 The v0.12 line adds an opt-in OpsChugex cloud security posture gateway. The public MCP forwards bounded cloud asset, identity, secret and network-reachability evidence to a host-configured private OpsChugex service and returns security score, risk level, ordered findings, attack paths, evidence gaps and recommendations. Proprietary security rules, severity thresholds, scoring and attack-path correlation are not included in this public MIT repository.
@@ -61,6 +63,7 @@ AI assistants are more useful in engineering work when they can call focused too
 - Optional OpsChugex private policy and governance intelligence for development, staging, production and regulated profiles.
 - Optional OpsChugex private cloud security posture intelligence for exposure, identity, secrets and attack-path analysis.
 - Optional OpsChugex private advanced FinOps intelligence for rightsizing, anomaly detection, Kubernetes/cloud cost correlation and savings-range analysis.
+- Optional OpsChugex private change intelligence for pre-change dependency propagation, blast-radius mapping, blockers and rollback/readiness analysis.
 
 ## Tools
 
@@ -113,6 +116,12 @@ When explicitly enabled, v0.13 exposes `analyze_advanced_finops`. The tool accep
 
 The public MCP contains no proprietary savings factors, anomaly thresholds, prioritization rules, confidence algorithm or portfolio deduplication logic. It does not resize resources, terminate workloads, purchase commitments, change Kubernetes requests or perform billing actions.
 
+### Optional OpsChugex change intelligence and blast-radius analysis
+
+When explicitly enabled, v0.14 exposes `analyze_change_blast_radius`. The tool accepts bounded planned-change items, topology nodes/edges and readiness evidence, then forwards them to the private OpsChugex change-intelligence engine. It returns risk level/score, impacted nodes, representative blast paths, blockers, warnings, evidence gaps and recommendations.
+
+The public MCP contains no proprietary graph-propagation algorithm, change-risk weights, production-blocker rules or approval logic. The tool is read-only and cannot apply Terraform, mutate Kubernetes, merge pull requests, deploy workloads, approve changes or execute rollback.
+
 ### Optional infrastructure operations
 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
@@ -136,13 +145,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.13.0
+npx -y cloud-devops-mcp-server@0.14.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.13.0
+npx.cmd -y cloud-devops-mcp-server@0.14.0
 ```
 
 ## Install from npm
@@ -150,7 +159,7 @@ npx.cmd -y cloud-devops-mcp-server@0.13.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.13.0
+npm install -g cloud-devops-mcp-server@0.14.0
 cloud-devops-mcp-server
 ```
 
@@ -177,7 +186,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.14.0"]
     }
   }
 }
@@ -190,7 +199,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.14.0"]
     }
   }
 }
@@ -211,7 +220,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.13.0 release candidate passes 111 automated tests, with 85.76% statement, 72.10% branch, 85.71% function and 89.12% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
+The v0.14.0 release candidate passes 116 automated tests, with 85.80% statement, 72.18% branch, 85.89% function and 89.11% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -280,6 +289,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Optional v0.11 governance intelligence uses a separately gated host-configured HTTPS endpoint and the same host-side OpsChugex token; proprietary policy rules and enforcement remain outside the public repository.
 - Optional v0.12 cloud security posture intelligence uses its own fail-closed gate and host-configured HTTPS endpoint; proprietary security scoring and attack-path correlation remain in the private OpsChugex core.
 - Optional v0.13 advanced FinOps intelligence uses its own fail-closed gate and host-configured HTTPS endpoint; proprietary savings, anomaly, prioritization and deduplication logic remain in the private OpsChugex core.
+- Optional v0.14 change intelligence uses its own fail-closed gate and host-configured HTTPS endpoint; proprietary dependency propagation, risk weighting and blocker logic remain in the private OpsChugex core.
 - No cloud mutation tool is exposed.
 - Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
 - No generic shell tool or force-push capability is exposed.
@@ -288,8 +298,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Roadmap
 
-- **Current: v0.13.0 Advanced FinOps Intelligence** - public gateway to private OpsChugex rightsizing, anomaly detection, Kubernetes/cloud cost correlation and evidence-backed savings ranges.
-- **v0.14.0 Change Intelligence & Blast-Radius Analysis** - predict affected services and resources before Terraform, Kubernetes or CI/CD changes.
+- **Current: v0.14.0 Change Intelligence & Blast-Radius Analysis** - public gateway to private OpsChugex pre-change dependency propagation, impacted-service mapping, blockers and readiness analysis.
 - **v0.15.0 Controlled Remediation Gateway** - approval-gated safe fixes for selected cloud, Kubernetes and Terraform operational problems.
 - **v0.16.0 Multi-Account / Multi-Organization Operations** - AWS Organizations, Azure tenants/subscriptions and GCP organizations/projects topology.
 - **v0.17.0 Incident Command & Automated Runbooks** - incident timelines, evidence bundles, remediation plans, rollback recommendations and post-incident reports.

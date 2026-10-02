@@ -177,7 +177,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.9.0 release candidate passes 91 automated tests, with 85.75% statement, 71.86% branch, 85.29% function and 89.22% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
+The v0.9.0 release passes 91 automated tests, with 85.75% statement, 71.86% branch, 85.29% function and 89.22% line coverage. The production dependency audit reports zero vulnerabilities. Clean public installation, npm trusted publication and official MCP Registry publication are verified in the public acceptance record.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 

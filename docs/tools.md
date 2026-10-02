@@ -262,3 +262,33 @@ These tools appear only when `CLOUD_DEVOPS_MCP_OBSERVABILITY_ENABLED=true`.
 - `generate_operations_brief` summarizes service health, incidents, deployments, SLO status, drift and FinOps findings into one operator-facing brief.
 
 The six intelligence tools make no external calls and remain read-only. Live integrations retain the same endpoint, account, log-group, cluster, namespace and repository allowlists described in the configuration guide.
+
+## Optional v0.9 distributed tracing and SLO intelligence
+
+These tools appear only when `CLOUD_DEVOPS_MCP_TRACING_ENABLED=true`.
+
+### `trace_search`
+
+Searches an explicitly allowlisted Grafana Tempo or Jaeger backend over a bounded time window and returns normalized trace summaries. Tempo supports bounded TraceQL. Jaeger uses the stable v3 JSON/HTTP trace-summary API.
+
+### `trace_summary`
+
+Retrieves one trace by 64-bit or 128-bit hexadecimal trace ID from an allowlisted Tempo or Jaeger backend and summarizes service names, operations, error spans, root spans, duration and slow spans from OpenTelemetry-style trace data.
+
+### `trace_dependency_map`
+
+Builds caller-to-callee service edges from supplied parent/child span relationships and reports call counts, error counts, error rates and average child-span duration.
+
+### `assess_tracing_coverage`
+
+Assesses tracing coverage for inbound requests, outbound dependencies, databases, messaging, span error status, service/environment/version attributes, trace-log correlation and documented sampling policy.
+
+### `analyze_slo_burn_rate`
+
+Calculates short- and long-window request-failure burn rates against a supplied SLO target, classifies the current burn signal and estimates the time required to consume a 30-day error budget if the observed maximum rate persists.
+
+### `correlate_trace_slo_incident`
+
+Correlates representative trace evidence with SLO burn, dependency edges and optional deployment timing. It reports evidence strength and problematic dependencies without assigning or ranking a root cause.
+
+The live trace tools are bounded and read-only. The analysis tools make no external calls. No v0.9 tool ingests traces, mutates sampling, deletes telemetry or changes tracing-backend state.

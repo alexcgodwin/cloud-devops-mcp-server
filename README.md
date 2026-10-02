@@ -10,7 +10,7 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
-The v0.8 line adds an opt-in production-observability plane for Prometheus, Grafana, CloudWatch Logs Insights, Kubernetes pod health and GitHub Actions failure diagnosis, plus deterministic cross-signal and operational intelligence. v0.8.1 adds cloud-health assessment, deployment/incident correlation, observability coverage, FinOps correlation, cross-runtime drift analysis and operations briefs. The existing live multi-cloud read plane for AWS, Azure and GCP remains bounded and read-only. Cloud mutation remains intentionally unavailable.
+The v0.9 line adds an opt-in distributed-tracing and SLO-intelligence plane for Grafana Tempo and Jaeger v3 trace reads, service dependency mapping, tracing coverage assessment, multi-window SLO burn-rate analysis and trace/SLO incident correlation. The v0.8 production-observability and operations-intelligence plane remains available for Prometheus, Grafana, CloudWatch Logs Insights, Kubernetes health, GitHub Actions diagnosis, cloud health, FinOps and drift. Live AWS, Azure and GCP access remains bounded and read-only. Cloud mutation remains intentionally unavailable.
 
 ## Table of contents
 
@@ -48,6 +48,7 @@ AI assistants are more useful in engineering work when they can call focused too
 - CycloneDX/SPDX SBOM quality and software supply-chain correlation.
 - Optional authenticated Streamable HTTP serving for self-hosted remote access.
 - Optional allowlisted live AWS/Azure/GCP inventory, observability, FinOps and drift signals.
+- Optional Grafana Tempo and Jaeger v3 trace reads, service dependency maps and SLO burn-rate intelligence.
 
 ## Tools
 
@@ -74,6 +75,10 @@ When explicitly enabled, six additional tools provide allowlisted AWS/Azure/GCP 
 
 When explicitly enabled, twelve additional tools provide bounded Prometheus queries, Grafana alert summaries, CloudWatch Logs Insights queries, Kubernetes pod-health summaries, GitHub Actions failure diagnosis, cross-signal incident correlation, cloud-health assessment, deployment/incident correlation, observability coverage assessment, FinOps correlation, cross-runtime drift analysis and operations briefs. Endpoints, cloud scopes, log groups, cluster contexts, namespaces and repositories are allowlisted. The layer is read-only and exposes no alert mutation, deployment mutation or arbitrary shell execution.
 
+### Optional distributed tracing and SLO intelligence
+
+When explicitly enabled, six additional v0.9 tools provide bounded Tempo/Jaeger trace search and retrieval, service dependency mapping, tracing coverage assessment, multi-window SLO burn-rate analysis and trace/SLO incident correlation. Remote tracing endpoints must be allowlisted and use HTTPS unless loopback. Backend credentials stay in host environment variables. Trace search windows and result sizes are bounded, and the plane exposes no trace ingestion, sampling mutation or telemetry deletion.
+
 ### Optional infrastructure operations
 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
@@ -97,13 +102,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.8.1
+npx -y cloud-devops-mcp-server@0.9.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.8.1
+npx.cmd -y cloud-devops-mcp-server@0.9.0
 ```
 
 ## Install from npm
@@ -111,7 +116,7 @@ npx.cmd -y cloud-devops-mcp-server@0.8.1
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.8.1
+npm install -g cloud-devops-mcp-server@0.9.0
 cloud-devops-mcp-server
 ```
 
@@ -138,7 +143,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.8.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
     }
   }
 }
@@ -151,7 +156,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.8.1"]
+      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
     }
   }
 }
@@ -172,7 +177,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.8.1 release candidate passes 79 automated tests, with 85.58% statement, 72.17% branch, 85.58% function and 88.97% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install acceptance is recorded after npm and MCP Registry publication.
+The v0.9.0 release candidate passes 91 automated tests, with 85.75% statement, 71.86% branch, 85.29% function and 89.22% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 

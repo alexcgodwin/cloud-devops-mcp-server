@@ -56,8 +56,9 @@ import {
   prometheusQuery
 } from "./observability.js";
 import { registerOperationsIntelligenceTools } from "./operations-intelligence.js";
+import { registerTracingTools } from "./tracing.js";
 
-const VERSION = "0.8.1";
+const VERSION = "0.9.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1370,6 +1371,10 @@ export function createServer() {
     );
 
     registerOperationsIntelligenceTools(server);
+  }
+
+  if (process.env.CLOUD_DEVOPS_MCP_TRACING_ENABLED === "true") {
+    registerTracingTools(server);
   }
 
   return server;

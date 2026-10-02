@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.8.1",
-  "description": "Cloud DevOps MCP server with analysis, guarded execution, infrastructure, cloud and observability intelligence.",
+  "version": "0.9.0",
+  "description": "Cloud DevOps MCP server with analysis, guarded execution, cloud, observability and tracing intelligence.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -62,12 +62,20 @@
     ],
     "productionObservability": true,
     "operationsIntelligence": true,
+    "distributedTracing": true,
+    "tracingBackends": [
+      "tempo",
+      "jaeger-v3"
+    ],
+    "sloBurnRateIntelligence": true,
     "observabilityBackends": [
       "prometheus",
       "grafana",
       "cloudwatch-logs",
       "kubernetes",
-      "github-actions"
+      "github-actions",
+      "tempo",
+      "jaeger"
     ]
   },
   "tools": [

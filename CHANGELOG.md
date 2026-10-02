@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.9.0 - Distributed Tracing and SLO Intelligence
+
+- Added `trace_search` for bounded Grafana Tempo TraceQL and Jaeger v3 trace-summary searches against explicitly allowlisted endpoints.
+- Added `trace_summary` for normalized OpenTelemetry-style trace summaries from Tempo and Jaeger v3.
+- Added `trace_dependency_map` to derive service-to-service call edges, error rates and average child-span duration from supplied span relationships.
+- Added `assess_tracing_coverage` for instrumentation, resource attributes, trace-log correlation and sampling-policy coverage.
+- Added `analyze_slo_burn_rate` for short/long-window request-failure burn analysis and error-budget exhaustion estimates.
+- Added `correlate_trace_slo_incident` for trace, SLO, dependency and deployment-timing correlation without root-cause ranking.
+- Added a separate fail-closed tracing feature gate with HTTPS endpoint allowlists, host-side bearer tokens, bounded search windows and audit logging.
+- Preserved the non-destructive design: no OTLP ingestion, trace deletion, sampling mutation, storage mutation or arbitrary tracing-backend API access.
+- Verification: 91/91 tests pass; coverage 85.75% statements, 71.86% branches, 85.29% functions, 89.22% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.8.1 - Operations Intelligence Completion
 
 - Added `assess_cloud_health` to combine cloud alarms, metrics, logs, Kubernetes health, CI/CD, SLO and drift evidence into one bounded health assessment.

@@ -1,171 +1,191 @@
 # Public Release Acceptance
 
-Release: `cloud-devops-mcp-server@0.9.0`
+Release: `cloud-devops-mcp-server@0.10.0`
 Date: 2026-10-02
 
-This acceptance record was verified against repository CI, the publicly published npm package, a clean npm installation, a real MCP stdio client and the official MCP Registry publication workflow.
+This acceptance record was verified against repository CI, the publicly published npm package, a clean npm installation, a real MCP stdio client, the private OpsChugex v0.10 core integration, and the official MCP Registry publication workflow.
 
 ## Release status
 
 | Check | Result |
 | --- | --- |
-| GitHub release | v0.9.0 published |
-| npm exact version | 0.9.0 publicly available |
-| npm latest dist-tag | 0.9.0 |
+| GitHub release | v0.10.0 published |
+| npm exact version | 0.10.0 publicly available |
+| npm latest dist-tag | 0.10.0 |
 | npm trusted publish | GitHub Actions OIDC with provenance |
 | Clean npm install audit | 0 vulnerabilities |
 | MCP Registry schema validation | Pass |
 | MCP Registry authentication | GitHub Actions OIDC |
-| MCP Registry publication | Successfully published version 0.9.0 |
-| Repository quality gate | 91 of 91 tests pass |
-| Statement coverage | 85.75% |
-| Branch coverage | 71.86% |
-| Function coverage | 85.29% |
-| Line coverage | 89.22% |
+| MCP Registry publication | Successfully published version 0.10.0 |
+| Repository quality gate | 95 of 95 tests pass |
+| Statement coverage | 85.65% |
+| Branch coverage | 71.94% |
+| Function coverage | 85.10% |
+| Line coverage | 89.12% |
 | Production dependency audit | 0 vulnerabilities |
 
 ## Clean public-install acceptance
-
 A fresh temporary directory installed:
 
 ```powershell
-npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.9.0 @modelcontextprotocol/client@2.2.0
+npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.10.0 @modelcontextprotocol/client@2.2.0
 ```
 
-The clean installation completed with zero reported vulnerabilities. A real MCP client spawned the npm-installed package over stdio and verified:
+The clean installation completed with zero reported vulnerabilities.
 
-| Configuration | Tool count | Result |
-| --- | ---: | --- |
-| Default analysis | 12 | Pass |
-| v0.9 tracing/SLO plane enabled | 18 | Pass |
-| v0.8 observability + v0.9 tracing enabled | 30 | Pass |
-| All optional capability planes enabled | 52 | Pass |
+A real MCP client spawned the npm-installed package over stdio and verified:
 
-The client confirmed all six v0.9 tools were present.
-## v0.9 distributed tracing and SLO acceptance
+| Configuration | Tool count | Root-cause tool | Result |
+| --- | ---: | --- | --- |
+| Default analysis | 12 | Absent | Pass |
+| v0.10 root-cause gateway enabled | 13 | Present | Pass |
+| v0.9 tracing/SLO plane enabled | 18 | Absent | Pass |
+| v0.8 observability + v0.9 tracing enabled | 30 | Absent | Pass |
+| All optional capability planes enabled | 53 | Present | Pass |
 
-The v0.9 tracing plane is disabled by default and exposes six tools only when `CLOUD_DEVOPS_MCP_TRACING_ENABLED=true`:
+The default public surface therefore remains unchanged at twelve tools. The v0.10 commercial gateway appears only when explicitly enabled.
 
-- `trace_search`
-- `trace_summary`
-- `trace_dependency_map`
-- `assess_tracing_coverage`
-- `analyze_slo_burn_rate`
-- `correlate_trace_slo_incident`
+## v0.10 automated root-cause intelligence acceptance
 
-### Trace search
+The v0.10 public package adds one optional tool:
 
-`trace_search` supports two explicitly allowlisted tracing backends:
+- `diagnose_root_cause`
 
-- Grafana Tempo through its HTTP search API, with bounded TraceQL support.
-- Jaeger through the stable v3 JSON/HTTP trace-summary API.
+The tool accepts bounded incident evidence from:
 
-Search windows are limited to six hours and result counts are capped at 100. Tempo and Jaeger credentials remain host-side and are never accepted as MCP tool arguments.
+- Metrics
+- Logs
+- Distributed traces
+- Kubernetes
+- Cloud-provider signals
+- Terraform and infrastructure changes
+- CI/CD and deployment evidence
+The public MCP validates incident context and evidence, then forwards the request to a host-configured private OpsChugex service.
 
-### Trace summary
+The public MIT package does not contain the proprietary cause-ranking weights, contradiction rules, commercial correlation logic, or future remediation logic.
 
-`trace_summary` retrieves one 64-bit or 128-bit hexadecimal trace ID from an allowlisted Tempo or Jaeger endpoint.
+Returned assessments include:
 
-The server normalizes OpenTelemetry-style resource/span data and returns bounded summaries covering:
+- Ranked probable causes
+- Evidence-strength scores
+- Confidence labels
+- Supporting evidence IDs
+- Contradicting evidence IDs
+- Supporting evidence domains
+- A concise reasoning summary
+- Recommended next checks
+- Explicit limitations
 
-- Services
-- Operations
-- Error spans
-- Root spans
-- End-to-end duration
-- Slow spans
+Evidence scores are evidence-strength indicators. They are not statistical probabilities and do not prove causation.
 
-Trace normalization is capped at 5,000 spans.
+## End-to-end gateway acceptance
 
-### Dependency mapping
+A local instance of the private OpsChugex v0.10 core was started on loopback for acceptance testing.
 
-`trace_dependency_map` builds service-to-service edges from caller-supplied parent/child span relationships and reports:
+The clean npm-installed public MCP was configured only through host environment variables and called `diagnose_root_cause` through a real MCP stdio client.
 
-- Call count
-- Error count
-- Error rate
-- Average child-span duration
+The test supplied four incident evidence domains around a synthetic checkout deployment:
 
-It makes no external calls.
-### Tracing coverage
+- CI/CD deployment evidence
+- Kubernetes rollout failure evidence
+- Distributed trace latency evidence
+- Application log version-error evidence
+The end-to-end result was:
 
-`assess_tracing_coverage` checks explicit evidence for:
+```json
+{
+  "service": "checkout",
+  "assessment": "strong",
+  "topCause": "deployment_regression",
+  "topConfidence": "strong",
+  "topScore": 88,
+  "domainCount": 4
+}
+```
 
-- Inbound/server spans
-- Outbound/client spans
-- Database spans
-- Messaging spans
-- Error status
-- `service.name`
-- Environment resource metadata
-- Deployment/service version metadata
-- Trace-log correlation
-- Documented sampling policy
+This verifies the complete public-MCP-to-private-core request path without publishing the private ranking implementation.
 
-It returns a deterministic coverage score, maturity level, exact gaps and recommended actions.
-
-### SLO burn rate
-
-`analyze_slo_burn_rate` calculates short- and long-window error-budget burn from explicit request counts and a supplied SLO target.
-
-It returns:
-
-- Error rate for each window
-- Burn rate for each window
-- Combined burn rate
-- Severity
-- Estimated time to consume a 30-day error budget at the observed maximum rate
-- Recommended next actions
-
-The tool does not query monitoring systems or trigger remediation.
-
-### Trace/SLO incident correlation
-
-`correlate_trace_slo_incident` combines representative trace evidence with:
-
-- SLO burn severity
-- Dependency edges
-- Optional deployment timing
-
-It reports correlation strength, evidence domains and problematic dependencies.
-
-The tool deliberately does not rank or declare root cause. Root-cause ranking remains outside the v0.9 scope.
+No production credentials, customer data, or live customer infrastructure were used in this acceptance test.
 
 ## Security boundary
 
-The v0.9 plane uses a separate fail-closed gate and explicit endpoint allowlists.
-
-Remote Tempo and Jaeger URLs must use HTTPS. Plain HTTP is accepted only for loopback development addresses. Bearer tokens are read from host environment variables and are never returned in tool output.
-
-The tracing plane exposes no:
-
-- OTLP ingestion
-- Trace deletion
-- Sampling-policy mutation
-- Backend storage mutation
-- Arbitrary tracing-backend API access
-- Generic shell execution
-
-All six v0.9 tools are marked read-only and non-destructive.
-## Distribution verification
-
-The release workflow published the exact `0.9.0` metadata from the GitHub release tag.
-
-npm publication completed through GitHub Actions OIDC with signed provenance. The workflow waited until `cloud-devops-mcp-server@0.9.0` was publicly readable, then validated `server.json` with the pinned MCP Registry publisher.
-
-The release log recorded:
+The v0.10 gateway is disabled by default and requires:
 
 ```text
-cloud-devops-mcp-server@0.9.0 is publicly available.
-server.json is valid
-Successfully published
-Server io.github.alexcgodwin/cloud-devops-mcp-server version 0.9.0
+CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_ROOT_CAUSE_URL=<host-configured endpoint>
+CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<host-side secret>
+```
+
+Controls verified for the public gateway include:
+
+- The endpoint cannot be supplied as an MCP tool argument.
+- The bearer token cannot be supplied as an MCP tool argument.
+- Remote endpoints must use HTTPS.
+- Plain HTTP is accepted only for loopback development.
+- The bearer token must be at least 32 characters.
+- Evidence is schema-validated and capped at 1,000 records.
+- The private-service response is schema-validated before it is returned.
+- `diagnose_root_cause` is marked read-only and non-destructive.
+- No v0.10 gateway path remediates or mutates cloud, Kubernetes, Terraform, CI/CD, tracing, or observability state.
+- The public package contains no proprietary root-cause scoring engine.
+
+## Private-core verification
+
+The private OpsChugex v0.10 core is maintained separately from the public MIT repository.
+
+Its verification completed with:
+
+- 7 of 7 tests passing
+- 90.58% statement coverage
+- 85.71% branch coverage
+- 96.15% function coverage
+- 95.58% line coverage
+- 0 production dependency vulnerabilities
+- Private GitHub Actions CI passing
+
+The private repository remains proprietary and is not published to npm or the MCP Registry.
+
+## Distribution verification
+
+The v0.10.0 release workflow completed successfully.
+
+The workflow:
+
+1. Verified release-version alignment.
+2. Ran the repository quality gate.
+3. Published `cloud-devops-mcp-server@0.10.0` to npm through OIDC.
+4. Waited until the exact npm version was publicly readable.
+5. Installed and verified the pinned MCP Registry publisher.
+6. Authenticated to the MCP Registry through GitHub OIDC.
+7. Published `io.github.alexcgodwin/cloud-devops-mcp-server` version 0.10.0.
+
+Independent npm verification confirmed:
+
+```json
+{
+  "version": "0.10.0",
+  "dist-tags": {
+    "latest": "0.10.0"
+  }
+}
 ```
 
 ## Final acceptance
 
-`cloud-devops-mcp-server@0.9.0` passes repository CI, automated tests, coverage thresholds, production dependency audit, npm trusted publication, clean public installation, real MCP stdio tool discovery and official MCP Registry publication.
+`cloud-devops-mcp-server@0.10.0` passes repository CI, automated tests, coverage thresholds, production dependency audit, npm trusted publication, clean public installation, real MCP stdio tool discovery, an end-to-end call into the private OpsChugex intelligence core, and official MCP Registry publication.
 
-The v0.9 release adds distributed tracing and SLO intelligence while preserving the server's bounded, fail-closed and non-destructive operational model.
+The release establishes the intended product boundary:
 
-This record supersedes the v0.8.1 public-acceptance record for the current release.
+```text
+Public Cloud DevOps MCP
+        |
+        | bounded authenticated evidence contract
+        v
+Private OpsChugex Cloud Operations Core
+        |
+        v
+Proprietary root-cause intelligence
+```
+
+This record supersedes the v0.9.0 public-acceptance record for the current release.

@@ -1,7 +1,7 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Cloud DevOps MCP server with analysis, guarded execution, infrastructure, cloud and observability intelligence.",
   "author": {
     "name": "Alex C. Godwin",
@@ -61,6 +61,7 @@
       "spdx-json"
     ],
     "productionObservability": true,
+    "operationsIntelligence": true,
     "observabilityBackends": [
       "prometheus",
       "grafana",

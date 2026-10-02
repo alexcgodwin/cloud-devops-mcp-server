@@ -55,8 +55,9 @@ import {
   kubernetesHealthSummary,
   prometheusQuery
 } from "./observability.js";
+import { registerOperationsIntelligenceTools } from "./operations-intelligence.js";
 
-const VERSION = "0.8.0";
+const VERSION = "0.8.1";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1367,6 +1368,8 @@ export function createServer() {
       },
       async (input) => toolResult(correlateIncidentSignals(input))
     );
+
+    registerOperationsIntelligenceTools(server);
   }
 
   return server;

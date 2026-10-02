@@ -238,3 +238,27 @@ Surfaces bounded waste signals without making cost-saving changes:
 ### `cloud_drift_compare`
 
 Compares caller-supplied expected resource identifiers with the bounded live inventory and reports missing expected or unexpected live resources. It never reconciles drift.
+
+## Optional v0.8 production observability and operations intelligence
+
+These tools appear only when `CLOUD_DEVOPS_MCP_OBSERVABILITY_ENABLED=true`.
+
+### Live/read tools
+
+- `prometheus_query` runs bounded instant or range PromQL against an allowlisted endpoint.
+- `grafana_alert_summary` returns bounded Grafana managed-alert and active-alert summaries.
+- `cloudwatch_logs_query` runs bounded CloudWatch Logs Insights queries against allowlisted log groups.
+- `kubernetes_health_summary` summarizes pod readiness, restart and unhealthy states.
+- `github_actions_failure_diagnosis` classifies failed jobs using bounded, redacted job-log evidence.
+- `correlate_incident_signals` relates metrics, logs, alerts, Kubernetes and CI/CD evidence.
+
+### Supplied-evidence intelligence tools
+
+- `assess_cloud_health` produces a deterministic 0-100 health score and recommended actions from normalized operational evidence.
+- `correlate_deployment_incident` builds a post-deployment timeline and reports strong, possible or insufficient evidence of a deployment relationship without assigning root cause.
+- `assess_observability_coverage` measures coverage across metrics, logs, alerts, dashboards, SLOs, tracing, deployment markers and an on-call runbook.
+- `analyze_finops_waste` links cloud waste signals to Terraform ownership and identifies low-utilization Kubernetes workloads from caller-supplied usage data.
+- `detect_configuration_drift` compares expected and live cloud resources plus Kubernetes workloads without reconciling them.
+- `generate_operations_brief` summarizes service health, incidents, deployments, SLO status, drift and FinOps findings into one operator-facing brief.
+
+The six intelligence tools make no external calls and remain read-only. Live integrations retain the same endpoint, account, log-group, cluster, namespace and repository allowlists described in the configuration guide.

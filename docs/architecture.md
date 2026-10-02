@@ -10,7 +10,7 @@ The server has five separated capability planes:
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
 3. **Infrastructure operations plane** - optional Terraform validation/plan summaries and Kubernetes read-only runtime inspection.
 4. **Live multi-cloud read plane** - optional AWS, Azure and GCP inventory, managed Kubernetes, observability, FinOps and drift signals.
-5. **Production observability plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation.
+5. **Production observability and operations-intelligence plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation, cloud-health scoring, deployment correlation, coverage assessment, FinOps correlation, cross-runtime drift analysis and operations briefs.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -85,6 +85,8 @@ Live inventory is normalized to bounded metadata. Provider tokens, keys and full
 ## Production observability plane
 
 `src/observability.ts` provides fixed, read-only integrations for Prometheus-compatible query APIs, Grafana alert APIs, AWS CloudWatch Logs Insights, allowlisted Kubernetes pod health and GitHub Actions run diagnostics. It also includes deterministic correlation across metrics, logs, alerts, Kubernetes and CI/CD evidence.
+
+`src/operations-intelligence.ts` adds supplied-evidence analysis for cloud health, post-deployment incident timelines, observability coverage, FinOps/Terraform ownership correlation, cloud/Kubernetes drift and concise operations briefs. These tools do not query or mutate external systems.
 
 Remote observability endpoints must be exactly allowlisted and use HTTPS unless they are loopback addresses. AWS accounts/regions/log groups, Kubernetes contexts/namespaces and GitHub repositories are separately allowlisted. Query windows and result sizes are bounded, sensitive token patterns are redacted, and host-side credentials are never returned.
 

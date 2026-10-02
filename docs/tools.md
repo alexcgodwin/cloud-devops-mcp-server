@@ -172,3 +172,31 @@ Optional correlation inputs:
 - Build provenance status.
 
 Cross-domain rules detect mutable CI action references combined with mutable runtime images, and SBOMs that are not cryptographically tied to a signed/provenanced artifact.
+
+## Optional v0.6 infrastructure operations
+
+These tools appear only when `CLOUD_DEVOPS_MCP_INFRASTRUCTURE_OPERATIONS_ENABLED=true`.
+
+### `terraform_fmt_check`
+
+Runs `terraform fmt -check -recursive -diff` inside an allowlisted repository. It reports formatting drift without rewriting files.
+
+### `terraform_validate`
+
+Runs `terraform validate -json` and returns bounded validation diagnostics. It does not initialize providers or change infrastructure.
+
+### `terraform_plan_summary`
+
+Creates a temporary plan with refresh disabled and returns only action counts such as create, update, delete and replace. It never runs `terraform apply` and does not return full plan JSON.
+
+### `kubectl_current_context`
+
+Reads the current kubectl context and requires it to be explicitly allowlisted.
+
+### `kubectl_get_resources`
+
+Reads bounded metadata/status for allowlisted resources, contexts and namespaces. Secrets are not included in the default resource allowlist.
+
+### `kubectl_rollout_status`
+
+Reads rollout readiness for an allowlisted Deployment, StatefulSet or DaemonSet with watch disabled and a bounded timeout.

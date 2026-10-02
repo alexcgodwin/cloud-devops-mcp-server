@@ -1,5 +1,7 @@
 # Cloud DevOps MCP Server
 
+<!-- mcp-name: io.github.alexcgodwin/cloud-devops-mcp-server -->
+
 [![CI](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/cloud-devops-mcp-server.svg)](https://www.npmjs.com/package/cloud-devops-mcp-server)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-active-brightgreen.svg)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.alexcgodwin%2Fcloud-devops-mcp-server)
@@ -8,7 +10,7 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
-The v0.5 line adds an opt-in Controlled Execution Gateway for allowlisted Git/GitHub operations while preserving read-only analysis as the default. It supports guarded fetch, fast-forward-only pull, branch creation, selected-file commit, push, pull requests, CI status, gated merge and allowlisted workflow dispatch.
+The v0.6 line adds an opt-in Infrastructure Operations layer on top of the Controlled Execution Gateway: Terraform format/validate/plan-summary tools plus allowlisted Kubernetes context, resource-status and rollout inspection. Read-only analysis remains the default and no Terraform apply or Kubernetes mutation tools are exposed.
 
 ## Table of contents
 
@@ -63,6 +65,9 @@ AI assistants are more useful in engineering work when they can call focused too
 | `review_kubernetes_security` | Reviews privileged mode, host access, service accounts, capabilities, seccomp, root filesystems and NetworkPolicy. |
 | `review_software_supply_chain` | Correlates CycloneDX/SPDX SBOM quality with CI action pinning, image immutability, signatures and provenance. |
 
+### Optional infrastructure operations
+
+When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
 ## Architecture
 
 ```mermaid
@@ -83,13 +88,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.5.0
+npx -y cloud-devops-mcp-server@0.6.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.5.0
+npx.cmd -y cloud-devops-mcp-server@0.6.0
 ```
 
 ## Install from npm
@@ -97,7 +102,7 @@ npx.cmd -y cloud-devops-mcp-server@0.5.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.5.0
+npm install -g cloud-devops-mcp-server@0.6.0
 cloud-devops-mcp-server
 ```
 
@@ -124,7 +129,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
     }
   }
 }
@@ -137,7 +142,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
     }
   }
 }
@@ -158,7 +163,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The published v0.5.0 package passes 37 automated tests and a separate clean-install acceptance run. The npm-installed server exposed all twelve tools over stdio, passed AWS/Azure/GCP policy-pack calls, Terraform and Kubernetes security reviews, CycloneDX supply-chain correlation, and an authenticated Streamable HTTP client/server test with invalid-token rejection. The npm release also carries SLSA provenance.
+The published v0.6.0 package passes 37 automated tests and a separate clean-install acceptance run. The npm-installed server exposed all twelve tools over stdio, passed AWS/Azure/GCP policy-pack calls, Terraform and Kubernetes security reviews, CycloneDX supply-chain correlation, and an authenticated Streamable HTTP client/server test with invalid-token rejection. The npm release also carries SLSA provenance.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -219,15 +224,16 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Optional Streamable HTTP requires a bearer token of at least 32 characters.
 - Non-local HTTP binds require an explicit Host allowlist and an HTTPS public base URL for reverse-proxy/gateway termination.
 - Host and Origin validation are enabled through the official MCP Fastify adapter.
-- The analysis tools do not require cloud credentials or call cloud APIs.
+- The default analysis tools do not require cloud credentials or call cloud APIs.
+- Optional Terraform/Kubernetes operations may use locally configured provider or cluster credentials after explicit enablement and allowlisting.
 - Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
 - No generic shell tool or force-push capability is exposed.
 - Direct commit/push on protected branches is blocked, and high-impact GitHub actions require explicit confirmation.
-- It returns advisory guidance only; engineers remain responsible for review, approval and execution.
+- Analysis outputs are advisory. Optional operational tools remain bounded by explicit allowlists and fixed command/API surfaces.
 
 ## Roadmap
 
-- Add optional read-only cloud inventory connectors with narrowly scoped credentials.
+- Add optional AWS/Azure/GCP inventory connectors with narrowly scoped read-only credentials.
 - Add OAuth/OIDC resource-server authentication for multi-user hosted deployments.
 - Add machine-readable policy profiles for production, staging and regulated workloads.
 - Add vulnerability-database enrichment for SBOM components without weakening offline deterministic analysis.

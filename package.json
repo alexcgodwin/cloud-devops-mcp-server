@@ -1,7 +1,7 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.5.0",
-  "description": "Read-only MCP server for Cloud DevOps risk, multi-cloud identity, Terraform/Kubernetes security, supply-chain, incident and SLO analysis.",
+  "version": "0.6.0",
+  "description": "Cloud DevOps MCP server for evidence-backed analysis plus opt-in controlled Git/GitHub, Terraform and Kubernetes operations.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {

@@ -1,110 +1,123 @@
 # Public Release Acceptance
 
-Release: `cloud-devops-mcp-server@0.4.0`
+Release: `cloud-devops-mcp-server@0.6.0`  
 Date: 2026-10-01
 
-This verification was performed from a clean directory using the package published on npm rather than the repository source checkout.
+This acceptance record was verified against the publicly published npm package and the official MCP Registry, not only the repository source checkout.
 
-## Results
+## Release status
 
 | Check | Result |
 | --- | --- |
-| Clean npm install | Pass |
-| npm dependency audit | 0 vulnerabilities |
-| Installed CLI shim | Pass |
-| stdio MCP connection | Pass |
-| Tool discovery | 12 of 12 tools |
-| Cross-domain cloud change bundle | Pass |
-| Terraform change assessment | Pass |
-| Incident runbook | Pass |
-| CI/CD review | Pass |
-| SLO budget | Pass |
-| AWS IAM review | Pass |
-| Kubernetes deployment review | Pass |
-| GitHub Actions review | Pass |
-| Multi-cloud identity: AWS | Pass |
-| Multi-cloud identity: Azure | Pass |
-| Multi-cloud identity: GCP | Pass |
-| Terraform security policy pack | Pass |
-| Kubernetes security policy pack | Pass |
-| CycloneDX supply-chain correlation | Pass |
-| Malformed cloud identity input rejected | Pass |
-| Authenticated Streamable HTTP health check | Pass |
-| Invalid HTTP bearer token | 401 Unauthorized |
-| Valid HTTP bearer token | Pass |
-| HTTP tool discovery | 12 of 12 tools |
-| Authenticated HTTP tool call | Pass |
-| Sensitive filename scan | No findings |
-| Credential/token/private-key pattern scan | No findings |
+| GitHub release | v0.6.0 published |
+| npm latest | 0.6.0 |
+| npm exact version | 0.6.0 available |
 | npm trusted publish | GitHub Actions OIDC |
-| npm provenance | SLSA provenance v1 |
-| MCP Registry status | Active, latest = 0.4.0 |
+| npm dependency audit in clean install | 0 vulnerabilities |
+| MCP Registry schema validation | Pass |
+| MCP Registry publication | GitHub Actions OIDC |
+| MCP Registry status | Active |
+| MCP Registry latest | 0.6.0 |
+| Repository quality gate | 49 of 49 tests pass |
+| Statement coverage | 83.03% |
+| Branch coverage | 71.23% |
+| Function coverage | 85.42% |
+| Line coverage | 86.64% |
+| Production dependency audit | 0 vulnerabilities |
 
-## Public stdio command tested
+## Clean public-install acceptance
 
-Windows:
+A fresh temporary directory installed:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.4.0
+npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.6.0 @modelcontextprotocol/client@2.2.0
 ```
 
-The public command started `cloud-devops-mcp-server v0.4.0` over stdio, exposed twelve MCP tools and completed calls across all twelve successfully.
+The clean installation completed with zero reported vulnerabilities. A real MCP client then spawned the installed package over stdio and verified the following tool surfaces:
 
-## Multi-cloud policy-pack acceptance
+| Configuration | Tool count | Result |
+| --- | ---: | --- |
+| Default | 12 | Pass |
+| Controlled Git/GitHub execution enabled | 22 | Pass |
+| Terraform/Kubernetes infrastructure operations enabled | 18 | Pass |
+| Both optional operational planes enabled | 28 | Pass |
 
-The public package was exercised with all three supported identity-policy providers:
+The default remains the twelve evidence-backed analysis tools. Operational tools are not exposed unless their explicit environment gates are enabled.
 
-- AWS IAM policy JSON.
-- Azure RBAC role-definition JSON.
-- GCP IAM policy JSON.
+## Controlled Git/GitHub execution acceptance
 
-All three provider packs returned structured MCP results successfully.
+The npm-installed package was started with controlled execution enabled and the temporary test repository explicitly allowlisted.
 
-## Security-depth acceptance
+A real `git_status` MCP call completed successfully and returned the expected `main` branch. The v0.5/v0.6 automated test suite also verifies:
 
-The public package successfully executed:
+- Repository allowlisting.
+- Protected-branch blocking.
+- Fast-forward-only pull.
+- No force-push path.
+- Selected-file commit staging.
+- Push dry-run support.
+- GitHub pull-request creation and check inspection.
+- Passing-CI requirement before merge.
+- Exact confirmation strings for merge and workflow dispatch.
+- GitHub repository and workflow allowlists.
+- Audit logging and secret redaction.
 
-- `review_terraform_security` against Terraform plan JSON.
-- `review_kubernetes_security` against hardened Kubernetes YAML.
-- `review_software_supply_chain` against CycloneDX 1.6 SBOM data, immutable GitHub Action references, signed-artifact evidence, provenance evidence and digest-pinned Kubernetes images.
+## Terraform operations acceptance
 
-The supply-chain test returned structured SBOM metadata coverage, mutation checks, security findings and correlation output.
+The optional infrastructure plane adds:
 
-## Authenticated Streamable HTTP acceptance
+- `terraform_fmt_check`
+- `terraform_validate`
+- `terraform_plan_summary`
 
-The published npm package was started directly in HTTP mode with:
+Acceptance tests verify that formatting runs in check-only mode, validation returns bounded JSON diagnostics, and plan execution returns only summarized action counts.
 
-- Loopback binding on `127.0.0.1`.
-- A bearer token longer than 32 characters.
-- The public package entry point with `--http`.
+The plan path uses `-input=false`, `-lock=false`, `-refresh=false` and a temporary plan artifact. No `terraform apply`, destroy, import or state-mutation tool is exposed. Var-files must resolve within the allowlisted working directory.
 
-The health endpoint returned:
+## Kubernetes runtime-read acceptance
 
-```json
-{
-  "status": "ok",
-  "transport": "streamable-http",
-  "authentication": "bearer"
-}
-```
+The optional infrastructure plane also adds:
 
-A request with an invalid bearer token returned HTTP `401`. A real MCP client using the valid bearer token connected successfully, discovered all twelve tools and completed a `review_cloud_identity_policy` call.
+- `kubectl_current_context`
+- `kubectl_get_resources`
+- `kubectl_rollout_status`
 
-Remote non-loopback operation remains fail-closed unless allowed hosts and an HTTPS public base URL are explicitly configured.
+Acceptance tests verify context, namespace and resource allowlists; bounded metadata/status output; rollout checks with `--watch=false`; and rejection of unapproved contexts, namespaces and Secret resource retrieval.
 
-## Published package contents
+The server does not expose Kubernetes apply, create, patch, edit, delete, exec, cp or port-forward tools.
 
-The installed package contained only expected release artifacts and runtime dependencies.
+## Distribution and registry acceptance
 
-No `.env`, credential, private-key, token or suspicious secret-pattern files were found in the published package.
+The release workflow:
 
-## Distribution status
+1. Runs the full quality gate.
+2. Publishes npm through GitHub Actions OIDC with provenance.
+3. Waits until the exact npm version is publicly visible.
+4. Downloads the pinned MCP Registry publisher v1.8.1.
+5. Verifies its SHA-256 digest before execution.
+6. Validates `server.json`.
+7. Authenticates to the MCP Registry with GitHub OIDC.
+8. Publishes the same release metadata to the official MCP Registry.
 
-- npm package: `cloud-devops-mcp-server@0.4.0`
-- npm dist-tag: `latest = 0.4.0`
-- npm provenance: SLSA provenance v1
-- MCP Registry name: `io.github.alexcgodwin/cloud-devops-mcp-server`
-- MCP Registry status: active
-- MCP Registry latest version: `0.4.0`
+The official registry currently reports:
+
+- Name: `io.github.alexcgodwin/cloud-devops-mcp-server`
+- Status: active
+- Latest version: `0.6.0`
+- npm package: `cloud-devops-mcp-server@0.6.0`
 - Default transport: stdio
-- Optional transport: authenticated Streamable HTTP
+
+## Security boundary
+
+The v0.6 release deliberately keeps operational capability narrow:
+
+- No generic shell execution tool.
+- No force-push.
+- No direct protected-branch commit/push.
+- No Terraform apply or destroy.
+- No Kubernetes mutation.
+- Kubernetes Secrets are excluded from the default resource allowlist.
+- Repositories, branches/remotes, GitHub repositories/workflows, Kubernetes contexts/namespaces/resources and Terraform working paths are constrained before command execution.
+- Default analysis remains read-only and requires no cloud-provider credentials.
+
+This record supersedes the v0.4 public-acceptance record for the current release.

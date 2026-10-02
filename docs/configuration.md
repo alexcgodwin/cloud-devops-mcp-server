@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.14.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.14.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.13.0
+npm install -g cloud-devops-mcp-server@0.14.0
 cloud-devops-mcp-server
 ```
 
@@ -248,3 +248,21 @@ The FinOps endpoint is configured only by the host and cannot be supplied as an 
 When enabled, `analyze_advanced_finops` accepts at most 5,000 cloud resources and 5,000 Kubernetes workloads in one assessment. Cost values use one declared three-letter currency code per request.
 
 The public MCP validates input and output schemas but contains no private savings factors, anomaly thresholds, prioritization, confidence or portfolio-deduplication logic. Send only cost and utilization metadata, not provider credentials or secret values.
+
+## OpsChugex change-intelligence gateway (v0.14)
+
+The change-intelligence tool is disabled by default and uses its own feature gate:
+
+```text
+CLOUD_DEVOPS_MCP_OPSCHUGEX_CHANGE_INTELLIGENCE_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_CHANGE_INTELLIGENCE_URL=https://api.opschugex.com/v1/change/blast-radius
+CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<host-side secret at least 32 characters>
+```
+
+The endpoint is configured only by the host and cannot be supplied as an MCP argument. Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback development.
+
+When enabled, `analyze_change_blast_radius` accepts at most 1,000 planned change items, 5,000 topology nodes and 15,000 topology edges.
+
+Topology edges use `from depends on to` semantics. Send topology/readiness metadata only; do not send cloud credentials, kubeconfigs, GitHub tokens, private keys or executable scripts.
+
+The public MCP validates input/output schemas but contains no private dependency propagation, risk weighting, blocker rules or approval logic.

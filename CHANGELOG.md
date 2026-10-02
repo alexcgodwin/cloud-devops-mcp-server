@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.14.0 - Change Intelligence & Blast-Radius Gateway
+
+- Added opt-in `analyze_change_blast_radius` for bounded planned-change, topology and readiness evidence.
+- Added an independent fail-closed change-intelligence feature gate.
+- Added host-configured HTTPS endpoint validation and reuse of the host-side OpsChugex bearer token without exposing endpoint or credential arguments to MCP callers.
+- Added request bounds of 1,000 change items, 5,000 topology nodes and 15,000 topology edges.
+- Kept proprietary dependency propagation, risk weighting, blocker rules and change-risk scoring inside the private OpsChugex core.
+- Kept the gateway read-only: no Terraform apply, Kubernetes mutation, PR merge, deployment execution, approval or rollback action.
+- Added dedicated gateway tests including real MCP handler execution.
+- Verification: 116/116 tests pass; coverage 85.80% statements, 72.18% branches, 85.89% functions, 89.11% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.13.0 - Advanced FinOps Intelligence Gateway
 
 - Added opt-in `analyze_advanced_finops` for bounded cloud-cost, utilization and Kubernetes allocation evidence.

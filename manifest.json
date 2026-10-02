@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.13.0",
-  "description": "Cloud DevOps MCP server with guarded execution plus optional private OpsChugex root-cause, governance, security posture and FinOps gateways.",
+  "version": "0.14.0",
+  "description": "Cloud DevOps MCP server with guarded execution plus optional private OpsChugex root-cause, governance, security posture, FinOps and change-intelligence gateways.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -72,6 +72,13 @@
     "opschugexPrivateGovernanceGateway": true,
     "opschugexPrivateSecurityPostureGateway": true,
     "opschugexPrivateFinOpsGateway": true,
+    "opschugexPrivateChangeIntelligenceGateway": true,
+    "changeIntelligenceEvidenceDomains": [
+      "planned-changes",
+      "topology",
+      "readiness",
+      "blast-paths"
+    ],
     "finOpsEvidenceDomains": [
       "cloud-cost",
       "utilization",

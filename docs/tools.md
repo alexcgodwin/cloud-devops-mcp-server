@@ -302,3 +302,24 @@ This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_INTELLIGENCE_ENABLED=tru
 Accepts bounded incident evidence from metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD and forwards it to the host-configured private OpsChugex intelligence service. The response contains evidence-ranked probable causes, supporting and contradicting evidence IDs, evidence-strength scores, limitations and recommended next checks.
 
 The public MCP does not contain the ranking algorithm, does not accept endpoint URLs or credentials as tool arguments, and does not remediate the incident. Evidence scores are not statistical probabilities and should not be treated as proof of causation.
+
+## Optional v0.11 OpsChugex policy and governance intelligence
+
+This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_ENABLED=true`.
+
+### `assess_governance_policy`
+
+Accepts bounded factual resource evidence plus optional owner-attributed, time-bounded governance exceptions and forwards them to the host-configured private OpsChugex policy service.
+
+The returned assessment contains:
+
+- the selected governance profile
+- `pass`, `review`, or `block`
+- a governance score
+- control findings and severities
+- whether an approved exception was applied
+- evidence gaps
+- expired exception identifiers
+- a concise summary
+
+The public MCP does not contain the private profile rules, policy thresholds, scoring weights or exception-evaluation algorithm. The tool is read-only and does not modify tags, IAM, network configuration, encryption, backups, Terraform, Kubernetes or cloud resources.

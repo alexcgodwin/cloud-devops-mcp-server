@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.0 - Policy & Governance Engine Gateway
+
+- Added opt-in `assess_governance_policy` for bounded resource evidence and time-bounded governance exceptions.
+- Added a separate fail-closed governance feature gate so v0.10 root-cause behavior remains backward compatible.
+- Added host-configured HTTPS governance endpoint validation and reused the host-side OpsChugex bearer token without exposing endpoint or credential arguments to MCP callers.
+- Added request bounds of 2,000 resources and 500 exceptions.
+- Kept all proprietary development/staging/production/regulated profiles, control rules, scoring weights, exception-processing logic and enforcement capability inside the private OpsChugex core.
+- Kept governance read-only: no tags, IAM, networking, encryption, backup, Terraform, Kubernetes or cloud resources are mutated.
+- Added dedicated gateway and real MCP handler execution tests.
+- Verification: 101/101 tests pass; coverage 85.68% statements, 72.02% branches, 85.30% functions, 89.08% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.10.0 - Automated Root-Cause Intelligence
 
 - Added opt-in `diagnose_root_cause` for evidence-ranked probable causes across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD evidence.

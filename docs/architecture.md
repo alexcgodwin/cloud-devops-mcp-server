@@ -1,10 +1,10 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.10 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.11 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has seven separated capability planes:
+The server has eight separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
@@ -12,7 +12,8 @@ The server has seven separated capability planes:
 4. **Live multi-cloud read plane** - optional AWS, Azure and GCP inventory, managed Kubernetes, observability, FinOps and drift signals.
 5. **Production observability and operations-intelligence plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation, cloud-health scoring, deployment correlation, coverage assessment, FinOps correlation, cross-runtime drift analysis and operations briefs.
 6. **Distributed tracing and SLO-intelligence plane** - optional bounded Grafana Tempo and Jaeger v3 trace reads plus service dependency mapping, tracing coverage, multi-window SLO burn-rate analysis and trace/SLO incident correlation.
-7. **OpsChugex commercial intelligence gateway** - optional authenticated forwarding of bounded multi-domain incident evidence to the private OpsChugex root-cause engine. The public server contains the contract and transport guardrails, not the proprietary ranking logic.
+7. **OpsChugex root-cause gateway** - optional authenticated forwarding of bounded multi-domain incident evidence to the private OpsChugex root-cause engine. The public server contains the contract and transport guardrails, not the proprietary ranking logic.
+8. **OpsChugex governance gateway** - optional authenticated forwarding of bounded resource evidence and time-bounded exceptions to the private OpsChugex policy engine. The public server contains no proprietary profiles, policy rules, scoring weights or enforcement logic.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -24,14 +25,16 @@ flowchart TD
   Server --> Infra["Opt-in Terraform/Kubernetes plane"]
   Server --> Cloud["Opt-in live multi-cloud read plane"]
   Server --> Trace["Opt-in tracing + SLO plane"]
-  Server --> OpsCore["Opt-in OpsChugex root-cause gateway"]
+  Server --> RootCause["Opt-in OpsChugex root-cause gateway"]
+  Server --> Governance["Opt-in OpsChugex governance gateway"]
 
   Analysis --> Logic["Deterministic analyzers + policy packs"]
   GitOps --> GitGuards["Repo / branch / remote / workflow guards"]
   Infra --> InfraGuards["Repo / context / namespace / resource guards"]
   Cloud --> CloudGuards["Account / region / subscription / project guards"]
   Trace --> TraceGuards["Tempo / Jaeger endpoint + time-window guards"]
-  OpsCore --> OpsGuards["Configured HTTPS endpoint + host-side bearer token"]
+  RootCause --> OpsGuards["Configured HTTPS endpoints + host-side bearer token"]
+  Governance --> OpsGuards
   OpsGuards --> PrivateCore["Private OpsChugex commercial intelligence core"]
 
   CloudGuards --> AWS["AWS CLI fixed read commands"]
@@ -104,6 +107,18 @@ Remote observability endpoints must be exactly allowlisted and use HTTPS unless 
 The tracing plane is disabled by default and requires `CLOUD_DEVOPS_MCP_TRACING_ENABLED=true`. Tempo and Jaeger base URLs must be explicitly allowlisted and use HTTPS unless they are loopback addresses. Bearer tokens are host-managed environment variables and are never accepted as MCP tool arguments. Trace searches are capped at six-hour windows and 100 summaries; trace normalization is bounded to 5,000 spans.
 
 The plane exposes no OTLP ingestion, trace deletion, sampling-policy mutation, storage mutation or arbitrary backend API access. Correlation reports evidence strength and deliberately does not assign root cause.
+
+## OpsChugex root-cause gateway
+
+`src/opschugex.ts` contains the public v0.10 request/response contract and guarded HTTPS client for root-cause intelligence. The host supplies the endpoint and bearer token. MCP callers cannot supply either value.
+
+The root-cause ranking algorithm, cause-family weights, contradiction handling and commercial correlation logic remain in the private OpsChugex core.
+
+## OpsChugex governance gateway
+
+`src/opschugex-governance.ts` contains only the public v0.11 governance contract and guarded HTTPS client. It accepts bounded resource facts and optional owner-attributed, time-bounded exception metadata.
+
+The development, staging, production and regulated profiles, control rules, scoring weights, exception evaluation and future enforcement logic remain in the private OpsChugex core. The public gateway validates request/response shapes and exposes no policy mutation or infrastructure enforcement path.
 
 ## Audit and redaction
 

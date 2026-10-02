@@ -3,7 +3,7 @@
   "name": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "title": "Cloud DevOps MCP Server",
   "description": "Cloud DevOps analysis with guarded Git, infrastructure, cloud and observability operations.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "repository": {
     "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
     "source": "github",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "cloud-devops-mcp-server",
-      "version": "0.10.0",
+      "version": "0.11.0",
       "transport": {
         "type": "stdio"
       }

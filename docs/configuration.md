@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.11.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.11.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.10.0
+npm install -g cloud-devops-mcp-server@0.11.0
 cloud-devops-mcp-server
 ```
 
@@ -200,3 +200,19 @@ CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<random secret at least 32 characters>
 The URL is configured by the host and is never accepted as an MCP tool argument. Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback development. The bearer token remains host-side and is never returned in tool output.
 
 When enabled, `diagnose_root_cause` accepts at most 1,000 bounded evidence records across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD. The public MCP forwards the validated evidence to the private OpsChugex intelligence service and validates the returned assessment schema. It contains no proprietary ranking weights, cause-family rules or automated remediation logic.
+
+## OpsChugex policy and governance gateway (v0.11)
+
+The governance tool is disabled by default and uses its own feature gate:
+
+```text
+CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_URL=https://api.opschugex.com/v1/governance/assess
+CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<random secret at least 32 characters>
+```
+
+The governance endpoint is configured only by the host and cannot be supplied as an MCP argument. Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback development.
+
+When enabled, `assess_governance_policy` accepts at most 2,000 bounded resource records and 500 time-bounded exceptions. The public MCP validates input and output schemas but contains no private governance profile rules, scoring weights, exception-processing rules or enforcement logic.
+
+The same OpsChugex host token may authenticate the v0.10 root-cause and v0.11 governance private-service routes. Neither tool returns the token or accepts credentials from MCP callers.

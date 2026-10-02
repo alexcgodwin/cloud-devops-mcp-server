@@ -342,3 +342,25 @@ The returned assessment contains:
 - recommended next actions
 
 The public MCP does not contain the private detection thresholds, severity rules, scoring algorithm or attack-path correlation logic. The tool is read-only and does not rotate credentials, change IAM, modify network controls, alter encryption settings or remediate infrastructure.
+
+## Optional v0.13 OpsChugex advanced FinOps intelligence
+
+This tool appears only when `CLOUD_DEVOPS_MCP_OPSCHUGEX_FINOPS_ENABLED=true`.
+
+### `analyze_advanced_finops`
+
+Accepts bounded factual cloud-cost, utilization and Kubernetes allocation evidence and forwards it to the host-configured private OpsChugex FinOps service.
+
+The returned assessment contains:
+
+- analyzed monthly and annual cost
+- low/high estimated savings ranges
+- savings percentages
+- ordered optimization opportunities
+- cost anomaly count
+- confidence and priority
+- Kubernetes/cloud cost correlations
+- double-count prevention indicators
+- evidence gaps and a concise summary
+
+The public MCP does not contain the private savings factors, anomaly thresholds, prioritization, confidence or portfolio-deduplication algorithm. The tool is read-only and does not resize, terminate, purchase commitments, mutate Kubernetes, change storage tiers or perform billing actions.

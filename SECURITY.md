@@ -4,10 +4,10 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.12.x | Yes |
-| 0.11.x | Security fixes |
-| 0.10.x | Best-effort security fixes |
-| 0.9.x and earlier | No |
+| 0.13.x | Yes |
+| 0.12.x | Security fixes |
+| 0.11.x | Best-effort security fixes |
+| 0.10.x and earlier | No |
 
 ## Security posture
 
@@ -20,6 +20,8 @@ The v0.10 `diagnose_root_cause` gateway is read-only. It sends bounded evidence 
 The v0.11 `assess_governance_policy` gateway is separately gated and read-only. It sends bounded resource evidence and exception metadata to a host-configured private OpsChugex policy service. The public repository contains no proprietary governance profiles, policy rules, scoring weights, exception-processing logic or enforcement capability.
 
 The v0.12 `assess_cloud_security_posture` gateway is also separately gated and read-only. It sends bounded asset, identity, secret and network evidence to a host-configured private OpsChugex security service. The public repository contains no proprietary security detection thresholds, scoring rules, attack-path algorithm or remediation capability.
+
+The v0.13 `analyze_advanced_finops` gateway is separately gated and read-only. It sends bounded cost and utilization evidence to a host-configured private OpsChugex FinOps service. The public repository contains no proprietary savings factors, anomaly thresholds, prioritization, confidence or deduplication logic and cannot perform billing or infrastructure mutations.
 
 ## Transport security
 
@@ -72,4 +74,4 @@ Include:
 - Impact and suggested mitigation, if known.
 
 - Production-observability integrations are opt-in, exact-allowlisted, read-only, bounded and redacted; Prometheus/Grafana use HTTPS except for loopback development endpoints, and credentials remain host-side.
-- The v0.10 root-cause, v0.11 governance and v0.12 security posture gateways are independently opt-in, use host-configured HTTPS endpoints plus a minimum 32-character host-side bearer token, and accept neither endpoint configuration nor credentials from MCP callers.
+- The v0.10 root-cause, v0.11 governance, v0.12 security posture and v0.13 FinOps gateways are independently opt-in, use host-configured HTTPS endpoints plus a minimum 32-character host-side bearer token, and accept neither endpoint configuration nor credentials from MCP callers.

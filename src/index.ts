@@ -60,8 +60,9 @@ import { registerTracingTools } from "./tracing.js";
 import { registerOpsChugexRootCauseTool } from "./opschugex.js";
 import { registerOpsChugexGovernanceTool } from "./opschugex-governance.js";
 import { registerOpsChugexSecurityPostureTool } from "./opschugex-security.js";
+import { registerOpsChugexFinOpsTool } from "./opschugex-finops.js";
 
-const VERSION = "0.12.0";
+const VERSION = "0.13.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1390,6 +1391,10 @@ export function createServer() {
 
   if (process.env.CLOUD_DEVOPS_MCP_OPSCHUGEX_SECURITY_ENABLED === "true") {
     registerOpsChugexSecurityPostureTool(server);
+  }
+
+  if (process.env.CLOUD_DEVOPS_MCP_OPSCHUGEX_FINOPS_ENABLED === "true") {
+    registerOpsChugexFinOpsTool(server);
   }
 
   return server;

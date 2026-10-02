@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.12.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.12.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.13.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.12.0
+npm install -g cloud-devops-mcp-server@0.13.0
 cloud-devops-mcp-server
 ```
 
@@ -232,3 +232,19 @@ The security endpoint is configured only by the host and cannot be supplied as a
 When enabled, `assess_cloud_security_posture` accepts at most 3,000 assets, 3,000 identities, 2,000 secret findings and 10,000 network edges. The public MCP validates input and output schemas but contains no private detection thresholds, severity rules, security scoring, attack-path correlation or remediation logic.
 
 Do not send secret values, cloud access keys, provider tokens or private keys in the evidence payload. Send only metadata describing the observed security state.
+
+## OpsChugex advanced FinOps gateway (v0.13)
+
+The advanced FinOps tool is disabled by default and uses its own feature gate:
+
+```text
+CLOUD_DEVOPS_MCP_OPSCHUGEX_FINOPS_ENABLED=true
+CLOUD_DEVOPS_MCP_OPSCHUGEX_FINOPS_URL=https://api.opschugex.com/v1/finops/analyze
+CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN=<host-side secret at least 32 characters>
+```
+
+The FinOps endpoint is configured only by the host and cannot be supplied as an MCP argument. Remote endpoints must use HTTPS; plain HTTP is accepted only for loopback development.
+
+When enabled, `analyze_advanced_finops` accepts at most 5,000 cloud resources and 5,000 Kubernetes workloads in one assessment. Cost values use one declared three-letter currency code per request.
+
+The public MCP validates input and output schemas but contains no private savings factors, anomaly thresholds, prioritization, confidence or portfolio-deduplication logic. Send only cost and utilization metadata, not provider credentials or secret values.

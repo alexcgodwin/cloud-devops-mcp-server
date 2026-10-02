@@ -1,7 +1,7 @@
 {
   "name": "cloud-devops-mcp-server",
-  "version": "0.12.0",
-  "description": "Cloud DevOps MCP server with guarded operations and optional private OpsChugex root-cause, governance and security posture intelligence.",
+  "version": "0.13.0",
+  "description": "Cloud DevOps MCP server with guarded operations and optional private OpsChugex root-cause, governance, security posture and FinOps intelligence.",
   "type": "module",
   "mcpName": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "bin": {

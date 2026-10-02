@@ -1,16 +1,17 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.8 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.9 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has five separated capability planes:
+The server has six separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
 3. **Infrastructure operations plane** - optional Terraform validation/plan summaries and Kubernetes read-only runtime inspection.
 4. **Live multi-cloud read plane** - optional AWS, Azure and GCP inventory, managed Kubernetes, observability, FinOps and drift signals.
 5. **Production observability and operations-intelligence plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation, cloud-health scoring, deployment correlation, coverage assessment, FinOps correlation, cross-runtime drift analysis and operations briefs.
+6. **Distributed tracing and SLO-intelligence plane** - optional bounded Grafana Tempo and Jaeger v3 trace reads plus service dependency mapping, tracing coverage, multi-window SLO burn-rate analysis and trace/SLO incident correlation.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -21,11 +22,13 @@ flowchart TD
   Server --> GitOps["Opt-in Git/GitHub plane"]
   Server --> Infra["Opt-in Terraform/Kubernetes plane"]
   Server --> Cloud["Opt-in live multi-cloud read plane"]
+  Server --> Trace["Opt-in tracing + SLO plane"]
 
   Analysis --> Logic["Deterministic analyzers + policy packs"]
   GitOps --> GitGuards["Repo / branch / remote / workflow guards"]
   Infra --> InfraGuards["Repo / context / namespace / resource guards"]
   Cloud --> CloudGuards["Account / region / subscription / project guards"]
+  Trace --> TraceGuards["Tempo / Jaeger endpoint + time-window guards"]
 
   CloudGuards --> AWS["AWS CLI fixed read commands"]
   CloudGuards --> Azure["Azure CLI fixed read commands"]
@@ -89,6 +92,14 @@ Live inventory is normalized to bounded metadata. Provider tokens, keys and full
 `src/operations-intelligence.ts` adds supplied-evidence analysis for cloud health, post-deployment incident timelines, observability coverage, FinOps/Terraform ownership correlation, cloud/Kubernetes drift and concise operations briefs. These tools do not query or mutate external systems.
 
 Remote observability endpoints must be exactly allowlisted and use HTTPS unless they are loopback addresses. AWS accounts/regions/log groups, Kubernetes contexts/namespaces and GitHub repositories are separately allowlisted. Query windows and result sizes are bounded, sensitive token patterns are redacted, and host-side credentials are never returned.
+
+## Distributed tracing and SLO-intelligence plane
+
+`src/tracing.ts` provides bounded read access to Grafana Tempo and the stable Jaeger v3 JSON/HTTP query API. It can search traces, retrieve one trace by ID and normalize OpenTelemetry-style resource/span data into bounded summaries. It also provides local analysis for service dependency maps, tracing instrumentation coverage, multi-window SLO burn rates and trace/SLO incident correlation.
+
+The tracing plane is disabled by default and requires `CLOUD_DEVOPS_MCP_TRACING_ENABLED=true`. Tempo and Jaeger base URLs must be explicitly allowlisted and use HTTPS unless they are loopback addresses. Bearer tokens are host-managed environment variables and are never accepted as MCP tool arguments. Trace searches are capped at six-hour windows and 100 summaries; trace normalization is bounded to 5,000 spans.
+
+The plane exposes no OTLP ingestion, trace deletion, sampling-policy mutation, storage mutation or arbitrary backend API access. Correlation reports evidence strength and deliberately does not assign root cause.
 
 ## Audit and redaction
 

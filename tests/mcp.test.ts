@@ -2,6 +2,26 @@ import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 import { createServer } from "../src/index.js";
 
+function expectDescribedProperties(schema: any, path: string) {
+  if (!schema || typeof schema !== "object") return;
+
+  if (schema.properties) {
+    for (const [name, child] of Object.entries(schema.properties as Record<string, any>)) {
+      expect(child.description, `${path}.${name} should have a description`).toBeTruthy();
+      expectDescribedProperties(child, `${path}.${name}`);
+    }
+  }
+
+  if (schema.items) expectDescribedProperties(schema.items, `${path}[]`);
+
+  for (const keyword of ["allOf", "anyOf", "oneOf"]) {
+    const variants = schema[keyword];
+    if (Array.isArray(variants)) {
+      for (const variant of variants) expectDescribedProperties(variant, path);
+    }
+  }
+}
+
 describe("MCP server contract", () => {
   it("lists all tools with schemas and executes every registered handler", async () => {
     const server = createServer();
@@ -16,10 +36,13 @@ describe("MCP server contract", () => {
       expect(tools).toHaveLength(12);
 
       for (const tool of tools) {
+        expect(tool.description?.length ?? 0, `${tool.name} needs clear usage guidance`).toBeGreaterThan(100);
+        expectDescribedProperties(tool.inputSchema, tool.name);
         expect(tool.outputSchema).toBeDefined();
         expect(tool.annotations?.readOnlyHint).toBe(true);
         expect(tool.annotations?.destructiveHint).toBe(false);
         expect(tool.annotations?.idempotentHint).toBe(true);
+        expect(tool.annotations?.openWorldHint).toBe(false);
       }
 
       const calls = [

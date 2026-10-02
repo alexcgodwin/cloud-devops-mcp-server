@@ -4,10 +4,10 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.10.x | Yes |
-| 0.9.x | Security fixes |
-| 0.8.x | Best-effort security fixes |
-| 0.7.x and earlier | No |
+| 0.11.x | Yes |
+| 0.10.x | Security fixes |
+| 0.9.x | Best-effort security fixes |
+| 0.8.x and earlier | No |
 
 ## Security posture
 
@@ -16,6 +16,8 @@ Cloud DevOps MCP Server is read-only by default. The default analysis surface do
 It parses structured inputs and raw Terraform plan JSON, AWS IAM policy JSON, Azure RBAC JSON, GCP IAM JSON, Kubernetes YAML, GitHub Actions workflow YAML, CycloneDX JSON and SPDX JSON in-process.
 
 The v0.10 `diagnose_root_cause` gateway is read-only. It sends bounded evidence to a host-configured private OpsChugex service and contains no proprietary ranking rules or remediation capability.
+
+The v0.11 `assess_governance_policy` gateway is separately gated and read-only. It sends bounded resource evidence and exception metadata to a host-configured private OpsChugex policy service. The public repository contains no proprietary governance profiles, policy rules, scoring weights, exception-processing logic or enforcement capability.
 
 ## Transport security
 
@@ -68,4 +70,4 @@ Include:
 - Impact and suggested mitigation, if known.
 
 - Production-observability integrations are opt-in, exact-allowlisted, read-only, bounded and redacted; Prometheus/Grafana use HTTPS except for loopback development endpoints, and credentials remain host-side.
-- The v0.10 OpsChugex gateway is opt-in, uses a host-configured HTTPS endpoint plus a minimum 32-character host-side bearer token, and accepts neither endpoint configuration nor credentials from MCP callers.
+- The v0.10 root-cause and v0.11 governance gateways are independently opt-in, use host-configured HTTPS endpoints plus a minimum 32-character host-side bearer token, and accept neither endpoint configuration nor credentials from MCP callers.

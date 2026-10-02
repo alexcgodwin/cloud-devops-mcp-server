@@ -31,8 +31,16 @@ import {
   githubMergePullRequest,
   githubTriggerWorkflow
 } from "./execution.js";
+import {
+  kubectlCurrentContext,
+  kubectlGetResources,
+  kubectlRolloutStatus,
+  terraformFmtCheck,
+  terraformPlanSummary,
+  terraformValidate
+} from "./infrastructure.js";
 
-const VERSION = "0.5.0";
+const VERSION = "0.6.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -814,6 +822,172 @@ export function createServer() {
         })
       },
       async (input) => toolResult(await githubTriggerWorkflow(input))
+    );
+  }
+
+
+  if (process.env.CLOUD_DEVOPS_MCP_INFRASTRUCTURE_OPERATIONS_ENABLED === "true") {
+    const externalReadAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    } as const;
+
+    server.registerTool(
+      "terraform_fmt_check",
+      {
+        title: "Terraform Format Check",
+        description: "Run terraform fmt in check-only mode inside an allowlisted repository. It never rewrites Terraform files.",
+        annotations: readOnlyAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          workingDirectory: z.string().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          workingDirectory: z.string(),
+          formatted: z.boolean(),
+          exitCode: z.number(),
+          diff: z.string()
+        })
+      },
+      async (input) => toolResult(await terraformFmtCheck(input))
+    );
+
+    server.registerTool(
+      "terraform_validate",
+      {
+        title: "Terraform Validate",
+        description: "Run terraform validate -json inside an allowlisted repository and return bounded diagnostics. It does not initialize providers, plan or apply infrastructure.",
+        annotations: readOnlyAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          workingDirectory: z.string().optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          workingDirectory: z.string(),
+          valid: z.boolean(),
+          errorCount: z.number(),
+          warningCount: z.number(),
+          diagnostics: z.array(z.object({
+            severity: z.string(),
+            summary: z.string(),
+            detail: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await terraformValidate(input))
+    );
+
+    server.registerTool(
+      "terraform_plan_summary",
+      {
+        title: "Terraform Plan Summary",
+        description: "Run a non-apply Terraform plan with refresh disabled and return only a change summary. The tool never exposes full plan JSON and never runs terraform apply.",
+        annotations: externalReadAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          workingDirectory: z.string().optional(),
+          varFiles: z.array(z.string().min(1)).max(20).optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          workingDirectory: z.string(),
+          planSucceeded: z.boolean(),
+          hasChanges: z.boolean(),
+          exitCode: z.number(),
+          resourceChangeCount: z.number(),
+          counts: z.object({
+            create: z.number(),
+            update: z.number(),
+            delete: z.number(),
+            replace: z.number(),
+            read: z.number(),
+            noOp: z.number()
+          }),
+          diagnostic: z.string()
+        })
+      },
+      async (input) => toolResult(await terraformPlanSummary(input))
+    );
+
+    server.registerTool(
+      "kubectl_current_context",
+      {
+        title: "Kubernetes Current Context",
+        description: "Read the current kubectl context and require it to match the configured context allowlist before returning it.",
+        annotations: readOnlyAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1)
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          context: z.string(),
+          allowed: z.boolean()
+        })
+      },
+      async (input) => toolResult(await kubectlCurrentContext(input))
+    );
+
+    server.registerTool(
+      "kubectl_get_resources",
+      {
+        title: "Kubernetes Get Resources",
+        description: "Read bounded metadata and status summaries for allowlisted Kubernetes resource types, contexts and namespaces. Secrets and arbitrary resource types are not exposed.",
+        annotations: externalReadAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          context: z.string().min(1),
+          resource: z.string().min(1),
+          namespace: z.string().optional(),
+          name: z.string().optional(),
+          labelSelector: z.string().max(300).optional()
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          context: z.string(),
+          namespace: z.string(),
+          resource: z.string(),
+          count: z.number(),
+          objects: z.array(z.object({
+            kind: z.string(),
+            name: z.string(),
+            namespace: z.string(),
+            phase: z.string().optional(),
+            replicas: z.number().optional(),
+            readyReplicas: z.number().optional()
+          }))
+        })
+      },
+      async (input) => toolResult(await kubectlGetResources(input))
+    );
+
+    server.registerTool(
+      "kubectl_rollout_status",
+      {
+        title: "Kubernetes Rollout Status",
+        description: "Read rollout readiness for an allowlisted Deployment, StatefulSet or DaemonSet without watching indefinitely or mutating the cluster.",
+        annotations: externalReadAnnotations,
+        inputSchema: z.object({
+          repositoryPath: z.string().min(1),
+          context: z.string().min(1),
+          namespace: z.string().min(1),
+          kind: z.enum(["deployment", "statefulset", "daemonset"]),
+          name: z.string().min(1)
+        }),
+        outputSchema: z.object({
+          repositoryPath: z.string(),
+          context: z.string(),
+          namespace: z.string(),
+          resource: z.string(),
+          ready: z.boolean(),
+          exitCode: z.number(),
+          message: z.string()
+        })
+      },
+      async (input) => toolResult(await kubectlRolloutStatus(input))
     );
   }
 

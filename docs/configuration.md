@@ -11,7 +11,7 @@ Use the published npm package so clients do not depend on a local source checkou
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
     }
   }
 }
@@ -24,7 +24,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.5.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.6.0"]
     }
   }
 }
@@ -33,7 +33,7 @@ On Windows, use `npx.cmd` if PowerShell execution policy blocks the `npx.ps1` wr
 ## Global install
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.5.0
+npm install -g cloud-devops-mcp-server@0.6.0
 cloud-devops-mcp-server
 ```
 
@@ -111,3 +111,18 @@ $env:CLOUD_DEVOPS_MCP_GITHUB_TOKEN="<fine-grained token>"
 ```
 
 Optional controls: protected branches, allowed branch prefixes, remotes, workflows and audit-log path. Force-push is not implemented. Pulls are fast-forward only. Commits stage only explicitly named paths. PR merge requires passing checks plus `confirm: "MERGE"`; workflow dispatch requires an allowlisted workflow plus `confirm: "TRIGGER"`.
+
+## Terraform and Kubernetes operations (v0.6)
+
+A second opt-in gate exposes six infrastructure operations:
+
+```text
+CLOUD_DEVOPS_MCP_INFRASTRUCTURE_OPERATIONS_ENABLED=true
+CLOUD_DEVOPS_MCP_ALLOWED_REPOSITORIES=/absolute/path/to/repo
+CLOUD_DEVOPS_MCP_ALLOWED_KUBE_CONTEXTS=dev-cluster,prod-cluster
+CLOUD_DEVOPS_MCP_ALLOWED_KUBE_NAMESPACES=default,platform
+```
+
+The Terraform layer provides check-only formatting, `terraform validate -json`, and a plan summary using `-refresh=false`, `-lock=false`, and no apply capability. Full plan JSON is not returned.
+
+The Kubernetes layer allows only configured contexts, namespaces and resource types. It returns bounded metadata/status summaries and rollout status. Secrets are excluded by default, and there are no apply, patch, delete, exec, port-forward or shell tools.

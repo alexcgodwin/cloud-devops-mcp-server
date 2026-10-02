@@ -1,3 +1,19 @@
+# Changelog
+
+All notable changes to Cloud DevOps MCP Server will be documented in this file.
+
+The format follows Keep a Changelog, and this project uses semantic versioning.
+
+## 0.6.0 - Infrastructure Validation and Runtime Read Layer
+
+- Added opt-in Terraform format checking, JSON validation and non-apply plan summaries.
+- Added allowlisted Kubernetes current-context, resource metadata/status and rollout-status inspection.
+- Terraform planning defaults to no refresh, no state lock and no apply capability; full plan JSON is never returned.
+- Kubernetes operations require context, namespace and resource allowlists; secrets and mutation commands are excluded.
+- Added deterministic command-runner injection for test coverage without cloud credentials or live clusters.
+- Added automatic MCP Registry publishing through GitHub Actions OIDC for future releases.
+- Verification: 49/49 tests pass; coverage 83.03% statements, 71.23% branches, 85.42% functions, 86.64% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.5.0 - Controlled Execution Gateway
 
 - Added opt-in allowlisted Git operations: status, fetch, fast-forward-only pull, branch creation, selected-file commit and push.
@@ -5,12 +21,6 @@
 - Added protected-branch blocking, no-force-push design, repository/remote/branch/workflow allowlists, dry-run support and JSONL audit logging.
 - Preserved the existing twelve analysis tools as the default read-only surface when execution is disabled.
 - Verification: 43/43 tests pass; coverage 85.17% statements, 73.46% branches, 88.23% functions, 88.96% lines; production audit reports 0 vulnerabilities.
-
-# Changelog
-
-All notable changes to Cloud DevOps MCP Server will be documented in this file.
-
-The format follows Keep a Changelog, and this project uses semantic versioning.
 
 ## [0.4.0] - 2026-10-01
 

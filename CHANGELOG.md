@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.13.0 - Advanced FinOps Intelligence Gateway
+
+- Added opt-in `analyze_advanced_finops` for bounded cloud-cost, utilization and Kubernetes allocation evidence.
+- Added a separate fail-closed FinOps feature gate so the other OpsChugex commercial gateways remain independently controlled.
+- Added host-configured HTTPS FinOps endpoint validation and reuse of the host-side OpsChugex bearer token without exposing endpoint or credential arguments to MCP callers.
+- Added request bounds of 5,000 cloud resources and 5,000 Kubernetes workloads.
+- Kept proprietary savings factors, anomaly thresholds, prioritization, confidence logic and cloud/Kubernetes deduplication inside the private OpsChugex core.
+- Kept FinOps read-only: no resizing, resource termination, commitment purchase, Kubernetes mutation, storage-tier change or billing action.
+- Added dedicated gateway tests including real MCP handler execution.
+- Verification: 111/111 tests pass; coverage 85.76% statements, 72.10% branches, 85.71% functions, 89.12% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.12.0 - Cloud Security Posture Intelligence Gateway
 
 - Added opt-in `assess_cloud_security_posture` for bounded cloud asset, identity, secret and network-reachability evidence.

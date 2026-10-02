@@ -1,10 +1,10 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.12 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.13 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has nine separated capability planes:
+The server has ten separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
@@ -15,6 +15,7 @@ The server has nine separated capability planes:
 7. **OpsChugex root-cause gateway** - optional authenticated forwarding of bounded multi-domain incident evidence to the private OpsChugex root-cause engine. The public server contains the contract and transport guardrails, not the proprietary ranking logic.
 8. **OpsChugex governance gateway** - optional authenticated forwarding of bounded resource evidence and time-bounded exceptions to the private OpsChugex policy engine. The public server contains no proprietary profiles, policy rules, scoring weights or enforcement logic.
 9. **OpsChugex security posture gateway** - optional authenticated forwarding of bounded asset, identity, secret and network evidence to the private OpsChugex security engine. The public server contains no proprietary detection thresholds, scoring rules or attack-path correlation logic.
+10. **OpsChugex advanced FinOps gateway** - optional authenticated forwarding of bounded cloud-cost, utilization and Kubernetes allocation evidence to the private OpsChugex FinOps engine. The public server contains no proprietary savings factors, anomaly thresholds, prioritization or deduplication logic.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -29,6 +30,7 @@ flowchart TD
   Server --> RootCause["Opt-in OpsChugex root-cause gateway"]
   Server --> Governance["Opt-in OpsChugex governance gateway"]
   Server --> Security["Opt-in OpsChugex security posture gateway"]
+  Server --> FinOps["Opt-in OpsChugex advanced FinOps gateway"]
 
   Analysis --> Logic["Deterministic analyzers + policy packs"]
   GitOps --> GitGuards["Repo / branch / remote / workflow guards"]
@@ -38,6 +40,7 @@ flowchart TD
   RootCause --> OpsGuards["Configured HTTPS endpoints + host-side bearer token"]
   Governance --> OpsGuards
   Security --> OpsGuards
+  FinOps --> OpsGuards
   OpsGuards --> PrivateCore["Private OpsChugex commercial intelligence core"]
 
   CloudGuards --> AWS["AWS CLI fixed read commands"]
@@ -150,3 +153,13 @@ The private OpsChugex core owns security detection rules, severity thresholds, s
 The gateway is disabled by default. Remote endpoints require HTTPS, the service URL and bearer token are host-managed, and neither can be supplied by an MCP caller.
 
 The gateway exposes no credential rotation, IAM mutation, network mutation, encryption mutation or infrastructure remediation path.
+
+## OpsChugex advanced FinOps gateway
+
+`src/opschugex-finops.ts` contains only the v0.13 public contract, bounded schemas and guarded HTTPS client.
+
+The private OpsChugex core owns idle-resource thresholds, rightsizing logic, savings ranges, cost-anomaly thresholds, commitment and spot prioritization, Kubernetes over-request analysis, confidence logic and portfolio savings deduplication.
+
+The gateway is disabled by default. Remote endpoints require HTTPS, the service URL and bearer token are host-managed, and neither can be supplied by an MCP caller.
+
+The gateway exposes no instance resize, resource termination, commitment purchase, Kubernetes mutation, storage-tier mutation or provider billing action.

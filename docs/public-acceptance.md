@@ -1,6 +1,6 @@
 # Public Release Acceptance
 
-Release: `cloud-devops-mcp-server@0.6.0`
+Release: `cloud-devops-mcp-server@0.7.0`
 Date: 2026-10-01
 
 This acceptance record was verified against the publicly published npm package and the official MCP Registry, not only the repository source checkout.
@@ -9,20 +9,20 @@ This acceptance record was verified against the publicly published npm package a
 
 | Check | Result |
 | --- | --- |
-| GitHub release | v0.6.0 published |
-| npm latest | 0.6.0 |
-| npm exact version | 0.6.0 available |
+| GitHub release | v0.7.0 published |
+| npm latest | 0.7.0 |
+| npm exact version | 0.7.0 available |
 | npm trusted publish | GitHub Actions OIDC |
-| npm dependency audit in clean install | 0 vulnerabilities |
+| Clean npm install audit | 0 vulnerabilities |
 | MCP Registry schema validation | Pass |
 | MCP Registry publication | GitHub Actions OIDC |
 | MCP Registry status | Active |
-| MCP Registry latest | 0.6.0 |
-| Repository quality gate | 49 of 49 tests pass |
-| Statement coverage | 83.03% |
-| Branch coverage | 71.23% |
-| Function coverage | 85.42% |
-| Line coverage | 86.64% |
+| MCP Registry latest | 0.7.0 |
+| Repository quality gate | 57 of 57 tests pass |
+| Statement coverage | 84.71% |
+| Branch coverage | 70.70% |
+| Function coverage | 85.75% |
+| Line coverage | 88.08% |
 | Production dependency audit | 0 vulnerabilities |
 
 ## Clean public-install acceptance
@@ -30,94 +30,120 @@ This acceptance record was verified against the publicly published npm package a
 A fresh temporary directory installed:
 
 ```powershell
-npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.6.0 @modelcontextprotocol/client@2.2.0
+npm.cmd install --ignore-scripts cloud-devops-mcp-server@0.7.0 @modelcontextprotocol/client@2.2.0
 ```
 
-The clean installation completed with zero reported vulnerabilities. A real MCP client then spawned the installed package over stdio and verified the following tool surfaces:
+The clean installation completed with zero reported vulnerabilities. A real MCP client then spawned the installed package over stdio and verified these tool surfaces:
 
 | Configuration | Tool count | Result |
 | --- | ---: | --- |
-| Default | 12 | Pass |
+| Default analysis | 12 | Pass |
 | Controlled Git/GitHub execution enabled | 22 | Pass |
 | Terraform/Kubernetes infrastructure operations enabled | 18 | Pass |
-| Both optional operational planes enabled | 28 | Pass |
+| Live multi-cloud reads enabled | 18 | Pass |
+| All optional planes enabled | 34 | Pass |
 
-The default remains the twelve evidence-backed analysis tools. Operational tools are not exposed unless their explicit environment gates are enabled.
+A real `git_status` MCP call against an explicitly allowlisted temporary Git repository also passed.
 
-## Controlled Git/GitHub execution acceptance
+## Live multi-cloud acceptance
 
-The npm-installed package was started with controlled execution enabled and the temporary test repository explicitly allowlisted.
+The v0.7 cloud plane adds six opt-in tools:
 
-A real `git_status` MCP call completed successfully and returned the expected `main` branch. The v0.5/v0.6 automated test suite also verifies:
+- `cloud_whoami`
+- `cloud_inventory_summary`
+- `cloud_kubernetes_clusters`
+- `cloud_observability_summary`
+- `cloud_finops_signals`
+- `cloud_drift_compare`
 
-- Repository allowlisting.
-- Protected-branch blocking.
-- Fast-forward-only pull.
-- No force-push path.
-- Selected-file commit staging.
-- Push dry-run support.
-- GitHub pull-request creation and check inspection.
-- Passing-CI requirement before merge.
-- Exact confirmation strings for merge and workflow dispatch.
-- GitHub repository and workflow allowlists.
-- Audit logging and secret redaction.
+Automated tests exercise AWS, Azure and GCP paths with deterministic injected command runners rather than live production credentials.
 
-## Terraform operations acceptance
+### AWS
 
-The optional infrastructure plane adds:
+Acceptance covers:
 
-- `terraform_fmt_check`
-- `terraform_validate`
-- `terraform_plan_summary`
+- STS caller identity and account verification.
+- Account, region and optional profile allowlists.
+- Bounded normalized inventory from the Resource Groups Tagging API.
+- EKS cluster discovery.
+- CloudWatch alarm-state summaries.
+- Available EBS volume detection.
+- Unassociated Elastic IP detection.
 
-Acceptance tests verify that formatting runs in check-only mode, validation returns bounded JSON diagnostics, and plan execution returns only summarized action counts.
+AWS general inventory is tag-based. Untagged AWS resources may not appear in the general inventory or AWS drift comparison.
 
-The plan path uses `-input=false`, `-lock=false`, `-refresh=false` and a temporary plan artifact. No `terraform apply`, destroy, import or state-mutation tool is exposed. Var-files must resolve within the allowlisted working directory.
+### Azure
 
-## Kubernetes runtime-read acceptance
+Acceptance covers:
 
-The optional infrastructure plane also adds:
+- Explicit subscription allowlisting.
+- Azure Resource Manager inventory normalization.
+- AKS cluster discovery.
+- Azure metric-alert summaries.
+- Unattached managed disk detection.
+- Unassociated public IP detection.
 
-- `kubectl_current_context`
-- `kubectl_get_resources`
-- `kubectl_rollout_status`
+### GCP
 
-Acceptance tests verify context, namespace and resource allowlists; bounded metadata/status output; rollout checks with `--watch=false`; and rejection of unapproved contexts, namespaces and Secret resource retrieval.
+Acceptance covers:
 
-The server does not expose Kubernetes apply, create, patch, edit, delete, exec, cp or port-forward tools.
+- Explicit project allowlisting.
+- Cloud Asset Inventory normalization.
+- GKE cluster discovery.
+- Logging-sink summaries.
+- Persistent disks with no attached users.
+- Reserved static IP signals.
 
-## Distribution and registry acceptance
+GCP general inventory requires Cloud Asset Inventory access for the configured identity.
 
-The release workflow:
+## Fail-closed public-package check
 
-1. Runs the full quality gate.
-2. Publishes npm through GitHub Actions OIDC with provenance.
-3. Waits until the exact npm version is publicly visible.
-4. Downloads the pinned MCP Registry publisher v1.8.1.
-5. Verifies its SHA-256 digest before execution.
-6. Validates `server.json`.
-7. Authenticates to the MCP Registry with GitHub OIDC.
-8. Publishes the same release metadata to the official MCP Registry.
+The clean npm-installed package was started with live-cloud reads enabled but without an Azure subscription allowlist.
 
-The official registry currently reports:
+A real `cloud_inventory_summary` MCP call was rejected before any Azure CLI inventory command could be accepted.
 
-- Name: `io.github.alexcgodwin/cloud-devops-mcp-server`
-- Status: active
-- Latest version: `0.6.0`
-- npm package: `cloud-devops-mcp-server@0.6.0`
-- Default transport: stdio
+Result: **Pass**.
+
+## Drift behavior
+
+`cloud_drift_compare` compares caller-supplied expected resource identifiers with the bounded live inventory. Tests verify missing-expected and unexpected-live reporting and the ability to suppress unexpected-live output.
+
+The drift tool has no reconciliation, create, update or delete path.
 
 ## Security boundary
 
-The v0.6 release deliberately keeps operational capability narrow:
+The v0.7 release keeps the default twelve analysis tools credential-free and read-only.
 
-- No generic shell execution tool.
-- No force-push.
-- No direct protected-branch commit/push.
-- No Terraform apply or destroy.
-- No Kubernetes mutation.
-- Kubernetes Secrets are excluded from the default resource allowlist.
-- Repositories, branches/remotes, GitHub repositories/workflows, Kubernetes contexts/namespaces/resources and Terraform working paths are constrained before command execution.
-- Default analysis remains read-only and requires no cloud-provider credentials.
+Optional live cloud access requires explicit enablement plus provider scope allowlists:
 
-This record supersedes the v0.4 public-acceptance record for the current release.
+- AWS account and region allowlists, with optional profile allowlist.
+- Azure subscription allowlist.
+- GCP project allowlist.
+
+Cloud credentials remain managed by the host's AWS CLI, Azure CLI or gcloud configuration. Credentials and tokens are not accepted through MCP tool arguments and are not returned in responses.
+
+The server deliberately exposes no:
+
+- Generic shell tool.
+- Cloud create/update/delete operation.
+- Cloud start/stop/resize operation.
+- Cloud attach/detach operation.
+- Cloud IAM/policy mutation.
+- Force-push.
+- Terraform apply/destroy.
+- Kubernetes mutation.
+
+Operational audit records redact known access-key and token patterns.
+
+## Distribution status
+
+- npm package: `cloud-devops-mcp-server@0.7.0`
+- npm dist-tag: `latest = 0.7.0`
+- npm trusted publishing: GitHub Actions OIDC
+- MCP Registry name: `io.github.alexcgodwin/cloud-devops-mcp-server`
+- MCP Registry status: active
+- MCP Registry latest version: `0.7.0`
+- Default transport: stdio
+- Optional transport: authenticated Streamable HTTP
+
+This record supersedes the v0.6 public-acceptance record for the current release.

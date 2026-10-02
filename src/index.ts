@@ -47,8 +47,16 @@ import {
   cloudObservabilitySummary,
   cloudWhoAmI
 } from "./cloud.js";
+import {
+  cloudWatchLogsQuery,
+  correlateIncidentSignals,
+  githubActionsFailureDiagnosis,
+  grafanaAlertSummary,
+  kubernetesHealthSummary,
+  prometheusQuery
+} from "./observability.js";
 
-const VERSION = "0.7.0";
+const VERSION = "0.8.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1142,6 +1150,224 @@ export function createServer() {
     );
   }
 
+
+
+  if (process.env.CLOUD_DEVOPS_MCP_OBSERVABILITY_ENABLED === "true") {
+    const observabilityReadAnnotations = {
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true
+    } as const;
+
+    server.registerTool(
+      "prometheus_query",
+      {
+        title: "Prometheus Query",
+        description: "Run a bounded, read-only PromQL instant or range query against an explicitly allowlisted Prometheus-compatible endpoint and return normalized series summaries.",
+        annotations: observabilityReadAnnotations,
+        inputSchema: z.object({
+          baseUrl: z.string().min(1).describe("Allowlisted Prometheus base URL."),
+          query: z.string().min(1).max(2000).describe("PromQL query to execute."),
+          startTime: z.number().optional().describe("Optional range start as Unix seconds; provide with endTime."),
+          endTime: z.number().optional().describe("Optional range end as Unix seconds; provide with startTime."),
+          stepSeconds: z.number().min(15).max(3600).optional().describe("Range-query step in seconds.")
+        }),
+        outputSchema: z.object({
+          baseUrl: z.string(),
+          mode: z.enum(["instant", "range"]),
+          resultType: z.string(),
+          seriesCount: z.number(),
+          series: z.array(z.object({
+            metric: z.record(z.string(), z.string()),
+            sampleCount: z.number(),
+            latestTimestamp: z.number().nullable(),
+            latestValue: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await prometheusQuery(input))
+    );
+
+    server.registerTool(
+      "grafana_alert_summary",
+      {
+        title: "Grafana Alert Summary",
+        description: "Read a bounded summary of Grafana managed alert rules and active alerts from an explicitly allowlisted Grafana endpoint without changing alert configuration.",
+        annotations: observabilityReadAnnotations,
+        inputSchema: z.object({
+          baseUrl: z.string().min(1).describe("Allowlisted Grafana base URL.")
+        }),
+        outputSchema: z.object({
+          baseUrl: z.string(),
+          ruleCount: z.number(),
+          pausedCount: z.number(),
+          activeAlertsAvailable: z.boolean(),
+          activeAlertCount: z.number(),
+          rules: z.array(z.object({
+            uid: z.string(),
+            title: z.string(),
+            folderUID: z.string(),
+            ruleGroup: z.string(),
+            condition: z.string(),
+            paused: z.boolean()
+          })),
+          activeAlerts: z.array(z.object({
+            labels: z.record(z.string(), z.string()),
+            annotations: z.record(z.string(), z.string()),
+            state: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await grafanaAlertSummary(input))
+    );
+
+    server.registerTool(
+      "cloudwatch_logs_query",
+      {
+        title: "CloudWatch Logs Query",
+        description: "Run a bounded AWS CloudWatch Logs Insights query against an explicitly allowlisted account, region and log group. It only reads query results and never changes logging resources.",
+        annotations: observabilityReadAnnotations,
+        inputSchema: z.object({
+          region: z.string().min(1).describe("Allowlisted AWS region."),
+          profile: z.string().optional().describe("Optional allowlisted AWS CLI profile."),
+          logGroup: z.string().min(1).describe("Allowlisted CloudWatch Logs log group."),
+          queryString: z.string().min(1).max(4000).describe("CloudWatch Logs Insights query string."),
+          startTime: z.number().int().describe("Query start as Unix seconds."),
+          endTime: z.number().int().describe("Query end as Unix seconds."),
+          limit: z.number().int().min(1).max(100).optional().describe("Maximum rows to return, up to 100.")
+        }),
+        outputSchema: z.object({
+          scope: z.string(),
+          logGroup: z.string(),
+          status: z.string(),
+          resultCount: z.number(),
+          rows: z.array(z.record(z.string(), z.string())),
+          statistics: z.object({
+            recordsMatched: z.number(),
+            recordsScanned: z.number(),
+            bytesScanned: z.number()
+          })
+        })
+      },
+      async (input) => toolResult(await cloudWatchLogsQuery(input))
+    );
+
+    server.registerTool(
+      "kubernetes_health_summary",
+      {
+        title: "Kubernetes Health Summary",
+        description: "Read bounded pod health for an explicitly allowlisted Kubernetes context and namespace, including readiness, restart and unhealthy-state summaries without cluster mutation.",
+        annotations: observabilityReadAnnotations,
+        inputSchema: z.object({
+          context: z.string().min(1).describe("Allowlisted kubectl context."),
+          namespace: z.string().min(1).describe("Allowlisted Kubernetes namespace."),
+          labelSelector: z.string().max(300).optional().describe("Optional bounded Kubernetes label selector.")
+        }),
+        outputSchema: z.object({
+          context: z.string(),
+          namespace: z.string(),
+          podCount: z.number(),
+          runningCount: z.number(),
+          readyCount: z.number(),
+          pendingCount: z.number(),
+          failedCount: z.number(),
+          restartingCount: z.number(),
+          unhealthyCount: z.number(),
+          unhealthyPods: z.array(z.object({
+            name: z.string(),
+            phase: z.string(),
+            ready: z.boolean(),
+            restarts: z.number(),
+            reason: z.string()
+          }))
+        })
+      },
+      async (input) => toolResult(await kubernetesHealthSummary(input))
+    );
+
+    server.registerTool(
+      "github_actions_failure_diagnosis",
+      {
+        title: "GitHub Actions Failure Diagnosis",
+        description: "Inspect failed jobs and bounded job logs for one GitHub Actions run in an explicitly allowlisted repository and classify likely failure categories without rerunning or changing the workflow.",
+        annotations: observabilityReadAnnotations,
+        inputSchema: z.object({
+          repository: z.string().min(3).describe("Allowlisted GitHub repository in owner/name form."),
+          runId: z.number().int().positive().describe("GitHub Actions workflow run ID.")
+        }),
+        outputSchema: z.object({
+          repository: z.string(),
+          runId: z.number(),
+          totalJobCount: z.number(),
+          failedJobCount: z.number(),
+          diagnosedJobCount: z.number(),
+          categoryCounts: z.record(z.string(), z.number()),
+          failedJobs: z.array(z.object({
+            id: z.number(),
+            name: z.string(),
+            conclusion: z.string(),
+            failedSteps: z.array(z.string()),
+            category: z.string(),
+            evidence: z.array(z.string())
+          }))
+        })
+      },
+      async (input) => toolResult(await githubActionsFailureDiagnosis(input))
+    );
+
+    server.registerTool(
+      "correlate_incident_signals",
+      {
+        title: "Correlate Incident Signals",
+        description: "Correlate supplied metrics, logs, alerts, Kubernetes health and CI/CD evidence into deterministic incident relationships and identify missing evidence needed for triage.",
+        annotations: readOnlyAnnotations,
+        inputSchema: z.object({
+          service: z.string().min(2).describe("Service or workload being investigated."),
+          metrics: z.array(z.object({
+            name: z.string().describe("Metric name."),
+            status: z.enum(["normal", "degraded", "critical"]).describe("Observed metric state."),
+            detail: z.string().describe("Metric observation supporting the state.")
+          })).max(100).optional().describe("Optional metric signals."),
+          logs: z.array(z.object({
+            level: z.enum(["info", "warn", "error", "critical"]).describe("Log severity."),
+            message: z.string().describe("Bounded log evidence.")
+          })).max(100).optional().describe("Optional log signals."),
+          alerts: z.array(z.object({
+            source: z.string().describe("Alert source."),
+            status: z.enum(["firing", "resolved", "unknown"]).describe("Alert state."),
+            summary: z.string().describe("Alert summary.")
+          })).max(100).optional().describe("Optional alert signals."),
+          kubernetes: z.array(z.object({
+            workload: z.string().describe("Kubernetes workload."),
+            status: z.enum(["healthy", "degraded", "failed"]).describe("Runtime health state."),
+            detail: z.string().describe("Runtime health evidence.")
+          })).max(100).optional().describe("Optional Kubernetes signals."),
+          cicd: z.array(z.object({
+            pipeline: z.string().describe("Pipeline or workflow."),
+            status: z.enum(["success", "failed", "running"]).describe("Delivery state."),
+            detail: z.string().describe("CI/CD evidence.")
+          })).max(100).optional().describe("Optional CI/CD signals.")
+        }),
+        outputSchema: z.object({
+          service: z.string(),
+          domainCount: z.number(),
+          signalCount: z.number(),
+          correlationCount: z.number(),
+          incidentConfidence: z.enum(["high", "medium", "low"]),
+          correlations: z.array(z.object({
+            ruleId: z.string(),
+            title: z.string(),
+            confidence: z.enum(["high", "medium"]),
+            domains: z.array(z.string()),
+            evidence: z.array(z.string())
+          })),
+          recommendedNextChecks: z.array(z.string())
+        })
+      },
+      async (input) => toolResult(correlateIncidentSignals(input))
+    );
+  }
 
   return server;
 }

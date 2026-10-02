@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.alexcgodwin/cloud-devops-mcp-server",
   "title": "Cloud DevOps MCP Server",
-  "description": "Cloud DevOps analysis plus opt-in Git, Terraform, Kubernetes and multi-cloud inventory.",
-  "version": "0.7.0",
+  "description": "Cloud DevOps analysis with guarded Git, infrastructure, cloud and observability operations.",
+  "version": "0.8.0",
   "repository": {
     "url": "https://github.com/alexcgodwin/cloud-devops-mcp-server",
     "source": "github",
@@ -13,7 +13,7 @@
     {
       "registryType": "npm",
       "identifier": "cloud-devops-mcp-server",
-      "version": "0.7.0",
+      "version": "0.8.0",
       "transport": {
         "type": "stdio"
       }

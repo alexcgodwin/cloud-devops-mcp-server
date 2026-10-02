@@ -10,7 +10,7 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
-The v0.7 line adds an opt-in live multi-cloud read plane for AWS, Azure and GCP: identity verification, bounded inventory, EKS/AKS/GKE discovery, observability summaries, FinOps waste signals and expected-vs-live drift reporting. Cloud mutation remains intentionally unavailable.
+The v0.8 line adds an opt-in production-observability plane for Prometheus, Grafana, CloudWatch Logs Insights, Kubernetes pod health and GitHub Actions failure diagnosis, plus deterministic cross-signal incident correlation. The existing live multi-cloud read plane for AWS, Azure and GCP remains bounded and read-only. Cloud mutation remains intentionally unavailable.
 
 ## Table of contents
 
@@ -70,6 +70,10 @@ AI assistants are more useful in engineering work when they can call focused too
 
 When explicitly enabled, six additional tools provide allowlisted AWS/Azure/GCP identity verification, bounded inventory, managed Kubernetes discovery, observability configuration summaries, FinOps waste signals and drift reporting. No cloud mutation commands are exposed. AWS general inventory is sourced from the Resource Groups Tagging API, so untagged AWS resources may not appear in that inventory or AWS drift comparison.
 
+### Optional production observability intelligence
+
+When explicitly enabled, six additional tools provide bounded Prometheus queries, Grafana alert summaries, CloudWatch Logs Insights queries, Kubernetes pod-health summaries, GitHub Actions failure diagnosis and cross-signal incident correlation. Endpoints, cloud scopes, log groups, cluster contexts, namespaces and repositories are allowlisted. The layer is read-only and exposes no alert mutation, deployment mutation or arbitrary shell execution.
+
 ### Optional infrastructure operations
 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
@@ -93,13 +97,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.7.0
+npx -y cloud-devops-mcp-server@0.8.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.7.0
+npx.cmd -y cloud-devops-mcp-server@0.8.0
 ```
 
 ## Install from npm
@@ -107,7 +111,7 @@ npx.cmd -y cloud-devops-mcp-server@0.7.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.7.0
+npm install -g cloud-devops-mcp-server@0.8.0
 cloud-devops-mcp-server
 ```
 
@@ -134,7 +138,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
     }
   }
 }
@@ -147,7 +151,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.7.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.8.0"]
     }
   }
 }
@@ -168,7 +172,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.7.0 release candidate passes 57 automated tests, the full coverage gate and a production dependency audit with zero vulnerabilities. Public clean-install acceptance is recorded after npm and MCP Registry publication.
+The v0.8.0 release candidate passes 69 automated tests, the full coverage gate and a production dependency audit with zero vulnerabilities. Public clean-install acceptance is recorded after npm and MCP Registry publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -232,6 +236,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - The default analysis tools do not require cloud credentials or call cloud APIs.
 - Optional Terraform/Kubernetes operations may use locally configured provider or cluster credentials after explicit enablement and allowlisting.
 - Optional live cloud reads use existing AWS CLI, Azure CLI or gcloud authentication and require explicit account/subscription/project allowlists.
+- Optional production-observability reads require explicit endpoint/resource allowlists and host-managed credentials; returned logs and diagnostics are bounded and redacted.
 - No cloud mutation tool is exposed.
 - Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
 - No generic shell tool or force-push capability is exposed.

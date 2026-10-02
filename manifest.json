@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.7.0",
-  "description": "MCP v2 server for Cloud DevOps analysis plus opt-in Git/GitHub, infrastructure and live multi-cloud read operations.",
+  "version": "0.8.0",
+  "description": "Cloud DevOps MCP server with analysis, guarded execution, infrastructure, cloud and observability intelligence.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -14,10 +14,15 @@
     "node": ">=20",
     "defaultTransport": "stdio",
     "command": "node",
-    "args": ["dist/index.js"],
+    "args": [
+      "dist/index.js"
+    ],
     "optionalTransport": {
       "type": "streamable-http",
-      "args": ["dist/index.js", "--http"],
+      "args": [
+        "dist/index.js",
+        "--http"
+      ],
       "authentication": "bearer",
       "remoteTlsRequired": true
     }
@@ -29,12 +34,20 @@
     "controlledExecution": true,
     "infrastructureOperations": true,
     "liveMultiCloudInventory": true,
-    "liveCloudProviders": ["aws", "azure", "gcp"],
+    "liveCloudProviders": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
     "cloudMutation": false,
     "terraformApply": false,
     "kubernetesMutation": false,
     "crossDomainCorrelation": true,
-    "multiCloudIdentityPolicyPacks": ["aws", "azure", "gcp"],
+    "multiCloudIdentityPolicyPacks": [
+      "aws",
+      "azure",
+      "gcp"
+    ],
     "supplyChainAnalysis": true,
     "authenticatedStreamableHttp": true,
     "artifactParsing": [
@@ -46,20 +59,64 @@
       "github-actions-yaml",
       "cyclonedx-json",
       "spdx-json"
+    ],
+    "productionObservability": true,
+    "observabilityBackends": [
+      "prometheus",
+      "grafana",
+      "cloudwatch-logs",
+      "kubernetes",
+      "github-actions"
     ]
   },
   "tools": [
-    {"name": "assess_cloud_change_bundle", "category": "cross-domain-risk"},
-    {"name": "assess_terraform_change", "category": "infrastructure-risk"},
-    {"name": "build_incident_runbook", "category": "incident-response"},
-    {"name": "review_cicd_pipeline", "category": "delivery-readiness"},
-    {"name": "estimate_slo_error_budget", "category": "sre"},
-    {"name": "review_iam_policy", "category": "cloud-security"},
-    {"name": "review_kubernetes_deployment", "category": "kubernetes"},
-    {"name": "review_github_actions_workflow", "category": "ci-cd-security"},
-    {"name": "review_cloud_identity_policy", "category": "multi-cloud-identity"},
-    {"name": "review_terraform_security", "category": "terraform-security"},
-    {"name": "review_kubernetes_security", "category": "kubernetes-security"},
-    {"name": "review_software_supply_chain", "category": "software-supply-chain"}
+    {
+      "name": "assess_cloud_change_bundle",
+      "category": "cross-domain-risk"
+    },
+    {
+      "name": "assess_terraform_change",
+      "category": "infrastructure-risk"
+    },
+    {
+      "name": "build_incident_runbook",
+      "category": "incident-response"
+    },
+    {
+      "name": "review_cicd_pipeline",
+      "category": "delivery-readiness"
+    },
+    {
+      "name": "estimate_slo_error_budget",
+      "category": "sre"
+    },
+    {
+      "name": "review_iam_policy",
+      "category": "cloud-security"
+    },
+    {
+      "name": "review_kubernetes_deployment",
+      "category": "kubernetes"
+    },
+    {
+      "name": "review_github_actions_workflow",
+      "category": "ci-cd-security"
+    },
+    {
+      "name": "review_cloud_identity_policy",
+      "category": "multi-cloud-identity"
+    },
+    {
+      "name": "review_terraform_security",
+      "category": "terraform-security"
+    },
+    {
+      "name": "review_kubernetes_security",
+      "category": "kubernetes-security"
+    },
+    {
+      "name": "review_software_supply_chain",
+      "category": "software-supply-chain"
+    }
   ]
 }

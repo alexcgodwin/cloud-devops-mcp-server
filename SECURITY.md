@@ -4,18 +4,18 @@
 
 | Version | Supported |
 | --- | --- |
-| 0.4.x | Yes |
-| 0.3.x | Security fixes |
-| 0.2.x | Best-effort security fixes |
-| 0.1.x | No |
+| 0.10.x | Yes |
+| 0.9.x | Security fixes |
+| 0.8.x | Best-effort security fixes |
+| 0.7.x and earlier | No |
 
 ## Security posture
 
-Cloud DevOps MCP Server is advisory and read-only. It does not deploy infrastructure, mutate cloud resources, execute supplied configuration, or require cloud-provider credentials for its analysis tools.
+Cloud DevOps MCP Server is read-only by default. The default analysis surface does not deploy infrastructure, mutate cloud resources, execute supplied configuration, or require cloud-provider credentials. Optional controlled Git/GitHub execution is separately gated and allowlisted.
 
 It parses structured inputs and raw Terraform plan JSON, AWS IAM policy JSON, Azure RBAC JSON, GCP IAM JSON, Kubernetes YAML, GitHub Actions workflow YAML, CycloneDX JSON and SPDX JSON in-process.
 
-All registered tools are marked read-only, non-destructive and idempotent.
+The v0.10 `diagnose_root_cause` gateway is read-only. It sends bounded evidence to a host-configured private OpsChugex service and contains no proprietary ranking rules or remediation capability.
 
 ## Transport security
 
@@ -44,6 +44,7 @@ A shared static bearer token is intended for private self-hosted use. Multi-user
 Do not commit:
 
 - `CLOUD_DEVOPS_MCP_BEARER_TOKEN`
+- `CLOUD_DEVOPS_MCP_OPSCHUGEX_TOKEN`
 - cloud credentials
 - GitHub/npm tokens
 - private keys
@@ -67,3 +68,4 @@ Include:
 - Impact and suggested mitigation, if known.
 
 - Production-observability integrations are opt-in, exact-allowlisted, read-only, bounded and redacted; Prometheus/Grafana use HTTPS except for loopback development endpoints, and credentials remain host-side.
+- The v0.10 OpsChugex gateway is opt-in, uses a host-configured HTTPS endpoint plus a minimum 32-character host-side bearer token, and accepts neither endpoint configuration nor credentials from MCP callers.

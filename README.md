@@ -10,6 +10,8 @@
 
 Cloud DevOps MCP Server is a Model Context Protocol v2 server by Alex C. Godwin. It provides evidence-backed Cloud DevOps analysis across infrastructure, identity, Kubernetes, CI/CD, SRE and software supply-chain controls.
 
+The v0.10 line adds an opt-in OpsChugex root-cause intelligence gateway. The public MCP sends bounded incident evidence to a host-configured private OpsChugex service and returns evidence-ranked probable causes, contradictions, limitations and next checks. Proprietary ranking and correlation rules are not included in this public MIT repository.
+
 The v0.9 line adds an opt-in distributed-tracing and SLO-intelligence plane for Grafana Tempo and Jaeger v3 trace reads, service dependency mapping, tracing coverage assessment, multi-window SLO burn-rate analysis and trace/SLO incident correlation. The v0.8 production-observability and operations-intelligence plane remains available for Prometheus, Grafana, CloudWatch Logs Insights, Kubernetes health, GitHub Actions diagnosis, cloud health, FinOps and drift. Live AWS, Azure and GCP access remains bounded and read-only. Cloud mutation remains intentionally unavailable.
 
 ## Table of contents
@@ -49,6 +51,7 @@ AI assistants are more useful in engineering work when they can call focused too
 - Optional authenticated Streamable HTTP serving for self-hosted remote access.
 - Optional allowlisted live AWS/Azure/GCP inventory, observability, FinOps and drift signals.
 - Optional Grafana Tempo and Jaeger v3 trace reads, service dependency maps and SLO burn-rate intelligence.
+- Optional OpsChugex private root-cause intelligence across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD evidence.
 
 ## Tools
 
@@ -79,6 +82,10 @@ When explicitly enabled, twelve additional tools provide bounded Prometheus quer
 
 When explicitly enabled, six additional v0.9 tools provide bounded Tempo/Jaeger trace search and retrieval, service dependency mapping, tracing coverage assessment, multi-window SLO burn-rate analysis and trace/SLO incident correlation. Remote tracing endpoints must be allowlisted and use HTTPS unless loopback. Backend credentials stay in host environment variables. Trace search windows and result sizes are bounded, and the plane exposes no trace ingestion, sampling mutation or telemetry deletion.
 
+### Optional OpsChugex root-cause intelligence
+
+When explicitly enabled, v0.10 exposes `diagnose_root_cause`. The tool accepts bounded evidence from metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD, then calls a host-configured private OpsChugex service. The public MCP contains no proprietary ranking rules, accepts no service URL or credential as tool input, and performs no remediation. Evidence scores represent evidence strength rather than statistical probability.
+
 ### Optional infrastructure operations
 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
@@ -102,13 +109,13 @@ flowchart TD
 Run the published MCP server directly from npm:
 
 ```bash
-npx -y cloud-devops-mcp-server@0.9.0
+npx -y cloud-devops-mcp-server@0.10.0
 ```
 
 On Windows PowerShell systems where script execution policy blocks `npx.ps1`, use:
 
 ```powershell
-npx.cmd -y cloud-devops-mcp-server@0.9.0
+npx.cmd -y cloud-devops-mcp-server@0.10.0
 ```
 
 ## Install from npm
@@ -116,7 +123,7 @@ npx.cmd -y cloud-devops-mcp-server@0.9.0
 Install the CLI globally if you prefer a persistent local command:
 
 ```bash
-npm install -g cloud-devops-mcp-server@0.9.0
+npm install -g cloud-devops-mcp-server@0.10.0
 cloud-devops-mcp-server
 ```
 
@@ -143,7 +150,7 @@ For MCP clients that support local stdio servers, the recommended public configu
   "mcpServers": {
     "cloud-devops": {
       "command": "npx",
-      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
     }
   }
 }
@@ -156,7 +163,7 @@ Windows clients can use `npx.cmd` if `npx` resolves through a blocked PowerShell
   "mcpServers": {
     "cloud-devops": {
       "command": "npx.cmd",
-      "args": ["-y", "cloud-devops-mcp-server@0.9.0"]
+      "args": ["-y", "cloud-devops-mcp-server@0.10.0"]
     }
   }
 }
@@ -177,7 +184,7 @@ The MCP endpoint is `http://127.0.0.1:3000/mcp` and requires `Authorization: Bea
 
 ## Public release verification
 
-The v0.9.0 release passes 91 automated tests, with 85.75% statement, 71.86% branch, 85.29% function and 89.22% line coverage. The production dependency audit reports zero vulnerabilities. Clean public installation, npm trusted publication and official MCP Registry publication are verified in the public acceptance record.
+The v0.10.0 release candidate passes 95 automated tests, with 85.65% statement, 71.94% branch, 85.10% function and 89.12% line coverage. The production dependency audit reports zero vulnerabilities. Public clean-install and MCP Registry acceptance are recorded after publication.
 
 See [docs/public-acceptance.md](docs/public-acceptance.md) for the verification record.
 
@@ -242,6 +249,7 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 - Optional Terraform/Kubernetes operations may use locally configured provider or cluster credentials after explicit enablement and allowlisting.
 - Optional live cloud reads use existing AWS CLI, Azure CLI or gcloud authentication and require explicit account/subscription/project allowlists.
 - Optional production-observability reads require explicit endpoint/resource allowlists and host-managed credentials; returned logs and diagnostics are bounded and redacted.
+- Optional v0.10 root-cause intelligence uses a host-configured HTTPS endpoint and host-side token; neither is accepted as a tool argument, and the proprietary ranking engine remains outside the public repository.
 - No cloud mutation tool is exposed.
 - Analysis remains read-only by default. Controlled execution appears only when explicitly enabled and allowlisted.
 - No generic shell tool or force-push capability is exposed.
@@ -250,11 +258,16 @@ More project notes are available in [DEVELOPMENT.md](DEVELOPMENT.md), [RELEASE.m
 
 ## Roadmap
 
-- Add richer cloud organization/account topology and tag-governance analysis on top of the read-only live inventory plane.
-- Add OAuth/OIDC resource-server authentication for multi-user hosted deployments.
-- Add machine-readable policy profiles for production, staging and regulated workloads.
-- Add vulnerability-database enrichment for SBOM components without weakening offline deterministic analysis.
-- Expand policy packs for data classification, secrets management, network segmentation and cloud organization guardrails.
+- **v0.11.0 Policy & Governance Engine** - production, staging and regulated policy profiles, organization guardrails, tagging, encryption, network and IAM standards.
+- **v0.12.0 Cloud Security Posture Intelligence** - deeper AWS/Azure/GCP misconfiguration detection, attack-path correlation, secrets and exposure analysis.
+- **v0.13.0 Advanced FinOps Intelligence** - utilization trends, rightsizing evidence, cost anomalies, Kubernetes/cloud cost correlation and optimization plans.
+- **v0.14.0 Change Intelligence & Blast-Radius Analysis** - predict affected services and resources before Terraform, Kubernetes or CI/CD changes.
+- **v0.15.0 Controlled Remediation Gateway** - approval-gated safe fixes for selected cloud, Kubernetes and Terraform operational problems.
+- **v0.16.0 Multi-Account / Multi-Organization Operations** - AWS Organizations, Azure tenants/subscriptions and GCP organizations/projects topology.
+- **v0.17.0 Incident Command & Automated Runbooks** - incident timelines, evidence bundles, remediation plans, rollback recommendations and post-incident reports.
+- **v0.18.0 Platform Engineering Intelligence** - service catalog, ownership, golden paths, environment health and developer-platform checks.
+- **v0.19.0 Enterprise Authentication & Authorization** - OAuth/OIDC, RBAC, per-user scopes, stronger hosted-MCP access controls and audit trails.
+- **v1.0.0 Production Stable Release** - stable tool contracts, compatibility guarantees, hardened security model, comprehensive documentation and enterprise-ready release standards.
 
 ## Author
 

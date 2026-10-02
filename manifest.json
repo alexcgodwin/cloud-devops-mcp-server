@@ -1,8 +1,8 @@
 {
   "name": "Cloud DevOps MCP Server",
   "slug": "cloud-devops-mcp-server",
-  "version": "0.9.0",
-  "description": "Cloud DevOps MCP server with analysis, guarded execution, cloud, observability and tracing intelligence.",
+  "version": "0.10.0",
+  "description": "Cloud DevOps MCP server with guarded execution, observability, tracing and an optional private root-cause gateway.",
   "author": {
     "name": "Alex C. Godwin",
     "url": "https://github.com/alexcgodwin"
@@ -68,6 +68,16 @@
       "jaeger-v3"
     ],
     "sloBurnRateIntelligence": true,
+    "opschugexPrivateRootCauseGateway": true,
+    "rootCauseEvidenceDomains": [
+      "metrics",
+      "logs",
+      "traces",
+      "kubernetes",
+      "cloud",
+      "terraform",
+      "ci-cd"
+    ],
     "observabilityBackends": [
       "prometheus",
       "grafana",

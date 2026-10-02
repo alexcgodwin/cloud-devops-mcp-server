@@ -6,7 +6,7 @@ on:
       version:
         description: Expected package version
         required: true
-        default: "0.9.0"
+        default: "0.10.0"
   release:
     types:
       - published

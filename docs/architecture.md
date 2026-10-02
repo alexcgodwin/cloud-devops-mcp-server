@@ -1,10 +1,10 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.9 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.10 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has six separated capability planes:
+The server has seven separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
@@ -12,6 +12,7 @@ The server has six separated capability planes:
 4. **Live multi-cloud read plane** - optional AWS, Azure and GCP inventory, managed Kubernetes, observability, FinOps and drift signals.
 5. **Production observability and operations-intelligence plane** - optional bounded Prometheus, Grafana, CloudWatch Logs, Kubernetes health and GitHub Actions failure diagnostics plus cross-signal correlation, cloud-health scoring, deployment correlation, coverage assessment, FinOps correlation, cross-runtime drift analysis and operations briefs.
 6. **Distributed tracing and SLO-intelligence plane** - optional bounded Grafana Tempo and Jaeger v3 trace reads plus service dependency mapping, tracing coverage, multi-window SLO burn-rate analysis and trace/SLO incident correlation.
+7. **OpsChugex commercial intelligence gateway** - optional authenticated forwarding of bounded multi-domain incident evidence to the private OpsChugex root-cause engine. The public server contains the contract and transport guardrails, not the proprietary ranking logic.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -23,12 +24,15 @@ flowchart TD
   Server --> Infra["Opt-in Terraform/Kubernetes plane"]
   Server --> Cloud["Opt-in live multi-cloud read plane"]
   Server --> Trace["Opt-in tracing + SLO plane"]
+  Server --> OpsCore["Opt-in OpsChugex root-cause gateway"]
 
   Analysis --> Logic["Deterministic analyzers + policy packs"]
   GitOps --> GitGuards["Repo / branch / remote / workflow guards"]
   Infra --> InfraGuards["Repo / context / namespace / resource guards"]
   Cloud --> CloudGuards["Account / region / subscription / project guards"]
   Trace --> TraceGuards["Tempo / Jaeger endpoint + time-window guards"]
+  OpsCore --> OpsGuards["Configured HTTPS endpoint + host-side bearer token"]
+  OpsGuards --> PrivateCore["Private OpsChugex commercial intelligence core"]
 
   CloudGuards --> AWS["AWS CLI fixed read commands"]
   CloudGuards --> Azure["Azure CLI fixed read commands"]

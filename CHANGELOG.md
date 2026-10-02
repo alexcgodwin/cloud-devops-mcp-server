@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.0 - Automated Root-Cause Intelligence
+
+- Added opt-in `diagnose_root_cause` for evidence-ranked probable causes across metrics, logs, traces, Kubernetes, cloud, Terraform and CI/CD evidence.
+- Added a strict public/private boundary: the public MIT repository contains only the MCP contract and guarded HTTPS client; proprietary ranking, weighting and commercial correlation logic remain in the private OpsChugex core.
+- Added supporting and contradicting evidence IDs, evidence-strength scoring, confidence labels, limitations and recommended next checks.
+- Added fail-closed commercial configuration with a host-configured endpoint, HTTPS requirement for remote targets and a host-side bearer token of at least 32 characters.
+- Kept root-cause intelligence read-only: v0.10 does not remediate incidents or mutate cloud, Kubernetes, Terraform, CI/CD or observability state.
+- Added dedicated gateway tests and updated architecture, configuration, security and tool documentation.
+- Verification: 95/95 tests pass; coverage 85.65% statements, 71.94% branches, 85.10% functions, 89.12% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.9.0 - Distributed Tracing and SLO Intelligence
 
 - Added `trace_search` for bounded Grafana Tempo TraceQL and Jaeger v3 trace-summary searches against explicitly allowlisted endpoints.

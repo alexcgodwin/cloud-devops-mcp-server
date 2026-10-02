@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.12.0 - Cloud Security Posture Intelligence Gateway
+
+- Added opt-in `assess_cloud_security_posture` for bounded cloud asset, identity, secret and network-reachability evidence.
+- Added a separate fail-closed security feature gate so root-cause and governance behavior remain independently controlled.
+- Added host-configured HTTPS security endpoint validation and reuse of the host-side OpsChugex bearer token without exposing endpoint or credential arguments to MCP callers.
+- Added request bounds of 3,000 assets, 3,000 identities, 2,000 secret findings and 10,000 network edges.
+- Kept proprietary misconfiguration rules, severity thresholds, security scoring and attack-path correlation inside the private OpsChugex core.
+- Kept security posture read-only: no credential rotation, IAM mutation, network changes, encryption changes or infrastructure remediation.
+- Added dedicated gateway tests including real MCP handler execution.
+- Verification: 106/106 tests pass; coverage 85.71% statements, 72.10% branches, 85.49% functions, 89.10% lines; production dependency audit reports 0 vulnerabilities.
+
 ## 0.11.0 - Policy & Governance Engine Gateway
 
 - Added opt-in `assess_governance_policy` for bounded resource evidence and time-bounded governance exceptions.

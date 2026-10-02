@@ -59,8 +59,9 @@ import { registerOperationsIntelligenceTools } from "./operations-intelligence.j
 import { registerTracingTools } from "./tracing.js";
 import { registerOpsChugexRootCauseTool } from "./opschugex.js";
 import { registerOpsChugexGovernanceTool } from "./opschugex-governance.js";
+import { registerOpsChugexSecurityPostureTool } from "./opschugex-security.js";
 
-const VERSION = "0.11.0";
+const VERSION = "0.12.0";
 
 const evidenceSchema = z.object({
   source: z.string(),
@@ -1385,6 +1386,10 @@ export function createServer() {
 
   if (process.env.CLOUD_DEVOPS_MCP_OPSCHUGEX_GOVERNANCE_ENABLED === "true") {
     registerOpsChugexGovernanceTool(server);
+  }
+
+  if (process.env.CLOUD_DEVOPS_MCP_OPSCHUGEX_SECURITY_ENABLED === "true") {
+    registerOpsChugexSecurityPostureTool(server);
   }
 
   return server;

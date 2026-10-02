@@ -1,10 +1,10 @@
 # Architecture
 
-Cloud DevOps MCP Server v0.11 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
+Cloud DevOps MCP Server v0.12 is an MCP v2 server built on the 2026-07-28 protocol line. Stdio is the default local transport. Authenticated Streamable HTTP is optional for self-hosted remote access.
 
 ## Runtime planes
 
-The server has eight separated capability planes:
+The server has nine separated capability planes:
 
 1. **Analysis plane** - twelve evidence-backed tools exposed by default. They parse caller-supplied evidence and remain read-only.
 2. **Controlled Git/GitHub execution plane** - optional guarded Git and GitHub operations.
@@ -14,6 +14,7 @@ The server has eight separated capability planes:
 6. **Distributed tracing and SLO-intelligence plane** - optional bounded Grafana Tempo and Jaeger v3 trace reads plus service dependency mapping, tracing coverage, multi-window SLO burn-rate analysis and trace/SLO incident correlation.
 7. **OpsChugex root-cause gateway** - optional authenticated forwarding of bounded multi-domain incident evidence to the private OpsChugex root-cause engine. The public server contains the contract and transport guardrails, not the proprietary ranking logic.
 8. **OpsChugex governance gateway** - optional authenticated forwarding of bounded resource evidence and time-bounded exceptions to the private OpsChugex policy engine. The public server contains no proprietary profiles, policy rules, scoring weights or enforcement logic.
+9. **OpsChugex security posture gateway** - optional authenticated forwarding of bounded asset, identity, secret and network evidence to the private OpsChugex security engine. The public server contains no proprietary detection thresholds, scoring rules or attack-path correlation logic.
 
 Each operational plane has its own explicit environment gate. The live cloud plane does not accept provider credentials as MCP arguments; it relies on the host's existing cloud CLI authentication plus scope allowlists.
 
@@ -27,6 +28,7 @@ flowchart TD
   Server --> Trace["Opt-in tracing + SLO plane"]
   Server --> RootCause["Opt-in OpsChugex root-cause gateway"]
   Server --> Governance["Opt-in OpsChugex governance gateway"]
+  Server --> Security["Opt-in OpsChugex security posture gateway"]
 
   Analysis --> Logic["Deterministic analyzers + policy packs"]
   GitOps --> GitGuards["Repo / branch / remote / workflow guards"]
@@ -35,6 +37,7 @@ flowchart TD
   Trace --> TraceGuards["Tempo / Jaeger endpoint + time-window guards"]
   RootCause --> OpsGuards["Configured HTTPS endpoints + host-side bearer token"]
   Governance --> OpsGuards
+  Security --> OpsGuards
   OpsGuards --> PrivateCore["Private OpsChugex commercial intelligence core"]
 
   CloudGuards --> AWS["AWS CLI fixed read commands"]
@@ -137,3 +140,13 @@ HTTP mode requires explicit opt-in, bearer authentication, timing-safe compariso
 Default analysis remains read-only and credential-free. Optional cloud/infrastructure access must be explicitly enabled and allowlisted.
 
 The server intentionally does not provide generic shell execution, force-push, Terraform apply/destroy, Kubernetes mutation, or cloud resource mutation tools.
+
+## OpsChugex cloud security posture gateway
+
+`src/opschugex-security.ts` contains only the v0.12 public contract, bounded schemas and guarded HTTPS client.
+
+The private OpsChugex core owns security detection rules, severity thresholds, security scoring and attack-path correlation. The public gateway accepts bounded asset, identity, secret and network-reachability evidence and validates the private response before returning it to the MCP client.
+
+The gateway is disabled by default. Remote endpoints require HTTPS, the service URL and bearer token are host-managed, and neither can be supplied by an MCP caller.
+
+The gateway exposes no credential rotation, IAM mutation, network mutation, encryption mutation or infrastructure remediation path.

@@ -30,7 +30,7 @@ function sampleResult() {
     customerFacingImpactCount: 2,
     environmentsAffected: ["production"],
     blockers: [{
-      id: "blocker-stateful-rollback-change-db",
+      id: "blocker-1",
       severity: "critical",
       reason: "Rollback evidence is missing.",
       relatedChangeItemIds: ["change-db"],

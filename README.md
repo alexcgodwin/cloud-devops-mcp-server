@@ -5,6 +5,7 @@
 [![CI](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml/badge.svg)](https://github.com/alexcgodwin/cloud-devops-mcp-server/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/cloud-devops-mcp-server.svg)](https://www.npmjs.com/package/cloud-devops-mcp-server)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-active-brightgreen.svg)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.alexcgodwin%2Fcloud-devops-mcp-server)
+[![Cloud DevOps MCP server](https://mcprush.com/badge/cloud-devops-mcp/card.svg)](https://mcprush.com/to/cloud-devops-mcp?ref=badge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![MCP](https://img.shields.io/badge/MCP-Cloud%20DevOps-blue)](server.json)
 

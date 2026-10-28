@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1050" viewBox="0 0 1600 1050" role="img" aria-label="Cloud DevOps MCP Server architecture diagram">
+<defs>
+<marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8z" fill="#7ED4FF"/></marker>
+<filter id="soft"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.22"/></filter>
+</defs>
+<rect width="1600" height="1050" fill="#0B1220"/>
+<rect x="0" y="0" width="8" height="1050" fill="#38BDF8"/>
+<text x="64" y="85" fill="#EEF5FF" font-family="Segoe UI,Arial,sans-serif" font-size="38" font-weight="700">Cloud DevOps MCP Server</text>
+<text x="67" y="123" fill="#ADBED2" font-family="Segoe UI,Arial,sans-serif" font-size="20">MCP tools • evidence-backed analysis • optional private intelligence</text>
+<rect x="1300" y="43" width="242" height="42" rx="16" fill="#183048" stroke="#294663"/>
+<text x="1421" y="69" text-anchor="middle" fill="#38BDF8" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="700">EDITABLE  /  DRAW.IO</text>
+<line x1="60" y1="142" x2="1540" y2="142" stroke="#2A405B"/>
+<rect x="50" y="159" width="1500" height="251" rx="17" fill="#101E34" stroke="#29415C" stroke-width="1.3"/>
+<rect x="50" y="178" width="6" height="46" rx="3" fill="#38BDF8"/>
+<text x="73" y="203" fill="#38BDF8" font-size="22" font-family="Segoe UI,Arial,sans-serif" font-weight="700">MCP REQUEST PATH</text>
+<text x="73" y="229" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">AI agents consume bounded MCP tool interfaces</text>
+<line x1="421" y1="318" x2="433" y2="318" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<line x1="791" y1="318" x2="803" y2="318" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<line x1="1161" y1="318" x2="1173" y2="318" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<rect x="70" y="253" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="96" cy="283" r="14" fill="#38BDF8" opacity="0.18"/>
+<text x="96" y="288" text-anchor="middle" fill="#38BDF8" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">01</text>
+<text x="119" y="288" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">AI Client</text>
+<text x="93" y="347" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">MCP-capable assistant</text>
+<rect x="440" y="253" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="466" cy="283" r="14" fill="#38BDF8" opacity="0.18"/>
+<text x="466" y="288" text-anchor="middle" fill="#38BDF8" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">02</text>
+<text x="489" y="288" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">MCP Transport</text>
+<text x="463" y="347" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Tool invocation</text>
+<rect x="810" y="253" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="836" cy="283" r="14" fill="#38BDF8" opacity="0.18"/>
+<text x="836" y="288" text-anchor="middle" fill="#38BDF8" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">03</text>
+<text x="859" y="288" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">MCP Server</text>
+<text x="833" y="347" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Request routing</text>
+<rect x="1180" y="253" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="1206" cy="283" r="14" fill="#38BDF8" opacity="0.18"/>
+<text x="1206" y="288" text-anchor="middle" fill="#38BDF8" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">04</text>
+<text x="1229" y="288" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Evidence Results</text>
+<text x="1203" y="347" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Structured findings</text>
+<rect x="50" y="437" width="1500" height="251" rx="17" fill="#101E34" stroke="#29415C" stroke-width="1.3"/>
+<rect x="50" y="456" width="6" height="46" rx="3" fill="#34D399"/>
+<text x="73" y="481" fill="#34D399" font-size="22" font-family="Segoe UI,Arial,sans-serif" font-weight="700">ANALYSIS CAPABILITIES</text>
+<text x="73" y="507" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Public tool implementation modules</text>
+<rect x="70" y="531" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="96" cy="561" r="14" fill="#34D399" opacity="0.18"/>
+<text x="96" y="566" text-anchor="middle" fill="#34D399" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">01</text>
+<text x="119" y="566" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Cloud Inventory</text>
+<text x="93" y="625" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">AWS / Azure / GCP</text>
+<rect x="440" y="531" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="466" cy="561" r="14" fill="#34D399" opacity="0.18"/>
+<text x="466" y="566" text-anchor="middle" fill="#34D399" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">02</text>
+<text x="489" y="566" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Infrastructure</text>
+<text x="463" y="625" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Kubernetes and IaC</text>
+<rect x="810" y="531" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="836" cy="561" r="14" fill="#34D399" opacity="0.18"/>
+<text x="836" y="566" text-anchor="middle" fill="#34D399" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">03</text>
+<text x="859" y="566" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">SRE &amp; Security</text>
+<text x="833" y="625" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Operations evidence</text>
+<rect x="1180" y="531" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="1206" cy="561" r="14" fill="#34D399" opacity="0.18"/>
+<text x="1206" y="566" text-anchor="middle" fill="#34D399" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">04</text>
+<text x="1229" y="566" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">CI/CD &amp; Governance</text>
+<text x="1203" y="625" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Guarded analysis</text>
+<rect x="50" y="715" width="1500" height="251" rx="17" fill="#101E34" stroke="#29415C" stroke-width="1.3"/>
+<rect x="50" y="734" width="6" height="46" rx="3" fill="#A78BFA"/>
+<text x="73" y="759" fill="#A78BFA" font-size="22" font-family="Segoe UI,Arial,sans-serif" font-weight="700">OPTIONAL PRIVATE GATEWAY</text>
+<text x="73" y="785" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Proprietary analytics remain outside public repo</text>
+<line x1="421" y1="874" x2="433" y2="874" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<line x1="791" y1="874" x2="803" y2="874" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<line x1="1161" y1="874" x2="1173" y2="874" stroke="#7ED4FF" stroke-width="3.5" marker-end="url(#arrow)"/>
+<rect x="70" y="809" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="96" cy="839" r="14" fill="#A78BFA" opacity="0.18"/>
+<text x="96" y="844" text-anchor="middle" fill="#A78BFA" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">01</text>
+<text x="119" y="844" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Opt-in Integration</text>
+<text x="93" y="903" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Bounded evidence</text>
+<rect x="440" y="809" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="466" cy="839" r="14" fill="#A78BFA" opacity="0.18"/>
+<text x="466" y="844" text-anchor="middle" fill="#A78BFA" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">02</text>
+<text x="489" y="844" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Private OpsChugex</text>
+<text x="463" y="903" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Configured gateway</text>
+<rect x="810" y="809" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="836" cy="839" r="14" fill="#A78BFA" opacity="0.18"/>
+<text x="836" y="844" text-anchor="middle" fill="#A78BFA" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">03</text>
+<text x="859" y="844" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Risk / FinOps Insights</text>
+<text x="833" y="903" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Private algorithms</text>
+<rect x="1180" y="809" width="348" height="131" rx="14" fill="#172741" stroke="#39536E" stroke-width="1.5" filter="url(#soft)"/>
+<circle cx="1206" cy="839" r="14" fill="#A78BFA" opacity="0.18"/>
+<text x="1206" y="844" text-anchor="middle" fill="#A78BFA" font-size="13" font-weight="700" font-family="Segoe UI,Arial,sans-serif">04</text>
+<text x="1229" y="844" fill="#EEF5FF" font-size="20" font-weight="700" font-family="Segoe UI,Arial,sans-serif">Returned Assessment</text>
+<text x="1203" y="903" fill="#ADBED2" font-size="15" font-family="Segoe UI,Arial,sans-serif">Blockers and evidence gaps</text>
+<text x="64" y="1024" fill="#ADBED2" font-size="13" font-family="Segoe UI,Arial,sans-serif">SOURCE-ALIGNED REFERENCE DIAGRAM    •    EDITABLE IN DIAGRAMS.NET    •    NOT A LIVE DEPLOYMENT CERTIFICATION</text>
+</svg>

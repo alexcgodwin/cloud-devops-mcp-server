@@ -128,6 +128,18 @@ The public MCP contains no proprietary graph-propagation algorithm, change-risk 
 When explicitly enabled, six additional tools provide Terraform format/validation/plan summaries and Kubernetes read-only runtime inspection. These operations use repository, context, namespace and resource allowlists. Full Terraform plan JSON, Kubernetes Secrets, arbitrary shell execution, Terraform apply and Kubernetes mutation are deliberately excluded.
 ## Architecture
 
+
+<!-- drawio:architecture:start -->
+### Editable architecture diagram
+
+![Architecture overview](docs/architecture/architecture.svg)
+
+[Open and edit in draw.io](docs/architecture/architecture.drawio) · [View full-size SVG](docs/architecture/architecture.svg)
+
+*This diagram is based on this repository's documented design and source code; refer to the project status above for deployed-versus-reference details.*
+
+<!-- drawio:architecture:end -->
+
 ```mermaid
 flowchart TD
   LocalClient["Local MCP client"] --> Stdio["stdio"]

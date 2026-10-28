@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Cloud architecture documentation" modified="2026-10-27T23:00:00.000Z" version="24.7.17" type="device">
+  <diagram id="architecture" name="Architecture">
+    <mxGraphModel dx="1600" dy="1050" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1050" math="0" shadow="0" background="#0B1220">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="background" value="" style="rounded=0;fillColor=#0B1220;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1600" height="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="Cloud DevOps MCP Server" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;strokeColor=none;fillColor=none;fontSize=34;fontStyle=1;fontColor=#EEF5FF;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="64" y="39" width="1280" height="57" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="MCP tools • evidence-backed analysis • optional private intelligence" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=17;fontColor=#ADBED2;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="67" y="101" width="1380" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="badge" value="EDITABLE  /  DRAW.IO" style="rounded=1;arcSize=22;strokeColor=#25405B;fillColor=#183048;fontColor=#38BDF8;fontSize=14;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="44" width="240" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-bg-0" value="" style="rounded=1;arcSize=14;strokeWidth=1.2;strokeColor=#29415C;fillColor=#101E34;" vertex="1" parent="1">
+          <mxGeometry x="50" y="159" width="1500" height="251" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-accent-0" value="" style="rounded=1;strokeColor=none;fillColor=#38BDF8;" vertex="1" parent="1">
+          <mxGeometry x="50" y="178" width="5" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-title-0" value="MCP REQUEST PATH" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;fontColor=#38BDF8;" vertex="1" parent="1">
+          <mxGeometry x="72" y="177" width="565" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-note-0" value="AI agents consume bounded MCP tool interfaces" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=14;fontColor=#ADBED2;" vertex="1" parent="1">
+          <mxGeometry x="72" y="210" width="1330" height="29" as="geometry" />
+        </mxCell>
+        <mxCell id="node-0-0" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#38BDF8;font-size:15px;font-weight:bold;&quot;&gt;01 &amp;nbsp; AI Client&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;MCP-capable assistant&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="70" y="253" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-0-1" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#38BDF8;font-size:15px;font-weight:bold;&quot;&gt;02 &amp;nbsp; MCP Transport&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Tool invocation&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="440" y="253" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-0-2" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#38BDF8;font-size:15px;font-weight:bold;&quot;&gt;03 &amp;nbsp; MCP Server&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Request routing&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="810" y="253" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-0-3" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#38BDF8;font-size:15px;font-weight:bold;&quot;&gt;04 &amp;nbsp; Evidence Results&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Structured findings&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="253" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#38BDF8;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-0-0" target="node-0-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#38BDF8;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-0-1" target="node-0-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-0-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#38BDF8;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-0-2" target="node-0-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-bg-1" value="" style="rounded=1;arcSize=14;strokeWidth=1.2;strokeColor=#29415C;fillColor=#101E34;" vertex="1" parent="1">
+          <mxGeometry x="50" y="437" width="1500" height="251" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-accent-1" value="" style="rounded=1;strokeColor=none;fillColor=#34D399;" vertex="1" parent="1">
+          <mxGeometry x="50" y="456" width="5" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-title-1" value="ANALYSIS CAPABILITIES" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;fontColor=#34D399;" vertex="1" parent="1">
+          <mxGeometry x="72" y="455" width="565" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-note-1" value="Public tool implementation modules" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=14;fontColor=#ADBED2;" vertex="1" parent="1">
+          <mxGeometry x="72" y="488" width="1330" height="29" as="geometry" />
+        </mxCell>
+        <mxCell id="node-1-0" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#34D399;font-size:15px;font-weight:bold;&quot;&gt;01 &amp;nbsp; Cloud Inventory&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;AWS / Azure / GCP&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="70" y="531" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-1-1" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#34D399;font-size:15px;font-weight:bold;&quot;&gt;02 &amp;nbsp; Infrastructure&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Kubernetes and IaC&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="440" y="531" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-1-2" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#34D399;font-size:15px;font-weight:bold;&quot;&gt;03 &amp;nbsp; SRE &amp;amp; Security&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Operations evidence&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="810" y="531" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-1-3" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#34D399;font-size:15px;font-weight:bold;&quot;&gt;04 &amp;nbsp; CI/CD &amp;amp; Governance&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Guarded analysis&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="531" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-bg-2" value="" style="rounded=1;arcSize=14;strokeWidth=1.2;strokeColor=#29415C;fillColor=#101E34;" vertex="1" parent="1">
+          <mxGeometry x="50" y="715" width="1500" height="251" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-accent-2" value="" style="rounded=1;strokeColor=none;fillColor=#A78BFA;" vertex="1" parent="1">
+          <mxGeometry x="50" y="734" width="5" height="46" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-title-2" value="OPTIONAL PRIVATE GATEWAY" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=22;fontStyle=1;fontColor=#A78BFA;" vertex="1" parent="1">
+          <mxGeometry x="72" y="733" width="565" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="lane-note-2" value="Proprietary analytics remain outside public repo" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=14;fontColor=#ADBED2;" vertex="1" parent="1">
+          <mxGeometry x="72" y="766" width="1330" height="29" as="geometry" />
+        </mxCell>
+        <mxCell id="node-2-0" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#A78BFA;font-size:15px;font-weight:bold;&quot;&gt;01 &amp;nbsp; Opt-in Integration&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Bounded evidence&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="70" y="809" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-2-1" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#A78BFA;font-size:15px;font-weight:bold;&quot;&gt;02 &amp;nbsp; Private OpsChugex&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Configured gateway&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="440" y="809" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-2-2" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#A78BFA;font-size:15px;font-weight:bold;&quot;&gt;03 &amp;nbsp; Risk / FinOps Insights&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Private algorithms&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="810" y="809" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="node-2-3" value="&lt;div style=&quot;font-family:Segoe UI,Arial,sans-serif;text-align:left;padding:8px;&quot;&gt;&lt;div style=&quot;color:#A78BFA;font-size:15px;font-weight:bold;&quot;&gt;04 &amp;nbsp; Returned Assessment&lt;/div&gt;&lt;div style=&quot;color:#ADBED2;font-size:12px;margin-top:9px;&quot;&gt;Blockers and evidence gaps&lt;/div&gt;&lt;/div&gt;" style="rounded=1;arcSize=11;html=1;whiteSpace=wrap;align=left;verticalAlign=top;spacing=12;shadow=0;strokeWidth=1.2;strokeColor=#35506B;fillColor=#172741;fontColor=#EEF5FF;fontSize=17;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="809" width="348" height="131" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-0" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#A78BFA;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-2-0" target="node-2-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#A78BFA;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-2-1" target="node-2-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-2-2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;jettySize=auto;strokeColor=#A78BFA;strokeWidth=3;endArrow=block;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="node-2-2" target="node-2-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" value="SOURCE-ALIGNED REFERENCE DIAGRAM     •     EDIT NODES AND CONNECTIONS IN DIAGRAMS.NET     •     NOT A DEPLOYMENT CERTIFICATION" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=12;fontColor=#ADBED2;" vertex="1" parent="1">
+          <mxGeometry x="62" y="1000" width="1480" height="32" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
